@@ -68,18 +68,21 @@ def cmd_diff(args, cfg: Config):
         #with schema_engine as schema_cursor:
         with open(cfg.schema.filename) as fh:
             sql = fh.read()
-            schema_cursor.execute(sql)
+            if sql.strip():
+                schema_cursor.execute(sql)
         if args.verbose:
             print('Creating migrated schema...', out=sys.stderr)
         migrations_cursor = migrations_engine.connect()
         for filename in sorted(os.listdir(cfg.migrations.directory)):
             if not filename.endswith('.sql'):
                 continue
-            print(f"- {filename}")
+            if args.verbose:
+                print(f"- {filename}", out=sys.stderr)
             filename = os.path.join(cfg.migrations.directory, filename)
             with open(filename) as fh:
                 sql = fh.read()
-                migrations_cursor.execute(fh)
+                if sql.strip():
+                    migrations_cursor.execute(sql)
         if args.verbose:
             print('Diffing...', out=sys.stderr)
         from schemainspect.pg import PostgreSQL
