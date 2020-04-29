@@ -72,7 +72,7 @@ def cmd_diff(args, cfg: Config):
         if args.verbose:
             print('Creating migrated schema...', out=sys.stderr)
         migrations_cursor = migrations_engine.connect()
-        for filename in os.listdir(cfg.migrations.directory):
+        for filename in sorted(os.listdir(cfg.migrations.directory)):
             if not filename.endswith('.sql'):
                 continue
             print(f"- {filename}")
