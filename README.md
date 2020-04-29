@@ -150,8 +150,7 @@ tool and the output printed to the console.
 
 ## FAQ
 
-### Tusker printed an error and it left the temporary tables behind. How
-can I remove them?
+### Tusker printed an error and left the temporary databases behind. How can I remove them?
 
 Run `tusker clean`. This will remove all databases which were created
 by previous runs of tusker. Tusker only removes databases which are
