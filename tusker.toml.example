@@ -1,0 +1,12 @@
+[schema]
+filename = "schema.sql"
+
+[migrations]
+directory = "migrations"
+
+[database]
+#host = ""
+#port = ""
+#user = ""
+#password = ""
+dbname = "tusker"
