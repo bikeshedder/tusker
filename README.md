@@ -138,7 +138,7 @@ applying SQL files in order.
 Some recommendations are:
 
 - NodeJS: [marv](https://www.npmjs.com/package/marv)
-- Rust: [pgmigrate](https://crates.io/crates/pgmigrate)
+- Rust: [refinery](https://crates.io/crates/refinery)
 
 ## How does it work?
 
