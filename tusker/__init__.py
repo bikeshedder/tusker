@@ -97,7 +97,7 @@ def cmd_diff(args, cfg: Config):
         migration = migra.Migration(migrations_engine, schema_engine)
         migration.set_safety(False)
         migration.add_all_changes()
-        print(migration.sql)
+        print(migration.sql, end='')
 
 
 def cmd_clean(args, cfg: Config):
