@@ -1,6 +1,6 @@
 # Tusker
 
-A PostgreSQL specific migration tool.
+A PostgreSQL specific migration tool
 
 ## Elevator pitch
 

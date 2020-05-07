@@ -1,8 +1,20 @@
 [tool.poetry]
 name = "tusker"
 version = "0.1.0"
-description = ""
 authors = ["Michael P. Jung <michael.jung@terreon.de>"]
+license = "Unlicense"
+readme = "README.md"
+description = "A PostgreSQL specific migration tool"
+repository = "https://github.com/bikeshedder/tusker"
+homepage = "https://github.com/bikeshedder/tusker"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Development Status :: 4 - Beta",
+    "Topic :: Database",
+    "Topic :: Utilities",
+]
 
 [tool.poetry.scripts]
 tusker = "tusker:main"
