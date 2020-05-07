@@ -155,3 +155,9 @@ tool and the output printed to the console.
 Run `tusker clean`. This will remove all databases which were created
 by previous runs of tusker. Tusker only removes databases which are
 marked with a `CREATED BY TUSKER` comment.
+
+### What does the `dbname` setting in `tusker.toml` mean?
+
+Tusker creates two temporary databases and uses this as prefix. The two
+databases are called `{dbname}_{timestamp}_schema` and
+`{dbname}_{timestamp}_migrations`.
