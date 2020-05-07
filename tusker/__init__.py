@@ -54,6 +54,14 @@ class DatabaseAdmin:
             finally:
                 engine.dispose()
         finally:
+            # For some reason the connection is not properly returned/closed
+            # by migra and/or SQLAlchemy. In order to fix this issue simply
+            # terminate all backends still using this database.
+            cursor.execute('''
+                SELECT pg_terminate_backend(pid)
+                FROM pg_stat_activity
+                WHERE datname = %s
+            ''', [dbname])
             cursor.execute(f'DROP DATABASE {dbname}')
 
 
