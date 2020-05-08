@@ -97,7 +97,6 @@ def cmd_diff(args, cfg: Config):
                     migrations_cursor.execute(sql)
         if args.verbose:
             print('Diffing...', out=sys.stderr)
-        from schemainspect.pg import PostgreSQL
         migration = migra.Migration(migrations_engine, schema_engine)
         migration.set_safety(False)
         migration.add_all_changes()
