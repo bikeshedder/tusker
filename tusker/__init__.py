@@ -46,7 +46,7 @@ class DatabaseAdmin:
                 )
             else:
                 engine = sqlalchemy.create_engine(
-                    'postgresql://', 
+                    'postgresql://',
                     connect_args=self.config.args(dbname=dbname)
                 )
             try:
@@ -76,7 +76,9 @@ def cmd_diff(args, cfg: Config):
         #with schema_engine as schema_cursor:
         with open(cfg.schema.filename) as fh:
             sql = fh.read()
-            if sql.strip():
+            sql = sql.strip()
+            if sql:
+                sql = sqlalchemy.text(sql)
                 schema_cursor.execute(sql)
         if args.verbose:
             print('Creating migrated schema...', out=sys.stderr)
@@ -89,7 +91,9 @@ def cmd_diff(args, cfg: Config):
             filename = os.path.join(cfg.migrations.directory, filename)
             with open(filename) as fh:
                 sql = fh.read()
-                if sql.strip():
+                sql = sql.strip()
+                if sql:
+                    sql = sqlalchemy.text(sql)
                     migrations_cursor.execute(sql)
         if args.verbose:
             print('Diffing...', out=sys.stderr)
@@ -121,19 +125,19 @@ def cmd_clean(args, cfg: Config):
     finally:
         cursor.close()
 
-            
+
 
 def main():
     parser = argparse.ArgumentParser(
         description='Generate a database migration.')
     parser.add_argument(
         "--verbose",
-        help='Enable verbose output', 
+        help='Enable verbose output',
         action='store_true',
         default=False)
     parser.add_argument(
         "--config",
-        help='The configuration file. Default: tusker.toml', 
+        help='The configuration file. Default: tusker.toml',
         default='tusker.toml')
     subparsers = parser.add_subparsers(
         dest='command',
