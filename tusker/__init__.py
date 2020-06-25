@@ -54,14 +54,6 @@ class DatabaseAdmin:
             finally:
                 engine.dispose()
         finally:
-            # For some reason the connection is not properly returned/closed
-            # by migra and/or SQLAlchemy. In order to fix this issue simply
-            # terminate all backends still using this database.
-            cursor.execute('''
-                SELECT pg_terminate_backend(pid)
-                FROM pg_stat_activity
-                WHERE datname = %s
-            ''', [dbname])
             cursor.execute(f'DROP DATABASE {dbname}')
 
 
@@ -70,33 +62,33 @@ def cmd_diff(args, cfg: Config):
     if args.verbose:
         print('Creating databases...', out=sys.stderr)
     with dba.createdb('schema') as schema_engine, dba.createdb('migrations') as migrations_engine:
-        schema_cursor = schema_engine.connect()
-        if args.verbose:
-            print('Creating target schema...', out=sys.stderr)
-        #with schema_engine as schema_cursor:
-        with open(cfg.schema.filename) as fh:
-            sql = fh.read()
-            sql = sql.strip()
-            if sql:
-                sql = sqlalchemy.text(sql)
-                schema_cursor.execute(sql)
-        if args.verbose:
-            print('Creating migrated schema...', out=sys.stderr)
-        migrations_cursor = migrations_engine.connect()
-        for filename in sorted(os.listdir(cfg.migrations.directory)):
-            if not filename.endswith('.sql'):
-                continue
+        with schema_engine.connect() as schema_cursor:
             if args.verbose:
-                print(f"- {filename}", out=sys.stderr)
-            filename = os.path.join(cfg.migrations.directory, filename)
-            with open(filename) as fh:
+                print('Creating target schema...', out=sys.stderr)
+            #with schema_engine as schema_cursor:
+            with open(cfg.schema.filename) as fh:
                 sql = fh.read()
                 sql = sql.strip()
                 if sql:
                     sql = sqlalchemy.text(sql)
-                    migrations_cursor.execute(sql)
+                    schema_cursor.execute(sql)
         if args.verbose:
-            print('Diffing...', out=sys.stderr)
+            print('Creating migrated schema...', out=sys.stderr)
+        with migrations_engine.connect() as migrations_cursor:
+            for filename in sorted(os.listdir(cfg.migrations.directory)):
+                if not filename.endswith('.sql'):
+                    continue
+                if args.verbose:
+                    print(f"- {filename}", out=sys.stderr)
+                filename = os.path.join(cfg.migrations.directory, filename)
+                with open(filename) as fh:
+                    sql = fh.read()
+                    sql = sql.strip()
+                    if sql:
+                        sql = sqlalchemy.text(sql)
+                        migrations_cursor.execute(sql)
+            if args.verbose:
+                print('Diffing...', out=sys.stderr)
         migration = migra.Migration(migrations_engine, schema_engine)
         migration.set_safety(False)
         migration.add_all_changes()
