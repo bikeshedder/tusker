@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.1.2 (unreleased)
+## v0.1.2
 
 * Fix closing of DB connections
 
