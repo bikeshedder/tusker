@@ -122,24 +122,40 @@ def main():
     parser = argparse.ArgumentParser(
         description='Generate a database migration.')
     parser.add_argument(
-        "--verbose",
-        help='Enable verbose output',
+        '--verbose',
+        help='enable verbose output',
         action='store_true',
         default=False)
     parser.add_argument(
-        "--config",
-        help='The configuration file. Default: tusker.toml',
+        '--config',
+        help='the configuration file. Default: tusker.toml',
         default='tusker.toml')
     subparsers = parser.add_subparsers(
         dest='command',
         required=True)
     parser_diff = subparsers.add_parser(
         'diff',
-        help='Show differences of target schema and migrations')
+        help='show differences of target schema and migrations')
+    parser_diff.add_argument(
+        '--from', '--source',
+        help='the actual schema version to compare from. Default: migrations',
+        dest='source',
+        choices=['migrations', 'schema'],
+        default='migrations')
+    parser_diff.add_argument(
+        '--to', '--target',
+        help='the future schema version to compare to. Default: schema',
+        dest='target',
+        choices=['migrations', 'schema'],
+        default='schema')
+    parser_diff.add_argument(
+        '--reverse',
+        help='inverts the from/source and to/target parameter',
+        action='store_true')
     parser_diff.set_defaults(func=cmd_diff)
     parser_clean = subparsers.add_parser(
         'clean',
-        help='Clean up left ofter *_migrations or *_schema tables')
+        help='clean up left ofter *_migrations or *_schema tables')
     parser_clean.set_defaults(func=cmd_clean)
     args = parser.parse_args()
     cfg = Config(args.config)
