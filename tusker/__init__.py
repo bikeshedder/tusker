@@ -32,6 +32,10 @@ class Tusker:
         else:
             return psycopg2.connect(**self.config.database.args(dbname='template1'))
 
+    def log(self, text):
+        if self.verbose:
+            print(text, file=sys.stderr)
+
     @contextmanager
     def createengine(self, dbname=None):
         if self.config.database.url:
@@ -66,8 +70,7 @@ class Tusker:
     def mgr_schema(self):
         with self.createdb('schema') as schema_engine:
             with schema_engine.connect() as schema_cursor:
-                if self.verbose:
-                    print('Creating original schema...', file=sys.stderr)
+                self.log('Creating original schema...')
                 with open(self.config.schema.filename) as fh:
                     sql = fh.read()
                     sql = sql.strip()
@@ -80,13 +83,11 @@ class Tusker:
     def mgr_migrations(self):
         with self.createdb('migrations') as migrations_engine:
             with migrations_engine.connect() as migrations_cursor:
-                if self.verbose:
-                    print('Creating migrated schema...', file=sys.stderr)
+                self.log('Creating migrated schema...')
                 for filename in sorted(os.listdir(self.config.migrations.directory)):
                     if not filename.endswith('.sql'):
                         continue
-                    if self.verbose:
-                        print(f"- {filename}", file=sys.stderr)
+                    self.log(f"- {filename}")
                     filename = os.path.join(self.config.migrations.directory, filename)
                     with open(filename) as fh:
                         sql = fh.read()
@@ -100,19 +101,16 @@ class Tusker:
     def mgr_database(self):
         with self.createengine(self.config.database.dbname) as database_engine:
             with database_engine.connect() as database_cursor:
-                if self.verbose:
-                    print('Observing database schema...', file=sys.stderr)
+                self.log('Observing database schema...')
             yield database_engine
 
     def mgr(self, name):
         return getattr(self, f'mgr_{name}')()
 
     def diff(self, source, target):
-        if self.verbose:
-            print('Creating databases...', file=sys.stderr)
+        self.log('Creating databases...')
         with self.mgr(source) as source, self.mgr(target) as target:
-            if self.verbose:
-                print(f'Diffing...', file=sys.stderr)
+            self.log(f'Diffing...')
             migration = migra.Migration(source, target)
             migration.set_safety(False)
             migration.add_all_changes()
@@ -132,8 +130,7 @@ class Tusker:
                 dbname = row[0]
                 if '"' in dbname:
                     raise RuntimeError('Database with an " in its name found. Please fix that manually.')
-                if self.verbose:
-                    print(f'Dropping {dbname} ...', file=sys.stderr)
+                self.log(f'Dropping {dbname} ...')
                 cursor.execute(f'DROP DATABASE "{dbname}"')
         finally:
             cursor.close()
