@@ -32,6 +32,23 @@ class DatabaseAdmin:
             return psycopg2.connect(**self.config.args(dbname='template1'))
 
     @contextmanager
+    def createengine(self, dbname=None):
+        if self.config.url:
+            engine = sqlalchemy.create_engine(
+                self.config.url,
+                connect_args={'dbname': dbname} if dbname else {},
+            )
+        else:
+            engine = sqlalchemy.create_engine(
+                'postgresql://',
+                connect_args=self.config.args(dbname=dbname)
+            )
+        try:
+            yield engine
+        finally:
+            engine.dispose()
+
+    @contextmanager
     def createdb(self, suffix):
         cursor = self.conn.cursor()
         now = int(time.time())
@@ -39,57 +56,62 @@ class DatabaseAdmin:
         cursor.execute(f'CREATE DATABASE "{dbname}"')
         cursor.execute(f'COMMENT ON DATABASE "{dbname}" IS \'{TUSKER_COMMENT}\'')
         try:
-            if self.config.url:
-                engine = sqlalchemy.create_engine(
-                    self.config.url,
-                    connect_args={'dbname': dbname},
-                )
-            else:
-                engine = sqlalchemy.create_engine(
-                    'postgresql://',
-                    connect_args=self.config.args(dbname=dbname)
-                )
-            try:
+            with self.createengine(dbname) as engine:
                 yield engine
-            finally:
-                engine.dispose()
         finally:
             cursor.execute(f'DROP DATABASE {dbname}')
-
 
 def cmd_diff(args, cfg: Config):
     dba = DatabaseAdmin(cfg)
     if args.verbose:
         print('Creating databases...', file=sys.stderr)
-    with dba.createdb('schema') as schema_engine, dba.createdb('migrations') as migrations_engine:
-        with schema_engine.connect() as schema_cursor:
-            if args.verbose:
-                print('Creating target schema...', file=sys.stderr)
-            #with schema_engine as schema_cursor:
-            with open(cfg.schema.filename) as fh:
-                sql = fh.read()
-                sql = sql.strip()
-                if sql:
-                    sql = sqlalchemy.text(sql)
-                    schema_cursor.execute(sql)
-        if args.verbose:
-            print('Creating migrated schema...', file=sys.stderr)
-        with migrations_engine.connect() as migrations_cursor:
-            for filename in sorted(os.listdir(cfg.migrations.directory)):
-                if not filename.endswith('.sql'):
-                    continue
+    with dba.createdb('schema') as schema_engine, dba.createdb('migrations') as migrations_engine, dba.createengine(cfg.database.dbname) as database_engine:
+        if 'schema' in [args.source, args.target]:
+            with schema_engine.connect() as schema_cursor:
                 if args.verbose:
-                    print(f"- {filename}", file=sys.stderr)
-                filename = os.path.join(cfg.migrations.directory, filename)
-                with open(filename) as fh:
+                    print('Creating original schema...', file=sys.stderr)
+                #with schema_engine as schema_cursor:
+                with open(cfg.schema.filename) as fh:
                     sql = fh.read()
                     sql = sql.strip()
                     if sql:
                         sql = sqlalchemy.text(sql)
-                        migrations_cursor.execute(sql)
-            if args.verbose:
-                print('Diffing...', file=sys.stderr)
-        migration = migra.Migration(migrations_engine, schema_engine)
+                        schema_cursor.execute(sql)
+        if 'migrations' in [args.source, args.target]:
+            with migrations_engine.connect() as migrations_cursor:
+                if args.verbose:
+                    print('Creating migrated schema...', file=sys.stderr)
+                for filename in sorted(os.listdir(cfg.migrations.directory)):
+                    if not filename.endswith('.sql'):
+                        continue
+                    if args.verbose:
+                        print(f"- {filename}", file=sys.stderr)
+                    filename = os.path.join(cfg.migrations.directory, filename)
+                    with open(filename) as fh:
+                        sql = fh.read()
+                        sql = sql.strip()
+                        if sql:
+                            sql = sqlalchemy.text(sql)
+                            migrations_cursor.execute(sql)
+        if 'database' in [args.source, args.target]:
+            with database_engine.connect() as database_cursor:
+                if args.verbose:
+                    print('Observing database schema...', file=sys.stderr)
+        if args.verbose:
+            print('Selecting source and target', file=sys.stderr)
+        source = (migrations_engine if args.source == 'migrations'
+                 else schema_engine if args.source == 'schema'
+                 else database_engine if args.source == 'database'
+                 else migrations_engine)
+        target = (migrations_engine if args.target == 'migrations'
+                 else schema_engine if args.target == 'schema'
+                 else database_engine if args.target == 'database'
+                 else schema_engine)
+        if args.reverse:
+            source, target = target, source
+        if args.verbose:
+            print(f'Diffing...', file=sys.stderr)
+        migration = migra.Migration(source, target)
         migration.set_safety(False)
         migration.add_all_changes()
         print(migration.sql, end='')
@@ -140,13 +162,13 @@ def main():
         '--from', '--source',
         help='the actual schema version to compare from. Default: migrations',
         dest='source',
-        choices=['migrations', 'schema'],
+        choices=['migrations', 'schema', 'database'],
         default='migrations')
     parser_diff.add_argument(
         '--to', '--target',
         help='the future schema version to compare to. Default: schema',
         dest='target',
-        choices=['migrations', 'schema'],
+        choices=['migrations', 'schema', 'database'],
         default='schema')
     parser_diff.add_argument(
         '--reverse',
