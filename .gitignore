@@ -1,2 +1,4 @@
 .env
 tusker.toml
+tusker.egg-info/
+__pycache__/
