@@ -18,30 +18,31 @@ from .config import Config
 TUSKER_COMMENT = 'CREATED BY TUSKER - If this table is left behind tusker probably crashed and was not able to clean up after itself. Either try running `tusker clean` or remove this database manually.'
 
 
-class DatabaseAdmin:
+class Tusker:
 
-    def __init__(self, cfg: Config):
-        self.config = cfg.database
+    def __init__(self, config: Config, verbose=False):
+        self.config = config
+        self.verbose = verbose
         self.conn = self._connect('template1')
         self.conn.autocommit = True
 
     def _connect(self, name):
-        if self.config.url:
-            return psycopg2.connect(self.config.url, dbname='template1')
+        if self.config.database.url:
+            return psycopg2.connect(self.config.database.url, dbname='template1')
         else:
-            return psycopg2.connect(**self.config.args(dbname='template1'))
+            return psycopg2.connect(**self.config.database.args(dbname='template1'))
 
     @contextmanager
     def createengine(self, dbname=None):
-        if self.config.url:
+        if self.config.database.url:
             engine = sqlalchemy.create_engine(
-                self.config.url,
+                self.config.database.url,
                 connect_args={'dbname': dbname} if dbname else {},
             )
         else:
             engine = sqlalchemy.create_engine(
                 'postgresql://',
-                connect_args=self.config.args(dbname=dbname)
+                connect_args=self.config.database.args(dbname=dbname)
             )
         try:
             yield engine
@@ -52,7 +53,7 @@ class DatabaseAdmin:
     def createdb(self, suffix):
         cursor = self.conn.cursor()
         now = int(time.time())
-        dbname = f'{self.config.dbname}_{now}_{suffix}'
+        dbname = f'{self.config.database.dbname}_{now}_{suffix}'
         cursor.execute(f'CREATE DATABASE "{dbname}"')
         cursor.execute(f'COMMENT ON DATABASE "{dbname}" IS \'{TUSKER_COMMENT}\'')
         try:
@@ -61,53 +62,57 @@ class DatabaseAdmin:
         finally:
             cursor.execute(f'DROP DATABASE {dbname}')
 
-def cmd_diff(args, cfg: Config):
-    dba = DatabaseAdmin(cfg)
-    if args.verbose:
-        print('Creating databases...', file=sys.stderr)
-    with dba.createdb('schema') as schema_engine, \
-            dba.createdb('migrations') as migrations_engine, \
-            dba.createengine(cfg.database.dbname) as database_engine:
-        if 'schema' in [args.source, args.target]:
+    @contextmanager
+    def mgr_schema(self):
+        with self.createdb('schema') as schema_engine:
             with schema_engine.connect() as schema_cursor:
-                if args.verbose:
+                if self.verbose:
                     print('Creating original schema...', file=sys.stderr)
-                with open(cfg.schema.filename) as fh:
+                with open(self.config.schema.filename) as fh:
                     sql = fh.read()
                     sql = sql.strip()
                     if sql:
                         sql = sqlalchemy.text(sql)
                         schema_cursor.execute(sql)
-        if 'migrations' in [args.source, args.target]:
+            yield schema_engine
+
+    @contextmanager
+    def mgr_migrations(self):
+        with self.createdb('migrations') as migrations_engine:
             with migrations_engine.connect() as migrations_cursor:
-                if args.verbose:
+                if self.verbose:
                     print('Creating migrated schema...', file=sys.stderr)
-                for filename in sorted(os.listdir(cfg.migrations.directory)):
+                for filename in sorted(os.listdir(self.config.migrations.directory)):
                     if not filename.endswith('.sql'):
                         continue
-                    if args.verbose:
+                    if self.verbose:
                         print(f"- {filename}", file=sys.stderr)
-                    filename = os.path.join(cfg.migrations.directory, filename)
+                    filename = os.path.join(self.config.migrations.directory, filename)
                     with open(filename) as fh:
                         sql = fh.read()
                         sql = sql.strip()
                         if sql:
                             sql = sqlalchemy.text(sql)
                             migrations_cursor.execute(sql)
-        if 'database' in [args.source, args.target]:
+            yield migrations_engine
+
+    @contextmanager
+    def mgr_database(self):
+        with self.createengine(self.config.database.dbname) as database_engine:
             with database_engine.connect() as database_cursor:
-                if args.verbose:
+                if self.verbose:
                     print('Observing database schema...', file=sys.stderr)
-        if args.verbose:
-            print('Selecting source and target', file=sys.stderr)
-        source = (migrations_engine if args.source == 'migrations'
-                 else schema_engine if args.source == 'schema'
-                 else database_engine if args.source == 'database'
-                 else migrations_engine)
-        target = (migrations_engine if args.target == 'migrations'
-                 else schema_engine if args.target == 'schema'
-                 else database_engine if args.target == 'database'
-                 else schema_engine)
+            yield database_engine
+
+    def mgr(self, name):
+        return getattr(self, f'mgr_{name}')()
+
+
+def cmd_diff(args, cfg: Config):
+    tusker = Tusker(cfg)
+    if args.verbose:
+        print('Creating databases...', file=sys.stderr)
+    with tusker.mgr(args.source) as source, tusker.mgr(args.target) as target:
         if args.reverse:
             source, target = target, source
         if args.verbose:
@@ -119,8 +124,8 @@ def cmd_diff(args, cfg: Config):
 
 
 def cmd_clean(args, cfg: Config):
-    dba = DatabaseAdmin(cfg)
-    cursor = dba.conn.cursor()
+    tusker = Tusker(cfg)
+    cursor = tusker.conn.cursor()
     try:
         cursor.execute('''
             SELECT db.datname
@@ -181,5 +186,7 @@ def main():
         help='clean up left over *_migrations or *_schema tables')
     parser_clean.set_defaults(func=cmd_clean)
     args = parser.parse_args()
+    if args.source == args.target:
+        parser.error("source and target must not be identical")
     cfg = Config(args.config)
     args.func(args, cfg)
