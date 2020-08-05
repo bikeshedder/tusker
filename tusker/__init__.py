@@ -107,43 +107,50 @@ class Tusker:
     def mgr(self, name):
         return getattr(self, f'mgr_{name}')()
 
+    def diff(self, source, target):
+        if self.verbose:
+            print('Creating databases...', file=sys.stderr)
+        with self.mgr(source) as source, self.mgr(target) as target:
+            if self.verbose:
+                print(f'Diffing...', file=sys.stderr)
+            migration = migra.Migration(source, target)
+            migration.set_safety(False)
+            migration.add_all_changes()
+            print(migration.sql, end='')
+
+    def clean(self):
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute('''
+                SELECT db.datname
+                FROM pg_database db
+                JOIN pg_shdescription dsc ON dsc.objoid = db.oid
+                WHERE dsc.description = %s;
+            ''', (TUSKER_COMMENT,))
+            rows = cursor.fetchall()
+            for row in rows:
+                dbname = row[0]
+                if '"' in dbname:
+                    raise RuntimeError('Database with an " in its name found. Please fix that manually.')
+                if self.verbose:
+                    print(f'Dropping {dbname} ...', file=sys.stderr)
+                cursor.execute(f'DROP DATABASE "{dbname}"')
+        finally:
+            cursor.close()
+
 
 def cmd_diff(args, cfg: Config):
-    tusker = Tusker(cfg)
-    if args.verbose:
-        print('Creating databases...', file=sys.stderr)
-    with tusker.mgr(args.source) as source, tusker.mgr(args.target) as target:
-        if args.reverse:
-            source, target = target, source
-        if args.verbose:
-            print(f'Diffing...', file=sys.stderr)
-        migration = migra.Migration(source, target)
-        migration.set_safety(False)
-        migration.add_all_changes()
-        print(migration.sql, end='')
+    tusker = Tusker(cfg, args.verbose)
+    source = args.source
+    target = args.target
+    if args.reverse:
+        source, target = target, source
+    tusker.diff(source, target)
 
 
 def cmd_clean(args, cfg: Config):
-    tusker = Tusker(cfg)
-    cursor = tusker.conn.cursor()
-    try:
-        cursor.execute('''
-            SELECT db.datname
-            FROM pg_database db
-            JOIN pg_shdescription dsc ON dsc.objoid = db.oid
-            WHERE dsc.description = %s;
-        ''', (TUSKER_COMMENT,))
-        rows = cursor.fetchall()
-        for row in rows:
-            dbname = row[0]
-            if '"' in dbname:
-                raise RuntimeError('Database with an " in its name found. Please fix that manually.')
-            if args.verbose:
-                print(f'Dropping {dbname} ...', file=sys.stderr)
-            cursor.execute(f'DROP DATABASE "{dbname}"')
-    finally:
-        cursor.close()
-
+    tusker = Tusker(cfg, args.verbose)
+    tusker.clean()
 
 
 def main():
