@@ -60,11 +60,11 @@ class DatabaseAdmin:
 def cmd_diff(args, cfg: Config):
     dba = DatabaseAdmin(cfg)
     if args.verbose:
-        print('Creating databases...', out=sys.stderr)
+        print('Creating databases...', file=sys.stderr)
     with dba.createdb('schema') as schema_engine, dba.createdb('migrations') as migrations_engine:
         with schema_engine.connect() as schema_cursor:
             if args.verbose:
-                print('Creating target schema...', out=sys.stderr)
+                print('Creating target schema...', file=sys.stderr)
             #with schema_engine as schema_cursor:
             with open(cfg.schema.filename) as fh:
                 sql = fh.read()
@@ -73,13 +73,13 @@ def cmd_diff(args, cfg: Config):
                     sql = sqlalchemy.text(sql)
                     schema_cursor.execute(sql)
         if args.verbose:
-            print('Creating migrated schema...', out=sys.stderr)
+            print('Creating migrated schema...', file=sys.stderr)
         with migrations_engine.connect() as migrations_cursor:
             for filename in sorted(os.listdir(cfg.migrations.directory)):
                 if not filename.endswith('.sql'):
                     continue
                 if args.verbose:
-                    print(f"- {filename}", out=sys.stderr)
+                    print(f"- {filename}", file=sys.stderr)
                 filename = os.path.join(cfg.migrations.directory, filename)
                 with open(filename) as fh:
                     sql = fh.read()
@@ -88,7 +88,7 @@ def cmd_diff(args, cfg: Config):
                         sql = sqlalchemy.text(sql)
                         migrations_cursor.execute(sql)
             if args.verbose:
-                print('Diffing...', out=sys.stderr)
+                print('Diffing...', file=sys.stderr)
         migration = migra.Migration(migrations_engine, schema_engine)
         migration.set_safety(False)
         migration.add_all_changes()
@@ -111,7 +111,7 @@ def cmd_clean(args, cfg: Config):
             if '"' in dbname:
                 raise RuntimeError('Database with an " in its name found. Please fix that manually.')
             if args.verbose:
-                print(f'Dropping {dbname} ...', out=sys.stderr)
+                print(f'Dropping {dbname} ...', file=sys.stderr)
             cursor.execute(f'DROP DATABASE "{dbname}"')
     finally:
         cursor.close()
