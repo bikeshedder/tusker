@@ -65,12 +65,13 @@ def cmd_diff(args, cfg: Config):
     dba = DatabaseAdmin(cfg)
     if args.verbose:
         print('Creating databases...', file=sys.stderr)
-    with dba.createdb('schema') as schema_engine, dba.createdb('migrations') as migrations_engine, dba.createengine(cfg.database.dbname) as database_engine:
+    with dba.createdb('schema') as schema_engine, \
+            dba.createdb('migrations') as migrations_engine, \
+            dba.createengine(cfg.database.dbname) as database_engine:
         if 'schema' in [args.source, args.target]:
             with schema_engine.connect() as schema_cursor:
                 if args.verbose:
                     print('Creating original schema...', file=sys.stderr)
-                #with schema_engine as schema_cursor:
                 with open(cfg.schema.filename) as fh:
                     sql = fh.read()
                     sql = sql.strip()
