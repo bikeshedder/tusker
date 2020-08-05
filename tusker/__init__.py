@@ -178,7 +178,7 @@ def main():
     parser_diff.set_defaults(func=cmd_diff)
     parser_clean = subparsers.add_parser(
         'clean',
-        help='clean up left ofter *_migrations or *_schema tables')
+        help='clean up left over *_migrations or *_schema tables')
     parser_clean.set_defaults(func=cmd_clean)
     args = parser.parse_args()
     cfg = Config(args.config)
