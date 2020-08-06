@@ -1,5 +1,5 @@
-from contextlib import contextmanager
 import argparse
+from contextlib import contextmanager, ExitStack
 import datetime
 import os
 import re
@@ -114,7 +114,22 @@ class Tusker:
             migration = migra.Migration(source, target)
             migration.set_safety(False)
             migration.add_all_changes()
-            print(migration.sql, end='')
+            return migration.sql
+
+    def check(self, backends):
+        diff_found = True
+        with ExitStack() as stack:
+            managers = [(name, stack.enter_context(self.mgr(name))) for name in backends]
+            for i in range(len(managers)-1):
+                source, target = (managers[i], managers[i+1])
+                self.log(f'Diffing {source[0]} against {target[0]}...')
+                migration = migra.Migration(source[1], target[1])
+                migration.set_safety(False)
+                migration.add_all_changes()
+                if migration.sql:
+                    return (source[0], target[0])
+                    diff_found = False
+        return None
 
     def clean(self):
         cursor = self.conn.cursor()
@@ -142,12 +157,46 @@ def cmd_diff(args, cfg: Config):
     target = args.target
     if args.reverse:
         source, target = target, source
-    tusker.diff(source, target)
+    sql = tusker.diff(source, target)
+    print(sql, end='')
+
+
+def cmd_check(args, cfg: Config):
+    backends = args.backends
+    if 'all' in backends:
+        backends = ['migrations', 'schema', 'database']
+    tusker = Tusker(cfg, args.verbose)
+    diff = tusker.check(backends)
+    if diff:
+        print(f'Schemas differ: {diff[0]} != {diff[1]}')
+        print(f'Run `tusker diff` to see the differences')
+        sys.exit(1)
+    else:
+        print('Schemas are identical')
+        sys.exit(0)
 
 
 def cmd_clean(args, cfg: Config):
     tusker = Tusker(cfg, args.verbose)
     tusker.clean()
+
+
+BACKEND_CHOICES = ['migrations', 'schema', 'database']
+
+class ValidateBackends(argparse.Action):
+    def __call__(self, parser, args, values, option_string=None):
+        if 'all' in values:
+            values = BACKEND_CHOICES
+        else:
+            if len(values) <= 1:
+                choices = ', '.join(map(repr, BACKEND_CHOICES))
+                raise argparse.ArgumentError(self, f'at least two backends are required to perform the check (choose from {choices}) or pass \'all\' on its own.')
+            for value in values:
+                if value not in BACKEND_CHOICES:
+                    choices = ', '.join(map(repr, BACKEND_CHOICES + ['all']))
+                    msg = f'invalid choice: {value!r} (choose from {choices})'
+                    raise argparse.ArgumentError(self, msg)
+        setattr(args, self.dest, values)
 
 
 def main():
@@ -167,24 +216,36 @@ def main():
         required=True)
     parser_diff = subparsers.add_parser(
         'diff',
-        help='show differences of target schema and migrations')
+        help='show differences between two schemas')
     parser_diff.add_argument(
         '--from', '--source',
         help='the actual schema version to compare from. Default: migrations',
         dest='source',
-        choices=['migrations', 'schema', 'database'],
+        choices=BACKEND_CHOICES,
         default='migrations')
     parser_diff.add_argument(
         '--to', '--target',
         help='the future schema version to compare to. Default: schema',
         dest='target',
-        choices=['migrations', 'schema', 'database'],
+        choices=BACKEND_CHOICES,
         default='schema')
     parser_diff.add_argument(
         '--reverse',
         help='inverts the from/source and to/target parameter',
         action='store_true')
     parser_diff.set_defaults(func=cmd_diff)
+    parser_check = subparsers.add_parser(
+        'check',
+        help='check for differences between schema, migrations and/or database. Returning code 0 if they match and 1 otherwise. This is useful for continuous integration checks.')
+    parser_check.set_defaults(func=cmd_check)
+    parser_check.add_argument(
+        'backends',
+        help='at least two backends are required to diff against each other (choose from {}). You can also pass \'all\' on its own to diff all backends against each other.'.format(', '.join(map(repr, BACKEND_CHOICES))),
+        metavar='backend',
+        nargs='*',
+        default=['migrations', 'schema'],
+        action=ValidateBackends
+    )
     parser_clean = subparsers.add_parser(
         'clean',
         help='clean up left over *_migrations or *_schema tables')
