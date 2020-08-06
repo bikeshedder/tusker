@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.2.0 (unreleased)
+## v0.2.0
 
 * Add `from` and `to` argument to `diff` command which makes it possible
   to compare a schema file, migration files and an existing database.
