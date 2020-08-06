@@ -158,8 +158,8 @@ tool and the output printed to the console.
 
 ### Is it possible to diff the schema and/or migrations against an existing database?
 
-Yes. This feature has been added in 0.2. You can pass a `--source` and `--target`
-option to the `tusker diff` command. Check the output of `tusker diff --help` for
+Yes. This feature has been added in 0.2. You can pass a `from` and `to`
+argument to the `tusker diff` command. Check the output of `tusker diff --help` for
 more details.
 
 ### Tusker printed an error and left the temporary databases behind. How can I remove them?
@@ -170,10 +170,12 @@ marked with a `CREATED BY TUSKER` comment.
 
 ### What does the `dbname` setting in `tusker.toml` mean?
 
-When diffing against a ready migrated database this database name is used:
+When diffing against a ready migrated database this database name is used. This
+command will print out the difference between the current database schema and
+the target schema:
 
 ```shell
-tusker diff --target database
+tusker diff database
 ```
 
 Tusker also needs to create temporary databases when diffing against the `schema`

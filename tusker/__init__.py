@@ -216,29 +216,39 @@ def main():
         required=True)
     parser_diff = subparsers.add_parser(
         'diff',
-        help='show differences between two schemas')
+        help='show differences between two schemas',
+        description='''
+            This command calculates the difference between two database schemas.
+            The from- and to-parameter accept one of the following backends:
+            migrations, schema, database
+        ''')
     parser_diff.add_argument(
         'source',
+        metavar='from',
         nargs="?",
-        metavar='source',
-        help=f'backend to use for the source schema. Default: migrations, Choices: {", ".join(map(repr, BACKEND_CHOICES))}',
+        help=f'from-backend for the diff operation. Default: migrations',
         choices=BACKEND_CHOICES,
         default='migrations')
     parser_diff.add_argument(
         'target',
+        metavar='to',
         nargs="?",
-        metavar='target',
-        help=f'backend to use for the target schema. Default: schema, Choices: {", ".join(map(repr, BACKEND_CHOICES))}',
+        help=f'to-backend for the diff operation. Default: schema',
         choices=BACKEND_CHOICES,
         default='schema')
     parser_diff.add_argument(
         '--reverse', '-r',
-        help='swaps the source and target argument creating a reverse diff',
+        help='swaps the "from" and "to" arguments creating a reverse diff',
         action='store_true')
     parser_diff.set_defaults(func=cmd_diff)
     parser_check = subparsers.add_parser(
         'check',
-        help='check for differences between schema, migrations and/or database. Returning code 0 if they match and 1 otherwise. This is useful for continuous integration checks.')
+        help='check for differences between schemas',
+        description='''
+            This command checks for differences between two or more schemas.
+            Exit code 0 means that the schemas are all in sync. Otherwise the
+            exit code 1 is used. This is useful for continuous integration checks.
+        ''')
     parser_check.set_defaults(func=cmd_check)
     parser_check.add_argument(
         'backends',
@@ -253,7 +263,7 @@ def main():
         help='clean up left over *_migrations or *_schema tables')
     parser_clean.set_defaults(func=cmd_clean)
     args = parser.parse_args()
-    if hasattr(args, 'source') and hasattr(args, 'target') and args.source == args.target:
+    if hasattr(args, 'from') and hasattr(args, 'target') and args.source == args.target:
         parser.error("source and target must not be identical")
     cfg = Config(args.config)
     args.func(args, cfg)

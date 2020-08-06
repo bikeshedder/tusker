@@ -2,11 +2,10 @@
 
 ## v0.2.0 (unreleased)
 
-* Add `--source` and `--target` option to `diff` command which makes
-  it possible to compare schema, migrations or an existing database
-  with each other.
+* Add `from` and `to` argument to `diff` command which makes it possible
+  to compare a schema file, migration files and an existing database.
 * Add `--reverse` option to `diff` command.
-* Add check command
+* Add `check` command
 
 ## v0.1.2
 
