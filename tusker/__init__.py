@@ -208,7 +208,7 @@ def main():
         action='store_true',
         default=False)
     parser.add_argument(
-        '--config',
+        '--config', '-c',
         help='the configuration file. Default: tusker.toml',
         default='tusker.toml')
     subparsers = parser.add_subparsers(
@@ -218,19 +218,19 @@ def main():
         'diff',
         help='show differences between two schemas')
     parser_diff.add_argument(
-        '--from', '--source',
+        '--source', '-s',
         help='the actual schema version to compare from. Default: migrations',
         dest='source',
         choices=BACKEND_CHOICES,
         default='migrations')
     parser_diff.add_argument(
-        '--to', '--target',
+        '--target', '-t',
         help='the future schema version to compare to. Default: schema',
         dest='target',
         choices=BACKEND_CHOICES,
         default='schema')
     parser_diff.add_argument(
-        '--reverse',
+        '--reverse', '-r',
         help='inverts the from/source and to/target parameter',
         action='store_true')
     parser_diff.set_defaults(func=cmd_diff)
