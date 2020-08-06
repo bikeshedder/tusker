@@ -1,5 +1,9 @@
 # Tusker
 
+[![GitHub](https://img.shields.io/github/license/bikeshedder/tusker?label=License&logoColor=white&style=for-the-badge)](https://github.com/bikeshedder/tusker/blob/master/LICENSE)
+&nbsp;
+[![PyPI](https://img.shields.io/pypi/v/tusker?label=PyPI&logo=pypi&logoColor=white&style=for-the-badge)](https://pypi.org/project/tusker)
+
 A PostgreSQL specific migration tool
 
 ## Elevator pitch
