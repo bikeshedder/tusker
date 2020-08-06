@@ -66,6 +66,12 @@ tusker diff
 This should give you an empty output. This means that there is no difference
 between applying the migrations in order and the target schema.
 
+Alternatively you can run the check command:
+
+```
+tusker check
+```
+
 If you want to change the schema in the future simply change the `schema.sql`
 and run `tusker diff` to create the migration for you.
 
@@ -150,6 +156,12 @@ tool and the output printed to the console.
 
 ## FAQ
 
+### Is it possible to diff the schema and/or migrations against an existing database?
+
+Yes. This feature has been added in 0.2. You can pass a `--source` and `--target`
+option to the `tusker diff` command. Check the output of `tusker diff --help` for
+more details.
+
 ### Tusker printed an error and left the temporary databases behind. How can I remove them?
 
 Run `tusker clean`. This will remove all databases which were created
@@ -158,6 +170,12 @@ marked with a `CREATED BY TUSKER` comment.
 
 ### What does the `dbname` setting in `tusker.toml` mean?
 
-Tusker creates two temporary databases and uses this as prefix. The two
-databases are called `{dbname}_{timestamp}_schema` and
-`{dbname}_{timestamp}_migrations`.
+When diffing against a ready migrated database this database name is used:
+
+```shell
+tusker diff --target database
+```
+
+Tusker also needs to create temporary databases when diffing against the `schema`
+and/or `migrations`. The two databases are called `{dbname}_{timestamp}_schema`
+and `{dbname}_{timestamp}_migrations`.

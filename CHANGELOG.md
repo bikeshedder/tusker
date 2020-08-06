@@ -6,6 +6,7 @@
   it possible to compare schema, migrations or an existing database
   with each other.
 * Add `--reverse` option to `diff` command.
+* Add check command
 
 ## v0.1.2
 
