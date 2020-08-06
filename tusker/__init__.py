@@ -218,20 +218,22 @@ def main():
         'diff',
         help='show differences between two schemas')
     parser_diff.add_argument(
-        '--source', '-s',
-        help='the actual schema version to compare from. Default: migrations',
-        dest='source',
+        'source',
+        nargs="?",
+        metavar='source',
+        help=f'backend to use for the source schema. Default: migrations, Choices: {", ".join(map(repr, BACKEND_CHOICES))}',
         choices=BACKEND_CHOICES,
         default='migrations')
     parser_diff.add_argument(
-        '--target', '-t',
-        help='the future schema version to compare to. Default: schema',
-        dest='target',
+        'target',
+        nargs="?",
+        metavar='target',
+        help=f'backend to use for the target schema. Default: schema, Choices: {", ".join(map(repr, BACKEND_CHOICES))}',
         choices=BACKEND_CHOICES,
         default='schema')
     parser_diff.add_argument(
         '--reverse', '-r',
-        help='inverts the from/source and to/target parameter',
+        help='swaps the source and target argument creating a reverse diff',
         action='store_true')
     parser_diff.set_defaults(func=cmd_diff)
     parser_check = subparsers.add_parser(
