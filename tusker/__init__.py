@@ -190,7 +190,7 @@ def main():
         help='clean up left over *_migrations or *_schema tables')
     parser_clean.set_defaults(func=cmd_clean)
     args = parser.parse_args()
-    if args.source == args.target:
+    if hasattr(args, 'source') and hasattr(args, 'target') and args.source == args.target:
         parser.error("source and target must not be identical")
     cfg = Config(args.config)
     args.func(args, cfg)
