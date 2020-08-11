@@ -107,16 +107,16 @@ class Tusker:
     def mgr(self, name):
         return getattr(self, f'mgr_{name}')()
 
-    def diff(self, source, target):
+    def diff(self, source, target, with_privileges=False):
         self.log('Creating databases...')
         with self.mgr(source) as source, self.mgr(target) as target:
             self.log(f'Diffing...')
             migration = migra.Migration(source, target)
             migration.set_safety(False)
-            migration.add_all_changes()
+            migration.add_all_changes(privileges=with_privileges)
             return migration.sql
 
-    def check(self, backends):
+    def check(self, backends, with_privileges=False):
         diff_found = True
         with ExitStack() as stack:
             managers = [(name, stack.enter_context(self.mgr(name))) for name in backends]
@@ -125,7 +125,7 @@ class Tusker:
                 self.log(f'Diffing {source[0]} against {target[0]}...')
                 migration = migra.Migration(source[1], target[1])
                 migration.set_safety(False)
-                migration.add_all_changes()
+                migration.add_all_changes(privileges=with_privileges)
                 if migration.sql:
                     return (source[0], target[0])
                     diff_found = False
@@ -157,7 +157,7 @@ def cmd_diff(args, cfg: Config):
     target = args.target
     if args.reverse:
         source, target = target, source
-    sql = tusker.diff(source, target)
+    sql = tusker.diff(source, target, with_privileges=args.with_privileges)
     print(sql, end='')
 
 
@@ -166,7 +166,7 @@ def cmd_check(args, cfg: Config):
     if 'all' in backends:
         backends = ['migrations', 'schema', 'database']
     tusker = Tusker(cfg, args.verbose)
-    diff = tusker.check(backends)
+    diff = tusker.check(backends, with_privileges=args.with_privileges)
     if diff:
         print(f'Schemas differ: {diff[0]} != {diff[1]}')
         print(f'Run `tusker diff` to see the differences')
@@ -240,6 +240,10 @@ def main():
         '--reverse', '-r',
         help='swaps the "from" and "to" arguments creating a reverse diff',
         action='store_true')
+    parser_diff.add_argument(
+        '--with-privileges',
+        help='also output privilege differences (ie. grant/revoke statements)',
+        action='store_true')
     parser_diff.set_defaults(func=cmd_diff)
     parser_check = subparsers.add_parser(
         'check',
@@ -258,6 +262,10 @@ def main():
         default=['migrations', 'schema'],
         action=ValidateBackends
     )
+    parser_check.add_argument(
+        '--with-privileges',
+        help='also output privilege differences (ie. grant/revoke statements)',
+        action='store_true')
     parser_clean = subparsers.add_parser(
         'clean',
         help='clean up left over *_migrations or *_schema tables')
