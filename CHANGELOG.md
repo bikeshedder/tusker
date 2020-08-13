@@ -2,7 +2,7 @@
 
 ## v0.2.1 (unreleased)
 
-* Add `--wuth-privileges` option to `diff` and `check` commands.
+* Add `--with-privileges` option to `diff` and `check` commands.
 
 
 ## v0.2.0
