@@ -111,7 +111,7 @@ class Tusker:
         self.log('Creating databases...')
         with self.mgr(source) as source, self.mgr(target) as target:
             self.log(f'Diffing...')
-            migration = migra.Migration(source, target)
+            migration = migra.Migration(source, target, self.config.database.schema)
             migration.set_safety(False)
             migration.add_all_changes(privileges=with_privileges)
             return migration.sql
@@ -123,7 +123,7 @@ class Tusker:
             for i in range(len(managers)-1):
                 source, target = (managers[i], managers[i+1])
                 self.log(f'Diffing {source[0]} against {target[0]}...')
-                migration = migra.Migration(source[1], target[1])
+                migration = migra.Migration(source[1], target[1], schema=self.config.database.schema)
                 migration.set_safety(False)
                 migration.add_all_changes(privileges=with_privileges)
                 if migration.sql:

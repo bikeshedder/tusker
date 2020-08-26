@@ -43,7 +43,7 @@ class ConfigReader:
 
 
 class SchemaConfig:
-    
+
     def __init__(self, data):
         data = ConfigReader(data)
         self.filename = data.get('filename', str) or 'schema.sql'
@@ -53,7 +53,7 @@ class SchemaConfig:
 
 
 class MigrationsConfig:
-    
+
     def __init__(self, data):
         data = ConfigReader(data)
         self.directory = data.get('directory', str, True) or 'migrations'
@@ -63,7 +63,7 @@ class MigrationsConfig:
 
 
 class DatabaseConfig:
-    
+
     def __init__(self, data):
         data = ConfigReader(data)
         self.url = data.get('url', str)
@@ -72,6 +72,7 @@ class DatabaseConfig:
         self.dbname = data.get('dbname', str) or 'tusker'
         self.user = data.get('user', str)
         self.password = data.get('password', str)
+        self.schema = data.get('schema', str)
 
     def __str__(self):
         return f'DatabaseConfig({self.__dict__!r})'

@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.2.2 (unreleased)
+
+* Add support for `database.schema` config option
+
 ## v0.2.1
 
 * Add `--with-privileges` option to `diff` and `check` commands.
