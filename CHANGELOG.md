@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.2.2 (unreleased)
+## v0.2.2
 
 * Add support for `database.schema` config option
 
