@@ -22,7 +22,7 @@ class Config:
         self.database = DatabaseConfig(data['database'])
 
     def __str__(self):
-        return f'Config(schema={self.schema}, migrations={self.migrations}, database={self.database})'
+        return 'Config(schema={}, migrations={}, database={})'.format(self.schema, self.migrations, self.database)
 
 
 class ConfigReader:
@@ -33,12 +33,12 @@ class ConfigReader:
     def get(self, name, type, required=False):
         if name not in self.data:
             if required:
-                raise ConfigError.missing(f'database.{name}')
+                raise ConfigError.missing('database.{}'.format(name))
             else:
                 return None
         value = self.data[name]
         if not isinstance(value, type):
-            raise ConfigError.invalid(name, f"Not of type {type}")
+            raise ConfigError.invalid(name, 'Not of type {}'.format(type))
         return value
 
 
@@ -49,7 +49,7 @@ class SchemaConfig:
         self.filename = data.get('filename', str) or 'schema.sql'
 
     def __str__(self):
-        return f'SchemaConfig({self.__dict__!r})'
+        return 'SchemaConfig({!r})'.format(self.__dict__)
 
 
 class MigrationsConfig:
@@ -59,7 +59,7 @@ class MigrationsConfig:
         self.directory = data.get('directory', str, True) or 'migrations'
 
     def __str__(self):
-        return f'MigrationsConfig({self.__dict__!r})'
+        return 'MigrationsConfig({!r})'.format(self.__dict__)
 
 
 class DatabaseConfig:
@@ -75,7 +75,7 @@ class DatabaseConfig:
         self.schema = data.get('schema', str)
 
     def __str__(self):
-        return f'DatabaseConfig({self.__dict__!r})'
+        return 'DatabaseConfig({!r})'.format(self.__dict__)
 
     def args(self, **override):
         args = {
@@ -93,8 +93,8 @@ class ConfigError(RuntimeError):
 
     @classmethod
     def missing(cls, name):
-        return cls(f'Missing configuration: {name}')
+        return cls('Missing configuration: {}'.format(name))
 
     @classmethod
     def invalid(cls, name, reason):
-        return cls(f'Invalid configuration: {name}, {reason}')
+        return cls('Invalid configuration: {}, {}'.format(name, reason))

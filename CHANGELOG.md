@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.2.3 (unreleased)
+
+* Replace f-Strings by .format() calls. This fixes Python 3.5 support.
+
 ## v0.2.2
 
 * Add support for `database.schema` config option

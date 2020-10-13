@@ -57,14 +57,14 @@ class Tusker:
     def createdb(self, suffix):
         cursor = self.conn.cursor()
         now = int(time.time())
-        dbname = f'{self.config.database.dbname}_{now}_{suffix}'
-        cursor.execute(f'CREATE DATABASE "{dbname}"')
-        cursor.execute(f'COMMENT ON DATABASE "{dbname}" IS \'{TUSKER_COMMENT}\'')
+        dbname = '{}_{}_{}'.format(self.config.database.dbname, now, suffix)
+        cursor.execute('CREATE DATABASE "{}"'.format(dbname))
+        cursor.execute('COMMENT ON DATABASE "{}" IS \'{}\''.format(dbname, TUSKER_COMMENT))
         try:
             with self.createengine(dbname) as engine:
                 yield engine
         finally:
-            cursor.execute(f'DROP DATABASE {dbname}')
+            cursor.execute('DROP DATABASE {}'.format(dbname))
 
     @contextmanager
     def mgr_schema(self):
@@ -87,7 +87,7 @@ class Tusker:
                 for filename in sorted(os.listdir(self.config.migrations.directory)):
                     if not filename.endswith('.sql'):
                         continue
-                    self.log(f"- {filename}")
+                    self.log('- {}'.format(filename))
                     filename = os.path.join(self.config.migrations.directory, filename)
                     with open(filename) as fh:
                         sql = fh.read()
@@ -105,12 +105,12 @@ class Tusker:
             yield database_engine
 
     def mgr(self, name):
-        return getattr(self, f'mgr_{name}')()
+        return getattr(self, 'mgr_{}'.format(name))()
 
     def diff(self, source, target, with_privileges=False):
         self.log('Creating databases...')
         with self.mgr(source) as source, self.mgr(target) as target:
-            self.log(f'Diffing...')
+            self.log('Diffing...')
             migration = migra.Migration(source, target, self.config.database.schema)
             migration.set_safety(False)
             migration.add_all_changes(privileges=with_privileges)
@@ -122,7 +122,7 @@ class Tusker:
             managers = [(name, stack.enter_context(self.mgr(name))) for name in backends]
             for i in range(len(managers)-1):
                 source, target = (managers[i], managers[i+1])
-                self.log(f'Diffing {source[0]} against {target[0]}...')
+                self.log('Diffing {} against {}...'.format(source[0], target[0]))
                 migration = migra.Migration(source[1], target[1], schema=self.config.database.schema)
                 migration.set_safety(False)
                 migration.add_all_changes(privileges=with_privileges)
@@ -145,8 +145,8 @@ class Tusker:
                 dbname = row[0]
                 if '"' in dbname:
                     raise RuntimeError('Database with an " in its name found. Please fix that manually.')
-                self.log(f'Dropping {dbname} ...')
-                cursor.execute(f'DROP DATABASE "{dbname}"')
+                self.log('Dropping {} ...'.format(dbname))
+                cursor.execute('DROP DATABASE "{}"'.format(dbname))
         finally:
             cursor.close()
 
@@ -168,8 +168,8 @@ def cmd_check(args, cfg: Config):
     tusker = Tusker(cfg, args.verbose)
     diff = tusker.check(backends, with_privileges=args.with_privileges)
     if diff:
-        print(f'Schemas differ: {diff[0]} != {diff[1]}')
-        print(f'Run `tusker diff` to see the differences')
+        print('Schemas differ: {} != {}'.format(diff[0], diff[1]))
+        print('Run `tusker diff` to see the differences')
         sys.exit(1)
     else:
         print('Schemas are identical')
@@ -190,11 +190,11 @@ class ValidateBackends(argparse.Action):
         else:
             if len(values) <= 1:
                 choices = ', '.join(map(repr, BACKEND_CHOICES))
-                raise argparse.ArgumentError(self, f'at least two backends are required to perform the check (choose from {choices}) or pass \'all\' on its own.')
+                raise argparse.ArgumentError(self, 'at least two backends are required to perform the check (choose from {choices}) or pass \'all\' on its own.')
             for value in values:
                 if value not in BACKEND_CHOICES:
                     choices = ', '.join(map(repr, BACKEND_CHOICES + ['all']))
-                    msg = f'invalid choice: {value!r} (choose from {choices})'
+                    msg = 'invalid choice: {!r} (choose from {})'.format(value, choices)
                     raise argparse.ArgumentError(self, msg)
         setattr(args, self.dest, values)
 
@@ -225,15 +225,15 @@ def main():
     parser_diff.add_argument(
         'source',
         metavar='from',
-        nargs="?",
-        help=f'from-backend for the diff operation. Default: migrations',
+        nargs='?',
+        help='from-backend for the diff operation. Default: migrations',
         choices=BACKEND_CHOICES,
         default='migrations')
     parser_diff.add_argument(
         'target',
         metavar='to',
-        nargs="?",
-        help=f'to-backend for the diff operation. Default: schema',
+        nargs='?',
+        help='to-backend for the diff operation. Default: schema',
         choices=BACKEND_CHOICES,
         default='schema')
     parser_diff.add_argument(
@@ -272,6 +272,6 @@ def main():
     parser_clean.set_defaults(func=cmd_clean)
     args = parser.parse_args()
     if hasattr(args, 'from') and hasattr(args, 'target') and args.source == args.target:
-        parser.error("source and target must not be identical")
+        parser.error('source and target must not be identical')
     cfg = Config(args.config)
     args.func(args, cfg)
