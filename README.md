@@ -162,7 +162,7 @@ tool and the output printed to the console.
 
 ### Is it possible to split the schema into multiple files?
 
-Yes. This feature has been added in 0.2. You can now use `glob` patterns as
+Yes. This feature has been added in 0.3. You can now use `glob` patterns as
 part of the `schema.filename` setting. e.g.:
 
 ```toml
