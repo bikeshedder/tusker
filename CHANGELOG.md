@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.3.1 (unreleased)
+
+* Execute files specified by `glob` pattern in sorted order
+
 ## v0.3.0
 
 * Add `--version` argument

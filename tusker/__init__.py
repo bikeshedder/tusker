@@ -36,6 +36,7 @@ def execute_sql_file(cursor, filename):
         if sql:
             sql = sqlalchemy.text(sql)
             cursor.execute(sql)
+            cursor.execute('COMMIT')
 
 
 class Tusker:
@@ -91,7 +92,7 @@ class Tusker:
         with self.createdb('schema') as schema_engine:
             with schema_engine.connect() as schema_cursor:
                 self.log('Creating original schema...')
-                for filename in glob(self.config.schema.filename):
+                for filename in sorted(glob(self.config.schema.filename)):
                     self.log('- {}'.format(filename))
                     execute_sql_file(schema_cursor, filename)
             yield schema_engine
