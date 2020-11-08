@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.3.2 (unreleased)
+## v0.3.2
 
 * Fix transaction handling
 
