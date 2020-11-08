@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.3.0 (unreleased)
+## v0.3.0
 
 * Add `--version` argument
 * Add `glob` pattern support for `schema.filename` setting
