@@ -1,6 +1,7 @@
 import argparse
 from contextlib import contextmanager, ExitStack
 import datetime
+from glob import glob
 import os
 import re
 import string
@@ -26,6 +27,15 @@ try:
     __version__ = importlib_metadata.version(__name__)
 except:
     __version__ = 'unknown'
+
+
+def execute_sql_file(cursor, filename):
+    with open(filename) as fh:
+        sql = fh.read()
+        sql = sql.strip()
+        if sql:
+            sql = sqlalchemy.text(sql)
+            cursor.execute(sql)
 
 
 class Tusker:
@@ -81,12 +91,9 @@ class Tusker:
         with self.createdb('schema') as schema_engine:
             with schema_engine.connect() as schema_cursor:
                 self.log('Creating original schema...')
-                with open(self.config.schema.filename) as fh:
-                    sql = fh.read()
-                    sql = sql.strip()
-                    if sql:
-                        sql = sqlalchemy.text(sql)
-                        schema_cursor.execute(sql)
+                for filename in glob(self.config.schema.filename):
+                    self.log('- {}'.format(filename))
+                    execute_sql_file(schema_cursor, filename)
             yield schema_engine
 
     @contextmanager
@@ -99,12 +106,7 @@ class Tusker:
                         continue
                     self.log('- {}'.format(filename))
                     filename = os.path.join(self.config.migrations.directory, filename)
-                    with open(filename) as fh:
-                        sql = fh.read()
-                        sql = sql.strip()
-                        if sql:
-                            sql = sqlalchemy.text(sql)
-                            migrations_cursor.execute(sql)
+                    execute_sql_file(migrations_cursor, filename)
             yield migrations_engine
 
     @contextmanager

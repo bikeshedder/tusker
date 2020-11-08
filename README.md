@@ -160,6 +160,16 @@ tool and the output printed to the console.
 
 ## FAQ
 
+### Is it possible to split the schema into multiple files?
+
+Yes. This feature has been added in 0.2. You can now use `glob` patterns as
+part of the `schema.filename` setting. e.g.:
+
+```toml
+[schema]
+filename = "schema/*.sql"
+```
+
 ### Is it possible to diff the schema and/or migrations against an existing database?
 
 Yes. This feature has been added in 0.2. You can pass a `from` and `to`
