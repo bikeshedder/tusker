@@ -36,7 +36,6 @@ def execute_sql_file(cursor, filename):
         if sql:
             sql = sqlalchemy.text(sql)
             cursor.execute(sql)
-            cursor.execute('COMMIT')
 
 
 class Tusker:
@@ -90,7 +89,7 @@ class Tusker:
     @contextmanager
     def mgr_schema(self):
         with self.createdb('schema') as schema_engine:
-            with schema_engine.connect() as schema_cursor:
+            with schema_engine.begin() as schema_cursor:
                 self.log('Creating original schema...')
                 for filename in sorted(glob(self.config.schema.filename)):
                     self.log('- {}'.format(filename))
@@ -100,7 +99,7 @@ class Tusker:
     @contextmanager
     def mgr_migrations(self):
         with self.createdb('migrations') as migrations_engine:
-            with migrations_engine.connect() as migrations_cursor:
+            with migrations_engine.begin() as migrations_cursor:
                 self.log('Creating migrated schema...')
                 for filename in sorted(os.listdir(self.config.migrations.directory)):
                     if not filename.endswith('.sql'):
@@ -113,7 +112,7 @@ class Tusker:
     @contextmanager
     def mgr_database(self):
         with self.createengine(self.config.database.dbname) as database_engine:
-            with database_engine.connect() as database_cursor:
+            with database_engine.begin() as database_cursor:
                 self.log('Observing database schema...')
             yield database_engine
 

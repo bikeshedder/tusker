@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.3.2 (unreleased)
+
+* Fix transaction handling
+
 ## v0.3.1
 
 * Execute files specified by `glob` pattern in sorted order
