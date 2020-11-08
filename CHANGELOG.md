@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.3.1 (unreleased)
+## v0.3.1
 
 * Execute files specified by `glob` pattern in sorted order
 
