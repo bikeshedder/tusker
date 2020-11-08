@@ -18,6 +18,16 @@ from .config import Config
 TUSKER_COMMENT = 'CREATED BY TUSKER - If this table is left behind tusker probably crashed and was not able to clean up after itself. Either try running `tusker clean` or remove this database manually.'
 
 
+try:
+    import importlib.metadata as importlib_metadata
+except ModuleNotFoundError:
+    import importlib_metadata
+try:
+    __version__ = importlib_metadata.version(__name__)
+except:
+    __version__ = 'unknown'
+
+
 class Tusker:
 
     def __init__(self, config: Config, verbose=False):
@@ -202,6 +212,10 @@ class ValidateBackends(argparse.Action):
 def main():
     parser = argparse.ArgumentParser(
         description='Generate a database migration.')
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='%(prog)s {}'.format(__version__))
     parser.add_argument(
         '--verbose',
         help='enable verbose output',

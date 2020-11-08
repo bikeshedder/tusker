@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.2.4 (unreleased)
+
+* Add `--version` argument
+
 ## v0.2.3
 
 * Replace f-Strings by .format() calls. This fixes Python 3.5 support.
