@@ -20,7 +20,7 @@ classifiers = [
 tusker = "tusker:main"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.5"
 importlib-metadata = {version = "^1.0", python = "<3.8"}
 migra = "^1.0.1596263757"
 psycopg2-binary = "^2.8.5"
