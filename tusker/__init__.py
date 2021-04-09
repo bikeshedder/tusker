@@ -1,17 +1,12 @@
 import argparse
 from contextlib import contextmanager, ExitStack
-import datetime
 from glob import glob
 import os
-import re
-import string
 import sys
 import time
 
 import migra
 import psycopg2
-import sqlbag
-import schemainspect
 import sqlalchemy
 
 from .config import Config
