@@ -42,10 +42,7 @@ class Tusker:
         self.conn.autocommit = True
 
     def _connect(self, name):
-        if self.config.database.url:
-            return psycopg2.connect(self.config.database.url, dbname='template1')
-        else:
-            return psycopg2.connect(**self.config.database.args(dbname='template1'))
+        return psycopg2.connect(**self.config.database.args(dbname='template1'))
 
     def log(self, text):
         if self.verbose:
@@ -53,16 +50,11 @@ class Tusker:
 
     @contextmanager
     def createengine(self, dbname=None):
-        if self.config.database.url:
-            engine = sqlalchemy.create_engine(
-                self.config.database.url,
-                connect_args={'dbname': dbname} if dbname else {},
-            )
-        else:
-            engine = sqlalchemy.create_engine(
-                'postgresql://',
-                connect_args=self.config.database.args(dbname=dbname)
-            )
+        override = {'dbname': dbname} if dbname else {}
+        engine = sqlalchemy.create_engine(
+            'postgresql://',
+            connect_args=self.config.database.args(**override)
+        )
         try:
             yield engine
         finally:
@@ -72,7 +64,7 @@ class Tusker:
     def createdb(self, suffix):
         cursor = self.conn.cursor()
         now = int(time.time())
-        dbname = '{}_{}_{}'.format(self.config.database.dbname, now, suffix)
+        dbname = '{}_{}_{}'.format(self.config.database.args()['dbname'], now, suffix)
         cursor.execute('CREATE DATABASE "{}"'.format(dbname))
         cursor.execute('COMMENT ON DATABASE "{}" IS \'{}\''.format(dbname, TUSKER_COMMENT))
         try:
@@ -106,7 +98,7 @@ class Tusker:
 
     @contextmanager
     def mgr_database(self):
-        with self.createengine(self.config.database.dbname) as database_engine:
+        with self.createengine() as database_engine:
             with database_engine.begin() as database_cursor:
                 self.log('Observing database schema...')
             yield database_engine

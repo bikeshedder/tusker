@@ -1,5 +1,6 @@
 import os
 
+from psycopg2.extensions import parse_dsn
 from tomlkit.toml_file import TOMLFile
 
 
@@ -69,7 +70,7 @@ class DatabaseConfig:
         self.url = data.get('url', str)
         self.host = data.get('host', str)
         self.port = data.get('port', int)
-        self.dbname = data.get('dbname', str) or 'tusker'
+        self.dbname = data.get('dbname', str)
         self.user = data.get('user', str)
         self.password = data.get('password', str)
         self.schema = data.get('schema', str)
@@ -78,13 +79,16 @@ class DatabaseConfig:
         return 'DatabaseConfig({!r})'.format(self.__dict__)
 
     def args(self, **override):
-        args = {
-            'host': self.host,
-            'port': self.port,
-            'user': self.user,
-            'password': self.password,
-            'dbname': self.dbname,
-        }
+        if self.url:
+            args = parse_dsn(self.url)
+        else:
+            args = {}
+        for k in ['host', 'port', 'dbname', 'user', 'password']:
+            v = getattr(self, k)
+            if v is not None:
+                args[k] = v
+        if not args['dbname']:
+            args['dbname'] = 'tusker'
         args.update(override)
         return args
 

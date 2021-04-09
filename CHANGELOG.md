@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.3.3 (unreleased)
+
+* Add support for mixing url with other database settings
+
 ## v0.3.2
 
 * Fix transaction handling
