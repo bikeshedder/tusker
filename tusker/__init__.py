@@ -124,7 +124,6 @@ class Tusker:
             return migration.sql
 
     def check(self, backends, with_privileges=False):
-        diff_found = True
         with ExitStack() as stack:
             managers = [(name, stack.enter_context(self.mgr(name))) for name in backends]
             for i in range(len(managers)-1):
@@ -135,7 +134,6 @@ class Tusker:
                 migration.add_all_changes(privileges=with_privileges)
                 if migration.sql:
                     return (source[0], target[0])
-                    diff_found = False
         return None
 
     def clean(self):
