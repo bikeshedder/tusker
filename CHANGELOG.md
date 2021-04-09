@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.3.3 (unreleased)
+## v0.3.3
 
 * Add support for mixing url with other database settings
 
