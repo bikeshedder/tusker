@@ -172,9 +172,6 @@ class Tusker:
             rows = cursor.fetchall()
             for row in rows:
                 dbname = row[0]
-                if '"' in dbname:
-                    raise RuntimeError(
-                        'Database with an " in its name found. Please fix that manually.')
                 self.log('Dropping {} ...'.format(dbname))
                 cursor.execute(sql.SQL('DROP DATABASE {}').format(
                     sql.Identifier(dbname)
