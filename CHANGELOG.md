@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.3.4 (unreleased)
+
+* Fix quoting of database names
+
 ## v0.3.3
 
 * Add support for mixing url with other database settings

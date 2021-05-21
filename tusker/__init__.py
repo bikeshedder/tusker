@@ -7,6 +7,7 @@ import time
 
 import migra
 import psycopg2
+from psycopg2 import sql
 import sqlalchemy
 
 from .config import Config
@@ -65,13 +66,13 @@ class Tusker:
         cursor = self.conn.cursor()
         now = int(time.time())
         dbname = '{}_{}_{}'.format(self.config.database.args()['dbname'], now, suffix)
-        cursor.execute('CREATE DATABASE "{}"'.format(dbname))
-        cursor.execute('COMMENT ON DATABASE "{}" IS \'{}\''.format(dbname, TUSKER_COMMENT))
+        cursor.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(dbname)))
+        cursor.execute(sql.SQL('COMMENT ON DATABASE {} IS {}').format(sql.Identifier(dbname), sql.Literal(TUSKER_COMMENT)))
         try:
             with self.createengine(dbname) as engine:
                 yield engine
         finally:
-            cursor.execute('DROP DATABASE {}'.format(dbname))
+            cursor.execute(sql.SQL('DROP DATABASE {}').format(sql.Identifier(dbname)))
 
     @contextmanager
     def mgr_schema(self):
@@ -143,7 +144,7 @@ class Tusker:
                 if '"' in dbname:
                     raise RuntimeError('Database with an " in its name found. Please fix that manually.')
                 self.log('Dropping {} ...'.format(dbname))
-                cursor.execute('DROP DATABASE "{}"'.format(dbname))
+                cursor.execute(sql.SQL('DROP DATABASE {}').format(sql.Identifier(dbname)))
         finally:
             cursor.close()
 
