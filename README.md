@@ -20,7 +20,7 @@ Tusker does exactly this.
 ## Installation
 
 ```shell
-pip3 install tusker
+pipx install tusker
 ```
 
 Now you should be able to run tusker. Give it a try:
