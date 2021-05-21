@@ -71,7 +71,7 @@ class Tusker:
             with self.createengine(dbname) as engine:
                 yield engine
         finally:
-            cursor.execute('DROP DATABASE {}'.format(dbname))
+            cursor.execute('DROP DATABASE "{}"'.format(dbname))
 
     @contextmanager
     def mgr_schema(self):
