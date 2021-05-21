@@ -12,7 +12,11 @@ import sqlalchemy
 
 from .config import Config
 
-TUSKER_COMMENT = 'CREATED BY TUSKER - If this table is left behind tusker probably crashed and was not able to clean up after itself. Either try running `tusker clean` or remove this database manually.'
+TUSKER_COMMENT = (
+    'CREATED BY TUSKER - If this table is left behind tusker probably '
+    'crashed and was not able to clean up after itself. Either try '
+    'running `tusker clean` or remove this database manually.'
+)
 
 
 try:
@@ -43,7 +47,8 @@ class Tusker:
         self.conn.autocommit = True
 
     def _connect(self, name):
-        return psycopg2.connect(**self.config.database.args(dbname='template1'))
+        args = self.config.database.args(dbname='template1')
+        return psycopg2.connect(**args)
 
     def log(self, text):
         if self.verbose:
@@ -65,14 +70,25 @@ class Tusker:
     def createdb(self, suffix):
         cursor = self.conn.cursor()
         now = int(time.time())
-        dbname = '{}_{}_{}'.format(self.config.database.args()['dbname'], now, suffix)
-        cursor.execute(sql.SQL('CREATE DATABASE {}').format(sql.Identifier(dbname)))
-        cursor.execute(sql.SQL('COMMENT ON DATABASE {} IS {}').format(sql.Identifier(dbname), sql.Literal(TUSKER_COMMENT)))
+        dbname = '{}_{}_{}'.format(
+            self.config.database.args()['dbname'],
+            now,
+            suffix
+        )
+        cursor.execute(sql.SQL('CREATE DATABASE {}').format(
+            sql.Identifier(dbname)
+        ))
+        cursor.execute(sql.SQL('COMMENT ON DATABASE {} IS {}').format(
+            sql.Identifier(dbname),
+            sql.Literal(TUSKER_COMMENT)
+        ))
         try:
             with self.createengine(dbname) as engine:
                 yield engine
         finally:
-            cursor.execute(sql.SQL('DROP DATABASE {}').format(sql.Identifier(dbname)))
+            cursor.execute(sql.SQL('DROP DATABASE {}').format(
+                sql.Identifier(dbname)
+            ))
 
     @contextmanager
     def mgr_schema(self):
@@ -93,7 +109,10 @@ class Tusker:
                     if not filename.endswith('.sql'):
                         continue
                     self.log('- {}'.format(filename))
-                    filename = os.path.join(self.config.migrations.directory, filename)
+                    filename = os.path.join(
+                        self.config.migrations.directory,
+                        filename
+                    )
                     execute_sql_file(migrations_cursor, filename)
             yield migrations_engine
 
@@ -111,18 +130,30 @@ class Tusker:
         self.log('Creating databases...')
         with self.mgr(source) as source, self.mgr(target) as target:
             self.log('Diffing...')
-            migration = migra.Migration(source, target, self.config.database.schema)
+            migration = migra.Migration(
+                source,
+                target,
+                self.config.database.schema
+            )
             migration.set_safety(False)
             migration.add_all_changes(privileges=with_privileges)
             return migration.sql
 
     def check(self, backends, with_privileges=False):
         with ExitStack() as stack:
-            managers = [(name, stack.enter_context(self.mgr(name))) for name in backends]
+            managers = [(name, stack.enter_context(self.mgr(name)))
+                        for name in backends]
             for i in range(len(managers)-1):
                 source, target = (managers[i], managers[i+1])
-                self.log('Diffing {} against {}...'.format(source[0], target[0]))
-                migration = migra.Migration(source[1], target[1], schema=self.config.database.schema)
+                self.log('Diffing {} against {}...'.format(
+                    source[0],
+                    target[0]
+                ))
+                migration = migra.Migration(
+                    source[1],
+                    target[1],
+                    schema=self.config.database.schema
+                )
                 migration.set_safety(False)
                 migration.add_all_changes(privileges=with_privileges)
                 if migration.sql:
@@ -142,9 +173,12 @@ class Tusker:
             for row in rows:
                 dbname = row[0]
                 if '"' in dbname:
-                    raise RuntimeError('Database with an " in its name found. Please fix that manually.')
+                    raise RuntimeError(
+                        'Database with an " in its name found. Please fix that manually.')
                 self.log('Dropping {} ...'.format(dbname))
-                cursor.execute(sql.SQL('DROP DATABASE {}').format(sql.Identifier(dbname)))
+                cursor.execute(sql.SQL('DROP DATABASE {}').format(
+                    sql.Identifier(dbname)
+                ))
         finally:
             cursor.close()
 
@@ -181,6 +215,7 @@ def cmd_clean(args, cfg: Config):
 
 BACKEND_CHOICES = ['migrations', 'schema', 'database']
 
+
 class ValidateBackends(argparse.Action):
     def __call__(self, parser, args, values, option_string=None):
         if 'all' in values:
@@ -188,11 +223,21 @@ class ValidateBackends(argparse.Action):
         else:
             if len(values) <= 1:
                 choices = ', '.join(map(repr, BACKEND_CHOICES))
-                raise argparse.ArgumentError(self, 'at least two backends are required to perform the check (choose from {choices}) or pass \'all\' on its own.')
+                raise argparse.ArgumentError(
+                    self,
+                    (
+                        'at least two backends are required to perform '
+                        'the check (choose from {choices}) or pass \'all\' '
+                        'on its own.'
+                    )
+                )
             for value in values:
                 if value not in BACKEND_CHOICES:
                     choices = ', '.join(map(repr, BACKEND_CHOICES + ['all']))
-                    msg = 'invalid choice: {!r} (choose from {})'.format(value, choices)
+                    msg = 'invalid choice: {!r} (choose from {})'.format(
+                        value,
+                        choices
+                    )
                     raise argparse.ArgumentError(self, msg)
         setattr(args, self.dest, values)
 
@@ -258,7 +303,13 @@ def main():
     parser_check.set_defaults(func=cmd_check)
     parser_check.add_argument(
         'backends',
-        help='at least two backends are required to diff against each other (choose from {}). You can also pass \'all\' on its own to diff all backends against each other.'.format(', '.join(map(repr, BACKEND_CHOICES))),
+        help=(
+            'at least two backends are required to diff against each other '
+            '(choose from {}). You can also pass \'all\' on its own to diff '
+            'all backends against each other.'
+        ).format(
+            ', '.join(map(repr, BACKEND_CHOICES))
+        ),
         metavar='backend',
         nargs='*',
         default=['migrations', 'schema'],
