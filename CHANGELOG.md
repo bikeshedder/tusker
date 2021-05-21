@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.3.4 (unreleased)
+## v0.3.4
 
 * Fix quoting of database names
 
