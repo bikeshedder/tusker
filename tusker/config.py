@@ -57,8 +57,15 @@ class MigrationsConfig:
 
     def __init__(self, data):
         data = ConfigReader(data)
-        self.directory = data.get('directory', str, True) or 'migrations'
+        self.directory = data.get('directory', str, False)
         self.filename = data.get('filename', str, False)
+        if not self.directory and not self.filename:
+            self.directory = 'migrations'
+        elif self.directory and self.filename:
+            raise ConfigError.invalid(
+                'migrations',
+                'directory and filename parameters are mutually exclusive',
+            )
 
     def __str__(self):
         return 'MigrationsConfig({!r})'.format(self.__dict__)
