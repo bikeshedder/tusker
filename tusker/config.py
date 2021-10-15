@@ -58,6 +58,7 @@ class MigrationsConfig:
     def __init__(self, data):
         data = ConfigReader(data)
         self.directory = data.get('directory', str, True) or 'migrations'
+        self.filename = data.get('filename', str, False)
 
     def __str__(self):
         return 'MigrationsConfig({!r})'.format(self.__dict__)
