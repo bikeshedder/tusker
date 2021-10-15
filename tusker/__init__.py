@@ -105,14 +105,10 @@ class Tusker:
         with self.createdb('migrations') as migrations_engine:
             with migrations_engine.begin() as migrations_cursor:
                 self.log('Creating migrated schema...')
-                for filename in sorted(os.listdir(self.config.migrations.directory)):
+                for filename in self._get_migrations():
                     if not filename.endswith('.sql'):
                         continue
                     self.log('- {}'.format(filename))
-                    filename = os.path.join(
-                        self.config.migrations.directory,
-                        filename
-                    )
                     execute_sql_file(migrations_cursor, filename)
             yield migrations_engine
 
@@ -179,6 +175,16 @@ class Tusker:
         finally:
             cursor.close()
 
+    def _get_migrations(self):
+        migrations = []
+        if self.config.migrations.filename:
+            migrations = glob(self.config.migrations.filename)
+        else:
+            migrations = [
+                os.path.join(self.config.migrations.directory, filename)
+                for filename in os.listdir(self.config.migrations.directory)
+            ]
+        return sorted(migrations)
 
 def cmd_diff(args, cfg: Config):
     tusker = Tusker(cfg, args.verbose)
