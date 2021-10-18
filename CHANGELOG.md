@@ -5,7 +5,7 @@
 * Update `migra` to version `3.0`
 * Update `tomlkit` to version `0.7`
 * Update `sqlalchemy` to version `1.4`
-
+* Add `migrations.filename` setting which supports a `glob` pattern
 
 ## v0.3.4
 
