@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.4.1
+
+* Do not filter by `.sql` extension when using the `migrations.filename`
+  setting.
+
 ## v0.4.0
 
 * Add `migrations.filename` setting which supports a `glob` pattern
