@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.4.0 (unreleased)
+## v0.4.0
 
 * Add `migrations.filename` setting which supports a `glob` pattern
 * Fix error messages for invalid configurations

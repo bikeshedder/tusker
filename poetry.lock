@@ -161,7 +161,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "ef94e2682216b9c870319d5a0fe541b9a6119e172e2d2016bf6e00b5b2a0b222"
+content-hash = "1d122d273392b2b675c224fbdaa7f2ac902ae130fe35fd12a0c6237cc6e5b6b0"
 
 [metadata.files]
 greenlet = [
