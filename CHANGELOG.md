@@ -2,10 +2,12 @@
 
 ## v0.4.0 (unreleased)
 
+* Add `migrations.filename` setting which supports a `glob` pattern
+* Increase minimum `python` version to `3.6`
 * Update `migra` to version `3.0`
 * Update `tomlkit` to version `0.7`
 * Update `sqlalchemy` to version `1.4`
-* Add `migrations.filename` setting which supports a `glob` pattern
+* Update `psycopg2` to version `2.9`
 
 ## v0.3.4
 
