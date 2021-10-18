@@ -106,8 +106,6 @@ class Tusker:
             with migrations_engine.begin() as migrations_cursor:
                 self.log('Creating migrated schema...')
                 for filename in self._get_migrations():
-                    if not filename.endswith('.sql'):
-                        continue
                     self.log('- {}'.format(filename))
                     execute_sql_file(migrations_cursor, filename)
             yield migrations_engine
@@ -183,6 +181,7 @@ class Tusker:
             migrations = [
                 os.path.join(self.config.migrations.directory, filename)
                 for filename in os.listdir(self.config.migrations.directory)
+                if filename.endswith('.sql')
             ]
         return sorted(migrations)
 
