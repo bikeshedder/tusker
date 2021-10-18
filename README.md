@@ -115,7 +115,7 @@ configuration looks like that:
 filename = "schema.sql"
 
 [migrations]
-directory = "migrations"
+filename = "migrations/*.sql"
 
 [database]
 #host = ""
@@ -133,7 +133,7 @@ is also possible to pass a connection URL:
 filename = "schema.sql"
 
 [migrations]
-directory = "migrations"
+filename = "migrations/*.sql"
 
 [database]
 url = "postgresql:///my_awesome_db"
@@ -152,7 +152,7 @@ Some recommendations are:
 
 ## How does it work?
 
-Upon startup `tusker` reads all files from the `migration` directory
+Upon startup `tusker` reads all files from the `migrations` directory
 and runs them on an empty database. Another empty database is created
 and the target schema is created. Then those two schemas are
 diffed using the excellent [migra](https://pypi.org/project/migra/)
