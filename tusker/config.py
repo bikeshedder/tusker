@@ -28,13 +28,14 @@ class Config:
 
 class ConfigReader:
 
-    def __init__(self, data):
+    def __init__(self, data, path):
         self.data = data
+        self.path = path
 
     def get(self, name, type, required=False):
         if name not in self.data:
             if required:
-                raise ConfigError.missing('database.{}'.format(name))
+                raise ConfigError.missing('{}.{}'.format(path, name))
             else:
                 return None
         value = self.data[name]
@@ -46,7 +47,7 @@ class ConfigReader:
 class SchemaConfig:
 
     def __init__(self, data):
-        data = ConfigReader(data)
+        data = ConfigReader(data, 'schema')
         self.filename = data.get('filename', str) or 'schema.sql'
 
     def __str__(self):
@@ -56,7 +57,7 @@ class SchemaConfig:
 class MigrationsConfig:
 
     def __init__(self, data):
-        data = ConfigReader(data)
+        data = ConfigReader(data, 'migrations')
         self.directory = data.get('directory', str, False)
         self.filename = data.get('filename', str, False)
         if not self.directory and not self.filename:
@@ -74,7 +75,7 @@ class MigrationsConfig:
 class DatabaseConfig:
 
     def __init__(self, data):
-        data = ConfigReader(data)
+        data = ConfigReader(data, 'database')
         self.url = data.get('url', str)
         self.host = data.get('host', str)
         self.port = data.get('port', int)

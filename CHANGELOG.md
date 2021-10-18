@@ -3,6 +3,7 @@
 ## v0.4.0 (unreleased)
 
 * Add `migrations.filename` setting which supports a `glob` pattern
+* Fix error messages for invalid configurations
 * Increase minimum `python` version to `3.6`
 * Update `migra` to version `3.0`
 * Update `tomlkit` to version `0.7`
