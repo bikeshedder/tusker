@@ -34,8 +34,18 @@ def execute_sql_file(cursor, filename):
         sql = fh.read()
         sql = sql.strip()
         if sql:
-            sql = sqlalchemy.text(sql)
-            cursor.execute(sql)
+            try:
+                sql = sqlalchemy.text(sql)
+                cursor.execute(sql)
+            except sqlalchemy.exc.SQLAlchemyError as e:
+                # https://github.com/sqlalchemy/sqlalchemy/blob/9e7c068d669b209713da62da5748579f92d98129/lib/sqlalchemy/exc.py#L699-L709
+                # To provide more detail on the underlying error, but without printing the original SQL.
+                if e.orig:
+                    orig = e.orig
+                    error_text = "(%s.%s) %s" % (orig.__class__.__module__, orig.__class__.__name__, str(orig))
+                else:
+                    error_text = str(e)
+                raise Exception('Error executing SQL file {}: {}'.format(filename, error_text))
 
 
 class Tusker:
@@ -191,8 +201,11 @@ def cmd_diff(args, cfg: Config):
     target = args.target
     if args.reverse:
         source, target = target, source
-    sql = tusker.diff(source, target, with_privileges=args.with_privileges)
-    print(sql, end='')
+    try:
+        sql = tusker.diff(source, target, with_privileges=args.with_privileges)
+        print(sql, end='')
+    except Exception as e:
+        print(str(e))
 
 
 def cmd_check(args, cfg: Config):
@@ -200,14 +213,17 @@ def cmd_check(args, cfg: Config):
     if 'all' in backends:
         backends = ['migrations', 'schema', 'database']
     tusker = Tusker(cfg, args.verbose)
-    diff = tusker.check(backends, with_privileges=args.with_privileges)
-    if diff:
-        print('Schemas differ: {} != {}'.format(diff[0], diff[1]))
-        print('Run `tusker diff` to see the differences')
-        sys.exit(1)
-    else:
-        print('Schemas are identical')
-        sys.exit(0)
+    try:
+        diff = tusker.check(backends, with_privileges=args.with_privileges)
+        if diff:
+            print('Schemas differ: {} != {}'.format(diff[0], diff[1]))
+            print('Run `tusker diff` to see the differences')
+            sys.exit(1)
+        else:
+            print('Schemas are identical')
+            sys.exit(0)
+    except Exception as e:
+        print(str(e))
 
 
 def cmd_clean(args, cfg: Config):
