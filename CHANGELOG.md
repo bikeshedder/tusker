@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.4.2 (unreleased)
+## v0.4.2
 
 * Add `migra.safe` and `migra.permission` to `tusker.toml`
 * Add `--safe` and `--unsafe` arguments
