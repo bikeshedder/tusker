@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.4.4 (unreleased)
+
+* Add default config for `migra` config section
+
 ## v0.4.3
 
 * Fix `privileges` configuration option
