@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.4.2 (unreleased)
+
+* Add `migra.safe` and `migra.permission` to `tusker.toml`
+* Add `--safe` and `--unsafe` arguments
+* Add `--without-privileges` argument
+
 ## v0.4.1
 
 * Do not filter by `.sql` extension when using the `migrations.filename`

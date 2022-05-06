@@ -123,6 +123,10 @@ filename = "migrations/*.sql"
 #user = ""
 #password = ""
 dbname = "tusker"
+
+[migra]
+safe = false
+privileges = false
 ```
 
 Instead of the exploded form of `host`, `port`, etc. it
@@ -157,6 +161,15 @@ and runs them on an empty database. Another empty database is created
 and the target schema is created. Then those two schemas are
 diffed using the excellent [migra](https://pypi.org/project/migra/)
 tool and the output printed to the console.
+
+## Tusker is `unsafe` by default
+
+Unlike `migra` the `tusker` command by default does not throw an
+exception when a `drop`-statement is generated. Always check your
+generated migrations prior to running them. If you want the same
+behavior as migra you can either use the `--safe` argument or set
+the `migra.safe` configuration option to `False` in your `tusker.toml`
+file.
 
 ## FAQ
 

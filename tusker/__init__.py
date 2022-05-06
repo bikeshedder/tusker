@@ -120,20 +120,20 @@ class Tusker:
     def mgr(self, name):
         return getattr(self, 'mgr_{}'.format(name))()
 
-    def diff(self, source, target, with_privileges=False):
+    def diff(self, source, target):
         self.log('Creating databases...')
         with self.mgr(source) as source, self.mgr(target) as target:
             self.log('Diffing...')
             migration = migra.Migration(
                 source,
                 target,
-                self.config.database.schema
+                self.config.database.schema,
             )
-            migration.set_safety(False)
-            migration.add_all_changes(privileges=with_privileges)
+            migration.set_safety(self.config.migra.safe)
+            migration.add_all_changes(privileges=self.config.migra.privileges)
             return migration.sql
 
-    def check(self, backends, with_privileges=False):
+    def check(self, backends):
         with ExitStack() as stack:
             managers = [(name, stack.enter_context(self.mgr(name)))
                         for name in backends]
@@ -148,8 +148,8 @@ class Tusker:
                     target[1],
                     schema=self.config.database.schema
                 )
-                migration.set_safety(False)
-                migration.add_all_changes(privileges=with_privileges)
+                migration.set_safety(self.config.migra.safe)
+                migration.add_all_changes(privileges=self.config.migra.privileges)
                 if migration.sql:
                     return (source[0], target[0])
         return None
@@ -191,7 +191,7 @@ def cmd_diff(args, cfg: Config):
     target = args.target
     if args.reverse:
         source, target = target, source
-    sql = tusker.diff(source, target, with_privileges=args.with_privileges)
+    sql = tusker.diff(source, target)
     print(sql, end='')
 
 
@@ -200,7 +200,7 @@ def cmd_check(args, cfg: Config):
     if 'all' in backends:
         backends = ['migrations', 'schema', 'database']
     tusker = Tusker(cfg, args.verbose)
-    diff = tusker.check(backends, with_privileges=args.with_privileges)
+    diff = tusker.check(backends)
     if diff:
         print('Schemas differ: {} != {}'.format(diff[0], diff[1]))
         print('Run `tusker diff` to see the differences')
@@ -242,6 +242,39 @@ class ValidateBackends(argparse.Action):
                     )
                     raise argparse.ArgumentError(self, msg)
         setattr(args, self.dest, values)
+
+
+def add_migra_args(parser):
+    g = parser.add_mutually_exclusive_group()
+    g.add_argument(
+        '--safe',
+        help='throw an exception if drop-statements are generated.',
+        action='store_const',
+        dest='safe',
+        const=True,
+    )
+    g.add_argument(
+        '--unsafe',
+        help='don\'t throw an exception if drop-statements are generated.',
+        action='store_const',
+        dest='safe',
+        const=False,
+    )
+    g = parser.add_mutually_exclusive_group()
+    g.add_argument(
+        '--with-privileges',
+        help='output privilege differences (ie. grant/revoke statements).',
+        action='store_const',
+        dest='privileges',
+        const=True,
+    )
+    g.add_argument(
+        '--without-privileges',
+        help='don\'t output privilege differences.',
+        action='store_const',
+        dest='privileges',
+        const=False,
+    )
 
 
 def main():
@@ -290,9 +323,11 @@ def main():
         help='swaps the "from" and "to" arguments creating a reverse diff',
         action='store_true')
     parser_diff.add_argument(
-        '--with-privileges',
-        help='also output privilege differences (ie. grant/revoke statements)',
-        action='store_true')
+        '--create-extensions-only',
+        help='Only output create extension statements, nothing else. ',
+        action='store_true',
+    )
+    add_migra_args(parser_diff)
     parser_diff.set_defaults(func=cmd_diff)
     parser_check = subparsers.add_parser(
         'check',
@@ -317,10 +352,7 @@ def main():
         default=['migrations', 'schema'],
         action=ValidateBackends
     )
-    parser_check.add_argument(
-        '--with-privileges',
-        help='also output privilege differences (ie. grant/revoke statements)',
-        action='store_true')
+    add_migra_args(parser_check)
     parser_clean = subparsers.add_parser(
         'clean',
         help='clean up left over *_migrations or *_schema tables')
@@ -329,4 +361,8 @@ def main():
     if hasattr(args, 'from') and hasattr(args, 'target') and args.source == args.target:
         parser.error('source and target must not be identical')
     cfg = Config(args.config)
+    if getattr(args, 'safe') is not None:
+        cfg.migra.safe = args.safe
+    if getattr(args, 'privileges') is not None:
+        cfg.migra.privileges = args.privileges
     args.func(args, cfg)
