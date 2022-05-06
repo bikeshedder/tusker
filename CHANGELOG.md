@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.4.3 (unreleased)
+
+* Fix `privileges` configuration option
+
 ## v0.4.2
 
 * Add `migra.safe` and `migra.permission` to `tusker.toml`

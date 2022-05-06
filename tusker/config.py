@@ -112,7 +112,7 @@ class MigraConfig:
     def __init__(self, data):
         data = ConfigReader(data, 'migra')
         self.safe = data.get('safe', bool, default=False)
-        self.privileges = data.get('with_privileges', bool, default=False)
+        self.privileges = data.get('privileges', bool, default=False)
 
 
 class ConfigError(RuntimeError):
