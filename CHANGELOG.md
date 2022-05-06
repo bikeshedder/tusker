@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.4.4 (unreleased)
+## v0.4.4
 
 * Add default config for `migra` config section
 
