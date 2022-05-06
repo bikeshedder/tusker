@@ -18,6 +18,7 @@ class Config:
         data.setdefault('database', {'dbname': 'tusker'})
         data.setdefault('schema', {'filename': 'schema.sql'})
         data.setdefault('migrations', {'directory': 'migrations'})
+        data.setdefault('migra', {'safe': False, 'privileges': False})
         self.schema = SchemaConfig(data['schema'])
         self.migrations = MigrationsConfig(data['migrations'])
         self.database = DatabaseConfig(data['database'])
