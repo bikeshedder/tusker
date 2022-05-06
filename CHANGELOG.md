@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.4.3 (unreleased)
+## v0.4.3
 
 * Fix `privileges` configuration option
 
