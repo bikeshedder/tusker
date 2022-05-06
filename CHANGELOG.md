@@ -6,6 +6,7 @@
 * Add `--safe` and `--unsafe` arguments
 * Add `--without-privileges` argument
 * Update `tomlkit` to version `0.10`
+* Update locked dependency versions
 
 ## v0.4.1
 
