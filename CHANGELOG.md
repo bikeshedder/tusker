@@ -5,6 +5,7 @@
 * Add `migra.safe` and `migra.permission` to `tusker.toml`
 * Add `--safe` and `--unsafe` arguments
 * Add `--without-privileges` argument
+* Update `tomlkit` to version `0.10`
 
 ## v0.4.1
 
