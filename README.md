@@ -183,6 +183,13 @@ part of the `schema.filename` setting. e.g.:
 filename = "schema/*.sql"
 ```
 
+As of 0.4.5 recursive glob patterns are supported as well:
+
+```toml
+[schema]
+filename = "schema/**/*.sql"
+```
+
 ### Is it possible to diff the schema and/or migrations against an existing database?
 
 Yes. This feature has been added in 0.2. You can pass a `from` and `to`
