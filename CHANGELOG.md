@@ -3,6 +3,7 @@
 ## v0.4.5 (unreleased)
 
 * Add support for `**` in glob pattern
+* Improve output of SQL errors
 
 ## v0.4.4
 
