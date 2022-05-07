@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.4.5 (unreleased)
+## v0.4.5
 
 * Add support for `**` in glob pattern
 * Improve output of SQL errors
