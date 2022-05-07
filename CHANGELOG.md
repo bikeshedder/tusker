@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.4.5 (unreleased)
+
+* Add support for `**` in glob pattern
+
 ## v0.4.4
 
 * Add default config for `migra` config section
