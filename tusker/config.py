@@ -16,8 +16,8 @@ class Config:
             data = {}
         # time to validate some configuration variables
         data.setdefault('database', {'dbname': 'tusker'})
-        data.setdefault('schema', {'filename': 'schema.sql'})
-        data.setdefault('migrations', {'directory': 'migrations'})
+        data.setdefault('schema', {'filename': 'schema.sql', 'encoding': 'utf-8'})
+        data.setdefault('migrations', {'directory': 'migrations', 'encoding': 'utf-8'})
         data.setdefault('migra', {'safe': False, 'privileges': False})
         self.schema = SchemaConfig(data['schema'])
         self.migrations = MigrationsConfig(data['migrations'])
@@ -56,6 +56,7 @@ class SchemaConfig:
     def __init__(self, data):
         data = ConfigReader(data, 'schema')
         self.filename = data.get('filename', str) or 'schema.sql'
+        self.encoding = data.get('encoding', str) or 'utf-8'
 
     def __str__(self):
         return 'SchemaConfig({!r})'.format(self.__dict__)
@@ -67,6 +68,7 @@ class MigrationsConfig:
         data = ConfigReader(data, 'migrations')
         self.directory = data.get('directory', str, False)
         self.filename = data.get('filename', str, False)
+        self.encoding = data.get('encoding', str) or 'utf-8'
         if not self.directory and not self.filename:
             self.directory = 'migrations'
         elif self.directory and self.filename:

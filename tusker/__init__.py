@@ -33,8 +33,8 @@ class ExecuteSqlError(Exception):
     pass
 
 
-def execute_sql_file(cursor, filename):
-    with open(filename, encoding="utf-8") as fh:
+def execute_sql_file(cursor, filename, encoding='utf-8'):
+    with open(filename, encoding=encoding) as fh:
         sql = fh.read()
     sql = sql.strip()
     if not sql:
@@ -112,7 +112,7 @@ class Tusker:
                 self.log('Creating original schema...')
                 for filename in sorted(glob(self.config.schema.filename, recursive=True)):
                     self.log('- {}'.format(filename))
-                    execute_sql_file(schema_cursor, filename)
+                    execute_sql_file(schema_cursor, filename, self.config.schema.encoding)
             yield schema_engine
 
     @contextmanager
@@ -122,7 +122,7 @@ class Tusker:
                 self.log('Creating migrated schema...')
                 for filename in self._get_migrations():
                     self.log('- {}'.format(filename))
-                    execute_sql_file(migrations_cursor, filename)
+                    execute_sql_file(migrations_cursor, filename, self.config.migrations.encoding)
             yield migrations_engine
 
     @contextmanager
