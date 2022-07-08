@@ -34,7 +34,7 @@ class ExecuteSqlError(Exception):
 
 
 def execute_sql_file(cursor, filename):
-    with open(filename, encoding="utf-8") as fh:
+    with open(filename) as fh:
         sql = fh.read()
     sql = sql.strip()
     if not sql:
