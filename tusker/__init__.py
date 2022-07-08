@@ -40,8 +40,7 @@ def execute_sql_file(cursor, filename):
     if not sql:
         return
     try:
-        sql = sqlalchemy.text(sql)
-        cursor.execute(sql)
+        cursor.exec_driver_sql(sql)
     except sqlalchemy.exc.SQLAlchemyError as e:
         # https://github.com/sqlalchemy/sqlalchemy/blob/9e7c068d669b209713da62da5748579f92d98129/lib/sqlalchemy/exc.py#L699-L709
         # To provide more detail on the underlying error, but without printing the original SQL.

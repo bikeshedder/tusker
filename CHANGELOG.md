@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.4.6 (unreleased)
+
+* Fix "A value is required for bind parameter ..." error caused
+  by SQL files containing code looking like SQLAlchemy parameters
+  (`:<params>`).
+
 ## v0.4.5
 
 * Add support for `**` in glob pattern
