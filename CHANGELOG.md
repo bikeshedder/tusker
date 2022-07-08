@@ -1,6 +1,6 @@
 # Change Log
 
-## v0.4.6 (unreleased)
+## v0.4.6
 
 * Fix "A value is required for bind parameter ..." error caused
   by SQL files containing code looking like SQLAlchemy parameters
