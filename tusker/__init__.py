@@ -4,6 +4,7 @@ from glob import glob
 import os
 import sys
 import time
+from collections import deque
 
 import migra
 import psycopg2
@@ -33,8 +34,9 @@ class ExecuteSqlError(Exception):
     pass
 
 
-def execute_sql_file(cursor, filename, encoding='utf-8'):
-    with open(filename, encoding=encoding) as fh:
+# TDOO Refactor
+def execute_sql_file(cursor, filename):
+    with open(filename, encoding="utf-8") as fh:
         sql = fh.read()
     sql = sql.strip()
     if not sql:
@@ -51,6 +53,25 @@ def execute_sql_file(cursor, filename, encoding='utf-8'):
         else:
             error_text = str(e)
         raise ExecuteSqlError('Error executing SQL file {}: {}'.format(filename, error_text))
+
+
+def execute_sql(cursor, sql, ignore_empty=True):
+    if not sql:
+        return
+    try:
+        sql = sqlalchemy.text(sql)
+        cursor.execute(sql)
+    except sqlalchemy.exc.SQLAlchemyError as e:
+        # https://github.com/sqlalchemy/sqlalchemy/blob/9e7c068d669b209713da62da5748579f92d98129/lib/sqlalchemy/exc.py#L699-L709
+        # To provide more detail on the underlying error, but without printing the original SQL.
+        if not e.orig:
+            raise ExecuteSqlError('Error executing SQL statement: {}\n{}'.format(str(e), sql))
+
+        if ignore_empty and "can't execute an empty query" in str(e.orig):
+            return
+
+        error_text = "({}.{}): {}\n{}".format(e.orig.__class__.__module__, e.orig.__class__.__name__, str(e.orig), sql)
+        raise ExecuteSqlError(error_text)
 
 
 class Tusker:
@@ -105,14 +126,55 @@ class Tusker:
                 sql.Identifier(dbname)
             ))
 
+
+
     @contextmanager
     def mgr_schema(self):
+
+        schema_files = sorted(glob(self.config.schema.filename, recursive=True))
+        schema_statements = []
+        for schema_file in schema_files:
+            with open(schema_file, "r", encoding="utf-8") as infile: # TODO encoding.
+                content = infile.read()
+            file_statements = content.split(";\n") # TODO Smarter way to split.
+            schema_statements.extend(file_statements)
+
+        # TODO CleanUp some statements.
+        self.log('Total statements count: {}'.format(len(schema_statements)))
+
+        statement_queue = deque(schema_statements)
+        with self.createdb('schema') as schema_engine:
+            self.log('Creating original schema...')
+            fails_in_a_row = 0
+
+            while statement_queue:
+                statement = statement_queue.popleft()
+                try:
+                    with schema_engine.begin() as schema_cursor:
+                        execute_sql(schema_cursor, statement)
+                    fails_in_a_row = 0
+                except ExecuteSqlError as e:
+                    fails_in_a_row += 1
+                    self.log('Statement failed ({} of {}): {}\nRetrying soon...\n'.format(fails_in_a_row, len(statement_queue), e))
+                    statement_queue.append(statement)
+
+                if fails_in_a_row > len(statement_queue):
+                    # TODO Better logging
+                    print("Critical error: dependency loop detected", file=sys.stderr)
+                    sys.exit(1)
+
+            yield schema_engine
+
+
+
+    @contextmanager
+    def mgr_schema_old(self):
         with self.createdb('schema') as schema_engine:
             with schema_engine.begin() as schema_cursor:
                 self.log('Creating original schema...')
                 for filename in sorted(glob(self.config.schema.filename, recursive=True)):
                     self.log('- {}'.format(filename))
-                    execute_sql_file(schema_cursor, filename, self.config.schema.encoding)
+                    execute_sql_file(schema_cursor, filename)
             yield schema_engine
 
     @contextmanager
@@ -122,7 +184,7 @@ class Tusker:
                 self.log('Creating migrated schema...')
                 for filename in self._get_migrations():
                     self.log('- {}'.format(filename))
-                    execute_sql_file(migrations_cursor, filename, self.config.migrations.encoding)
+                    execute_sql_file(migrations_cursor, filename)
             yield migrations_engine
 
     @contextmanager
