@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.4.8
+
+* Fix "`ypeError: dict is not a sequence" error when
+  the schema or migration files contain percent characters (`%`).
+
 ## v0.4.7
 
 * Fix "A value is required for bind parameter ..." error caused
