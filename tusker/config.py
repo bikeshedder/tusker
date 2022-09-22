@@ -1,4 +1,5 @@
 import os
+import re
 
 from psycopg2.extensions import parse_dsn
 from tomlkit.toml_file import TOMLFile
@@ -33,6 +34,14 @@ class Config:
         )
 
 
+def replace_from_env_var(matchobj):
+    env_variable = matchobj.group(1)
+    try:
+        return os.environ[env_variable]
+    except KeyError:
+        raise ConfigError.missing_env(env_variable)
+
+
 class ConfigReader:
 
     def __init__(self, data, path):
@@ -46,6 +55,11 @@ class ConfigReader:
             else:
                 return default
         value = self.data[name]
+
+        if isinstance(value, str):
+            # Replace any environment variables
+            value = re.sub(r"\${([a-zA-Z_][a-zA-Z_0-9]*)}", replace_from_env_var, value)
+
         if not isinstance(value, type):
             raise ConfigError.invalid(name, 'Not of type {}'.format(type))
         return value
@@ -117,6 +131,10 @@ class MigraConfig:
 
 
 class ConfigError(RuntimeError):
+
+    @classmethod
+    def missing_env(cls, env_variable):
+        return cls('Missing environment variable: {}'.format(env_variable))
 
     @classmethod
     def missing(cls, name):
