@@ -143,6 +143,13 @@ filename = "migrations/*.sql"
 url = "postgresql:///my_awesome_db"
 ```
 
+You can also use an environment variable in place of a hard-coded value:
+
+```toml
+[database]
+url = "${DATABASE_URL}"
+```
+
 ## How can I use the generated SQL files?
 
 The resulting SQL files can either be applied to the database by hand
