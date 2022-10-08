@@ -109,7 +109,7 @@ class Tusker:
         with self.createdb('schema') as schema_engine:
             with schema_engine.begin() as schema_cursor:
                 self.log('Creating original schema...')
-                for pattern in self.config.schema.filename.split(","):
+                for pattern in self.config.schema.filename:
                     for filename in sorted(glob(pattern, recursive=True)):
                         self.log('- {}'.format(filename))
                         execute_sql_file(schema_cursor, filename)

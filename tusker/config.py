@@ -16,7 +16,7 @@ class Config:
             data = {}
         # time to validate some configuration variables
         data.setdefault('database', {'dbname': 'tusker'})
-        data.setdefault('schema', {'filename': 'schema.sql'})
+        data.setdefault('schema', {'filename': ['schema.sql']})
         data.setdefault('migrations', {'directory': 'migrations'})
         data.setdefault('migra', {'safe': False, 'privileges': False})
         self.schema = SchemaConfig(data['schema'])
@@ -55,7 +55,7 @@ class SchemaConfig:
 
     def __init__(self, data):
         data = ConfigReader(data, 'schema')
-        self.filename = data.get('filename', str) or 'schema.sql'
+        self.filename = data.get('filename', list) or ['schema.sql']
 
     def __str__(self):
         return 'SchemaConfig({!r})'.format(self.__dict__)
