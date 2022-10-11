@@ -54,8 +54,11 @@ class ConfigReader:
 class SchemaConfig:
 
     def __init__(self, data):
-        data = ConfigReader(data, 'schema')
-        self.filename = data.get('filename', list) or ['schema.sql']
+        config = ConfigReader(data, 'schema')
+        if isinstance(data['filename'], str):
+            self.filename = [config.get('filename', str)]
+        else:
+            self.filename = config.get('filename', list) or ['schema.sql']
 
     def __str__(self):
         return 'SchemaConfig({!r})'.format(self.__dict__)
