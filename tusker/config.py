@@ -67,9 +67,14 @@ class SchemaConfig:
 class MigrationsConfig:
 
     def __init__(self, data):
-        data = ConfigReader(data, 'migrations')
-        self.directory = data.get('directory', str, False)
-        self.filename = data.get('filename', str, False)
+        config = ConfigReader(data, 'migrations')
+        self.directory = config.get('directory', str, False)
+
+        if isinstance(data['filename'], str):
+            self.filename = [config.get('filename', str)]
+        else:
+            self.filename = config.get('filename', list)
+            
         if not self.directory and not self.filename:
             self.directory = 'migrations'
         elif self.directory and self.filename:

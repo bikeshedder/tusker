@@ -191,7 +191,8 @@ class Tusker:
     def _get_migrations(self):
         migrations = []
         if self.config.migrations.filename:
-            migrations = glob(self.config.migrations.filename, recursive=True)
+            for pattern in self.config.migrations.filename:
+                migrations.extend(glob(pattern, recursive=True))
         else:
             migrations = [
                 os.path.join(self.config.migrations.directory, filename)
