@@ -50,17 +50,21 @@ class ConfigReader:
             raise ConfigError.invalid(name, 'Not of type {}'.format(type))
         return value
 
+    def get_list(self, name, required=False, default=None):
+        value = self.get(name, (str, list), required, default)
+        if isinstance(value, str):
+            value = [value]
+        else:
+            if value and not all(isinstance(x, str) for x in value):
+                raise ConfigError.invalid(name, 'Not a list of strings {}'.format(value))
+        return value
+
 
 class SchemaConfig:
 
     def __init__(self, data):
         data = ConfigReader(data, 'schema')
-        self.filename = data.get('filename', (str, list))
-        if isinstance(self.filename, str):
-            self.filename = [self.filename]
-        else:
-            if not all(isinstance(x, str) for x in self.filename):
-                raise ConfigError.invalid('filename', 'Not a list of strings {}'.format(self.filename))
+        self.filename = data.get_list('filename')
 
     def __str__(self):
         return 'SchemaConfig({!r})'.format(self.__dict__)
@@ -71,13 +75,7 @@ class MigrationsConfig:
     def __init__(self, data):
         data = ConfigReader(data, 'migrations')
         self.directory = data.get('directory', str, False)
-
-        self.filename = data.get('filename', (str, list))
-        if isinstance(self.filename, str):
-            self.filename = [self.filename]
-        else:
-            if not all(isinstance(x, str) for x in self.filename):
-                raise ConfigError.invalid('filename', 'Not a list of strings {}'.format(self.filename))
+        self.filename = data.get_list('filename')
 
         if not self.directory and not self.filename:
             self.directory = 'migrations'
