@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+
+* Add support for interpolated environment variables within config files.
+
 ## v0.4.8
 
 * Fix "`ypeError: dict is not a sequence" error when
