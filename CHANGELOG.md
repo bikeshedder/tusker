@@ -1,7 +1,7 @@
 # Change Log
 
 
-## v0.4.9
+## [Unreleased]
 * Added ability to specify schema.filename and migrations.filename as list
   of patterns used by glob to build the respective file lists. Defaults and
   backwards compatibility support of single string glob pattern

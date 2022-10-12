@@ -54,11 +54,13 @@ class ConfigReader:
 class SchemaConfig:
 
     def __init__(self, data):
-        config = ConfigReader(data, 'schema')
-        if isinstance(data['filename'], str):
-            self.filename = [config.get('filename', str)]
+        data = ConfigReader(data, 'schema')
+        self.filename = data.get('filename', (str, list))
+        if isinstance(self.filename, str):
+            self.filename = [self.filename]
         else:
-            self.filename = config.get('filename', list) or ['schema.sql']
+            if not all(isinstance(x, str) for x in self.filename):
+                raise ConfigError.invalid('filename', 'Not a list of strings {}'.format(self.filename))
 
     def __str__(self):
         return 'SchemaConfig({!r})'.format(self.__dict__)
@@ -67,14 +69,16 @@ class SchemaConfig:
 class MigrationsConfig:
 
     def __init__(self, data):
-        config = ConfigReader(data, 'migrations')
-        self.directory = config.get('directory', str, False)
+        data = ConfigReader(data, 'migrations')
+        self.directory = data.get('directory', str, False)
 
-        if isinstance(data['filename'], str):
-            self.filename = [config.get('filename', str)]
+        self.filename = data.get('filename', (str, list))
+        if isinstance(self.filename, str):
+            self.filename = [self.filename]
         else:
-            self.filename = config.get('filename', list)
-            
+            if not all(isinstance(x, str) for x in self.filename):
+                raise ConfigError.invalid('filename', 'Not a list of strings {}'.format(self.filename))
+
         if not self.directory and not self.filename:
             self.directory = 'migrations'
         elif self.directory and self.filename:
