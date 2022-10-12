@@ -1,6 +1,5 @@
 # Change Log
 
-
 ## [Unreleased]
 
 * Added ability to specify schema.filename and migrations.filename as list
