@@ -40,7 +40,7 @@ CREATE TABLE fruit (
 );
 ```
 
-Tusker also needs an empty `migrations` directory:
+You probably want to create an empty `migrations` directory, too:
 
 ```shell
 mkdir migrations

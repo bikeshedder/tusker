@@ -5,6 +5,7 @@
 * Added support for glob pattern lists for `schema.filename` and
   `migration.filename`. Plain strings are still supported.
 * Add support for interpolated environment variables within config files.
+* Deprecate `migrations.directory` configuration option.
 
 ## v0.4.8
 

@@ -18,7 +18,7 @@ class Config:
         # time to validate some configuration variables
         data.setdefault('database', {'dbname': 'tusker'})
         data.setdefault('schema', {'filename': ['schema.sql']})
-        data.setdefault('migrations', {'directory': 'migrations'})
+        data.setdefault('migrations', {'filename': ['migrations/*.sql']})
         data.setdefault('migra', {'safe': False, 'privileges': False})
         self.schema = SchemaConfig(data['schema'])
         self.migrations = MigrationsConfig(data['migrations'])
@@ -88,16 +88,28 @@ class MigrationsConfig:
 
     def __init__(self, data):
         data = ConfigReader(data, 'migrations')
-        self.directory = data.get('directory', str, False)
-        self.filename = data.get_list('filename')
-
-        if not self.directory and not self.filename:
-            self.directory = 'migrations'
-        elif self.directory and self.filename:
-            raise ConfigError.invalid(
-                'migrations',
-                'directory and filename parameters are mutually exclusive',
+        directory = data.get('directory', str, False)
+        if directory:
+            import warnings
+            warnings.warn(
+                'The "migrations.directory" configuration option is '
+                'deprecated and support for this option will be removed '
+                'in the next version of tusker. Please replace this by '
+                'the "migrations.filename" option which does support '
+                'globbing patterns.',
+                DeprecationWarning,
+                stacklevel=2
             )
+            filename = data.get_list('filename')
+            if filename:
+                raise ConfigError.invalid(
+                    'migrations directory and filename parameters '
+                    'are mutually exclusive',
+                )
+            else:
+                self.filename = ['{}/*.sql'.format(directory)]
+        else:
+            self.filename = data.get_list('filename', default=['migrations/*.sql'])
 
     def __str__(self):
         return 'MigrationsConfig({!r})'.format(self.__dict__)

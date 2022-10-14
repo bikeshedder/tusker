@@ -1,9 +1,9 @@
 import argparse
 from contextlib import contextmanager, ExitStack
 from glob import glob
-import os
 import sys
 import time
+import warnings
 
 import migra
 import psycopg2
@@ -109,10 +109,9 @@ class Tusker:
         with self.createdb('schema') as schema_engine:
             with schema_engine.begin() as schema_cursor:
                 self.log('Creating original schema...')
-                for pattern in self.config.schema.filename:
-                    for filename in sorted(glob(pattern, recursive=True)):
-                        self.log('- {}'.format(filename))
-                        execute_sql_file(schema_cursor, filename)
+                for filename in self._get_schema_files():
+                    self.log('- {}'.format(filename))
+                    execute_sql_file(schema_cursor, filename)
             yield schema_engine
 
     @contextmanager
@@ -120,7 +119,7 @@ class Tusker:
         with self.createdb('migrations') as migrations_engine:
             with migrations_engine.begin() as migrations_cursor:
                 self.log('Creating migrated schema...')
-                for filename in self._get_migrations():
+                for filename in self._get_migration_files():
                     self.log('- {}'.format(filename))
                     execute_sql_file(migrations_cursor, filename)
             yield migrations_engine
@@ -188,18 +187,14 @@ class Tusker:
         finally:
             cursor.close()
 
-    def _get_migrations(self):
-        migrations = []
-        if self.config.migrations.filename:
-            for pattern in self.config.migrations.filename:
-                migrations.extend(glob(pattern, recursive=True))
-        else:
-            migrations = [
-                os.path.join(self.config.migrations.directory, filename)
-                for filename in os.listdir(self.config.migrations.directory)
-                if filename.endswith('.sql')
-            ]
-        return sorted(migrations)
+    def _get_schema_files(self):
+        for pattern in self.config.schema.filename:
+            yield from sorted(glob(pattern, recursive=True))
+
+
+    def _get_migration_files(self):
+        for pattern in self.config.migrations.filename:
+            yield from sorted(glob(pattern, recursive=True))
 
 def cmd_diff(args, cfg: Config):
     tusker = Tusker(cfg, args.verbose)
@@ -302,6 +297,8 @@ def add_migra_args(parser):
 
 
 def main():
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
     parser = argparse.ArgumentParser(
         description='Generate a database migration.')
     parser.add_argument(
