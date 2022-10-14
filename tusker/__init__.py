@@ -109,9 +109,10 @@ class Tusker:
         with self.createdb('schema') as schema_engine:
             with schema_engine.begin() as schema_cursor:
                 self.log('Creating original schema...')
-                for filename in sorted(glob(self.config.schema.filename, recursive=True)):
-                    self.log('- {}'.format(filename))
-                    execute_sql_file(schema_cursor, filename)
+                for pattern in self.config.schema.filename:
+                    for filename in sorted(glob(pattern, recursive=True)):
+                        self.log('- {}'.format(filename))
+                        execute_sql_file(schema_cursor, filename)
             yield schema_engine
 
     @contextmanager
@@ -190,7 +191,8 @@ class Tusker:
     def _get_migrations(self):
         migrations = []
         if self.config.migrations.filename:
-            migrations = glob(self.config.migrations.filename, recursive=True)
+            for pattern in self.config.migrations.filename:
+                migrations.extend(glob(pattern, recursive=True))
         else:
             migrations = [
                 os.path.join(self.config.migrations.directory, filename)

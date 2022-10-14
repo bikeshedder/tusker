@@ -2,11 +2,15 @@
 
 ## [Unreleased]
 
+* Added ability to specify schema.filename and migrations.filename as list
+  of patterns used by glob to build the respective file lists. Defaults and
+  backwards compatibility support of single string glob pattern
+  still supported.
 * Add support for interpolated environment variables within config files.
 
 ## v0.4.8
 
-* Fix "`ypeError: dict is not a sequence" error when
+* Fix "`TypeError: dict is not a sequence" error when
   the schema or migration files contain percent characters (`%`).
 
 ## v0.4.7
