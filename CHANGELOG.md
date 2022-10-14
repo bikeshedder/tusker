@@ -6,6 +6,8 @@
   `migration.filename`. Plain strings are still supported.
 * Add support for interpolated environment variables within config files.
 * Deprecate `migrations.directory` configuration option.
+* Update `tomlkit` to version `0.11`
+* Update locked dependency versions
 
 ## v0.4.8
 
@@ -22,7 +24,7 @@
 
 ## v0.4.5
 
-* Add support for `**` in glob pattern
+* Add support for `\*\*` in glob pattern
 * Improve output of SQL errors
 
 ## v0.4.4
