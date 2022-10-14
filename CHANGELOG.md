@@ -1,6 +1,6 @@
 # Change Log
 
-## [Unreleased]
+## v0.5.0
 
 * Added support for glob pattern lists for `schema.filename` and
   `migration.filename`. Plain strings are still supported.
