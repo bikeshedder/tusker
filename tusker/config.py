@@ -78,7 +78,7 @@ class SchemaConfig:
 
     def __init__(self, data):
         data = ConfigReader(data, 'schema')
-        self.filename = data.get_list('filename')
+        self.filename = data.get_list('filename', default=['schema.sql'])
 
     def __str__(self):
         return 'SchemaConfig({!r})'.format(self.__dict__)
