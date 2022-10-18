@@ -175,7 +175,7 @@ Unlike `migra` the `tusker` command by default does not throw an
 exception when a `drop`-statement is generated. Always check your
 generated migrations prior to running them. If you want the same
 behavior as migra you can either use the `--safe` argument or set
-the `migra.safe` configuration option to `False` in your `tusker.toml`
+the `migra.safe` configuration option to `True` in your `tusker.toml`
 file.
 
 ## FAQ
