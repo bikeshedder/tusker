@@ -252,6 +252,7 @@ class ValidateBackends(argparse.Action):
                         'on its own.'.format(choices=choices)
                     )
                 )
+            backends = set()
             for value in values:
                 if value not in BACKEND_CHOICES:
                     choices = ', '.join(map(repr, BACKEND_CHOICES + ['all']))
@@ -260,6 +261,10 @@ class ValidateBackends(argparse.Action):
                         choices
                     )
                     raise argparse.ArgumentError(self, msg)
+                if value in backends:
+                    msg = 'duplicate found in backend list: {}'.format(value)
+                    raise argparse.ArgumentError(self, msg)
+                backends.add(value)
         setattr(args, self.dest, values)
 
 
@@ -379,7 +384,7 @@ def main():
         help='clean up left over *_migrations or *_schema tables')
     parser_clean.set_defaults(func=cmd_clean)
     args = parser.parse_args()
-    if hasattr(args, 'from') and hasattr(args, 'target') and args.source == args.target:
+    if hasattr(args, 'source') and hasattr(args, 'target') and args.source == args.target:
         parser.error('source and target must not be identical')
     cfg = Config(args.config)
     if getattr(args, 'safe') is not None:

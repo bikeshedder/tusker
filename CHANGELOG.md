@@ -3,6 +3,7 @@
 ## v0.5.1 (unreleased)
 
 * Fix error message for invalid backends
+* Fix validation of unique backends
 
 ## v0.5.0
 
