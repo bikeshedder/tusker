@@ -6,6 +6,7 @@
 * Fix validation of unique backends
 * Fix error when `--(un)safe` or `--(no)privileges` were
   not passed as arguments.
+* Replace `psycopg2-binary` dependency by `psycopg2`
 
 ## v0.5.0
 
