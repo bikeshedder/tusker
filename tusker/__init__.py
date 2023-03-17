@@ -385,7 +385,7 @@ def main():
     parser_clean.set_defaults(func=cmd_clean)
     args = parser.parse_args()
     if hasattr(args, 'source') and hasattr(args, 'target') and args.source == args.target:
-        parser.error('source and target must not be identical')
+        parser.error('to- and from-backend must not be identical')
     cfg = Config(args.config)
     if getattr(args, 'safe') is not None:
         cfg.migra.safe = args.safe
