@@ -4,6 +4,8 @@
 
 * Fix error message for invalid backends
 * Fix validation of unique backends
+* Fix error when `--(un)safe` or `--(no)privileges` were
+  not passed as arguments.
 
 ## v0.5.0
 

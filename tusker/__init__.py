@@ -387,8 +387,8 @@ def main():
     if hasattr(args, 'source') and hasattr(args, 'target') and args.source == args.target:
         parser.error('to- and from-backend must not be identical')
     cfg = Config(args.config)
-    if getattr(args, 'safe') is not None:
+    if getattr(args, 'safe', None) is not None:
         cfg.migra.safe = args.safe
-    if getattr(args, 'privileges') is not None:
+    if getattr(args, 'privileges', None) is not None:
         cfg.migra.privileges = args.privileges
     args.func(args, cfg)
