@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.5.1 (unreleased)
+
+* Fix error message for invalid backends
+
 ## v0.5.0
 
 * Added support for glob pattern lists for `schema.filename` and

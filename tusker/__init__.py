@@ -249,7 +249,7 @@ class ValidateBackends(argparse.Action):
                     (
                         'at least two backends are required to perform '
                         'the check (choose from {choices}) or pass \'all\' '
-                        'on its own.'
+                        'on its own.'.format(choices=choices)
                     )
                 )
             for value in values:
