@@ -2,11 +2,11 @@
 filename = "schema.sql"
 
 [migrations]
-directory = "migrations"
+filename = "migrations/*.sql"
 
 [database]
 #host = ""
-#port = ""
+#port = 5432
 #user = ""
 #password = ""
 dbname = "my_awesome_db"

@@ -123,6 +123,7 @@ filename = "migrations/*.sql"
 #user = ""
 #password = ""
 dbname = "my_awesome_db"
+#schema = "public"
 
 [migra]
 safe = false
