@@ -9,7 +9,7 @@ directory = "migrations"
 #port = ""
 #user = ""
 #password = ""
-dbname = "tusker"
+dbname = "my_awesome_db"
 #schema = "public"
 
 [migra]

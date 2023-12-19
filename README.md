@@ -122,7 +122,7 @@ filename = "migrations/*.sql"
 #port = 5432
 #user = ""
 #password = ""
-dbname = "tusker"
+dbname = "my_awesome_db"
 
 [migra]
 safe = false
@@ -140,7 +140,7 @@ filename = "schema.sql"
 filename = "migrations/*.sql"
 
 [database]
-url = "postgresql:///my_awesome_db"
+url = "postgresql:///my_awesome_db_connection"
 ```
 
 You can also use an environment variable in place of a hard-coded value:
