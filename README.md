@@ -204,6 +204,12 @@ Yes. This feature has been added in 0.2. You can pass a `from` and `to`
 argument to the `tusker diff` command. Check the output of `tusker diff --help` for
 more details.
 
+### How can I export initial schema from an existing database?
+
+For exporting the initial schema you can use the native Postgres
+[pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html) command with
+the `--schema-only` option.
+
 ### Tusker printed an error and left the temporary databases behind. How can I remove them?
 
 Run `tusker clean`. This will remove all databases which were created
