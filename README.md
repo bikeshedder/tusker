@@ -211,14 +211,19 @@ marked with a `CREATED BY TUSKER` comment.
 
 ### What does the `dbname` setting in `tusker.toml` mean?
 
-When diffing against a ready migrated database this database name is used. This
-command will print out the difference between the current database schema and
-the target schema:
+The `dbname` setting in `tusker.toml` is used when diffing against your database.
+This command will print out the difference between the current database schema
+and the target schema:
 
 ```shell
 tusker diff database
 ```
 
+Note that this command is meant to be run after you have migrated your database.
+
 Tusker also needs to create temporary databases when diffing against the `schema`
 and/or `migrations`. The two databases are called `{dbname}_{timestamp}_schema`
 and `{dbname}_{timestamp}_migrations`.
+
+If you do not specify a `dbname`, it will use the default database, which defaults
+to your current user name.
