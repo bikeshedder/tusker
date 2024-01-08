@@ -9,7 +9,6 @@ import migra
 import psycopg2
 from psycopg2 import sql
 import sqlalchemy
-from sqlalchemy.sql import text
 
 from .config import Config
 
@@ -151,7 +150,7 @@ class Tusker:
                 self.log("Applying...")
                 self.log(migration.sql)
                 with source.connect() as conn:
-                    conn.execute(text(migration.sql))
+                    conn.execute(migration.sql.replace('%', '%%'))
                 return "Applied\n"
             else:
                 return migration.sql
