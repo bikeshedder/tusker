@@ -9,6 +9,7 @@ import migra
 import psycopg2
 from psycopg2 import sql
 import sqlalchemy
+from sqlalchemy.sql import text
 
 from .config import Config
 
@@ -134,7 +135,7 @@ class Tusker:
     def mgr(self, name):
         return getattr(self, 'mgr_{}'.format(name))()
 
-    def diff(self, source, target):
+    def diff(self, source, target, apply=False):
         self.log('Creating databases...')
         with self.mgr(source) as source, self.mgr(target) as target:
             self.log('Diffing...')
@@ -145,7 +146,15 @@ class Tusker:
             )
             migration.set_safety(self.config.migra.safe)
             migration.add_all_changes(privileges=self.config.migra.privileges)
-            return migration.sql
+
+            if migration.sql and apply:
+                self.log("Applying...")
+                self.log(migration.sql)
+                with source.connect() as conn:
+                    conn.execute(text(migration.sql))
+                return "Applied\n"
+            else:
+                return migration.sql
 
     def check(self, backends):
         with ExitStack() as stack:
@@ -203,7 +212,7 @@ def cmd_diff(args, cfg: Config):
     if args.reverse:
         source, target = target, source
     try:
-        sql = tusker.diff(source, target)
+        sql = tusker.diff(source, target, args.apply)
         print(sql, end='')
     except ExecuteSqlError as e:
         print(str(e), file=sys.stderr)
@@ -351,6 +360,11 @@ def main():
     parser_diff.add_argument(
         '--create-extensions-only',
         help='Only output create extension statements, nothing else. ',
+        action='store_true',
+    )
+    parser_diff.add_argument(
+        '--apply',
+        help='Apply SQL',
         action='store_true',
     )
     add_migra_args(parser_diff)
