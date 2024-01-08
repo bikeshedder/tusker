@@ -233,5 +233,6 @@ and/or `migrations`. The two databases are called `{dbname}_{timestamp}_schema`
 and `{dbname}_{timestamp}_migrations`.
 
 The `dbname` setting overrides the database name in connection `url` (if specified).
-If you do not specify database name in `dbname` or in the connection `url`, it will
-use the default database, which defaults to the database user name.
+If neither a `dbname` nor a `url` is specified it will default to `tusker`. Calling
+`tusker diff database` only makes sense if you specify a `dbname` or your application
+does indeed use a database called `tusker`.
