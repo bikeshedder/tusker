@@ -17,22 +17,50 @@ Tusker does exactly this.
 This project aims to replace the [Python version of Tusker][pypi-tusker] with
 a complete rewrite in Rust. This project is in a very early stage.
 
-- [ ] Diffing
-  - [ ] collations
-  - [x] constraints
-  - [ ] deps
-  - [x] domains
-  - [x] enums (safe additive changes only)
-  - [x] extensions
-  - [x] functions (only normal functions)
-  - [x] indexes
-  - [ ] privileges
-  - [x] relations
-  - [ ] rlspolicies
-  - [ ] schemas
-  - [x] sequences
-  - [x] triggers
-  - [ ] types
+### Schema Diff Support
+
+The table below reflects the current implementation state of the Rust rewrite,
+not the intended end state. The focus is schema diffing for PostgreSQL 16, 17,
+and 18, and the Rust test suite runs against all three versions in CI.
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| Schemas | Not yet | Inspection exists, but creating/dropping whole schemas is still `todo!()` in the schema diff layer. |
+| Tables | Done | Supports create/drop and many column-level alters for ordinary tables. |
+| Columns | Partial | Supports common type/default/nullability/identity changes; generated-column alters are still treated as unsupported and emitted as warnings. |
+| Constraints | Partial | Supports table `CHECK`, `PRIMARY KEY`, `UNIQUE`, `EXCLUDE`, and `FOREIGN KEY` ordering. Named `NOT NULL` constraints introduced in PostgreSQL 18 are currently skipped. |
+| Indexes | Done | Supports standalone named indexes, including `CREATE INDEX` and `CREATE UNIQUE INDEX`. Constraint-backed indexes are handled through table constraints instead of as standalone indexes. |
+| Views | Not yet | Views and materialized views are inspected, but they are not currently diffed or emitted. |
+| Materialized views | Not yet | Inspected only; no diff/create/drop support yet. |
+| Functions | Partial | Supports normal functions and procedures, with dependency-aware ordering between routines. Aggregates and window functions are not currently diffed. |
+| Procedures | Done | Supported through the same routine diff path as functions. |
+| Triggers | Done | Supports create/drop and trigger enabled-state restoration. |
+| Sequences | Done | Supports create/drop/alter for standalone sequences. |
+| Enums | Done | Supports create/drop and safe additive changes. Reordering/removing enum labels intentionally fails with guidance instead of generating unsafe SQL. |
+| Domains | Done | Supports create/drop and common alters. Base type changes intentionally stop with a manual-action error instead of generating unsafe SQL. |
+| Extensions | Done | Supports create/drop, schema moves, and version updates. |
+| Composite types | Not yet | No inspection/diff support yet. |
+| Range types | Not yet | No dedicated support for user-defined range or multirange types yet. |
+| Collations | Not yet | No inspection/diff support yet. |
+| Comments | Not yet | No diff support yet for `COMMENT ON` statements or object descriptions. |
+| Privileges / ownership / GRANTs | Not yet | No privilege diff support yet. |
+| Row-level security policies | Not yet | No inspection/diff support yet. |
+| Foreign tables / FDWs | Not yet | Not currently inspected as diffable relations. |
+| Partitioned tables | Not yet | Partitioned tables are currently skipped by relation inspection. |
+| Dependencies beyond routines | Partial | Routine dependency ordering exists. General dependency tracking across views, types, tables, and other objects is still incomplete. |
+
+## Development
+
+Inside the devcontainer, run the Rust test suite against PostgreSQL 16, 17, and
+18 with:
+
+```shell
+./scripts/test-postgres-versions.sh
+```
+
+The command runs `cargo test --all-features --workspace` with `PG_URL` pointed
+at `postgres16`, `postgres17`, and `postgres18` in sequence. Any extra arguments
+are passed through to `cargo test`.
 
 ## Installation of the command line tool
 
@@ -50,6 +78,11 @@ tusker --help
 
 > ⚠️ **WARNING**  
 > Diffing is in its very early stages. This documentation is merely a placeholder for how things are supposed to work in the future.
+
+At the moment Tusker can diff tables, constraints, normal functions, and enums.
+Enum handling is intentionally conservative: adding enum values is supported, but
+unsafe enum rewrites such as removing or reordering values are emitted as a
+failing migration with guidance instead of silently generating runnable SQL.
 
 Once tusker is installed create a new file called `db/schema/fruit.sql`:
 
