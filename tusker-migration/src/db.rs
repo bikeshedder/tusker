@@ -36,7 +36,7 @@ impl Database {
         })
     }
     pub async fn init(&self) -> Result<(), PgError> {
-        let sql = include_str!("init.sql");
+        let sql = include_str!("../db/schema.sql");
         self.client.simple_query(sql).await.map(|_| ())
     }
     pub async fn get_migrations(&self) -> Result<Vec<DbMigration>, PgError> {
