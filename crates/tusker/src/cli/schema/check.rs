@@ -7,7 +7,7 @@ use crate::{config::Config, db::DiffDatabase};
 
 use super::{diff::inspect_backend, Backend};
 
-#[derive(Debug, Parser)]
+#[derive(Copy, Clone, Debug, Parser)]
 pub(crate) struct CheckArgs {
     /// from-backend for the diff operation
     #[arg(default_value_t = Backend::Schema)]

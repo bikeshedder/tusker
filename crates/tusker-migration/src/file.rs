@@ -8,7 +8,7 @@ use sha2::{Digest, Sha512};
 
 use crate::error::Error;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct MigrationFile {
     pub(crate) path: PathBuf,
     pub(crate) number: i32,

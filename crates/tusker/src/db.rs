@@ -11,6 +11,7 @@ const TUSKER_COMMENT: &str = concat!(
     "running `tusker clean` or remove this database manually.",
 );
 
+#[derive(Debug)]
 pub(crate) struct DiffDatabase {
     client: Client,
     config: DatabaseConfig,

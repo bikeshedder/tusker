@@ -107,7 +107,7 @@ impl DatabaseConfig {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub(crate) struct DiffConfig {
     #[serde(default = "default_diff_safe")]
     pub(crate) safe: bool,

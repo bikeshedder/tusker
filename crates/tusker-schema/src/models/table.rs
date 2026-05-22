@@ -34,7 +34,7 @@ impl TryFrom<Class> for Table {
 }
 
 /// Error returned when a non-table relation is converted into a [`Table`].
-#[derive(Debug, Error)]
+#[derive(Copy, Clone, Debug, Error)]
 #[error("Unsupported table for table: {0}")]
 pub struct InvalidRelkind(Relkind);
 

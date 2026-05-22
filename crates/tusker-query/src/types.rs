@@ -12,40 +12,52 @@ pub trait QueryNullableRowTyped<T> {}
 /// Marker trait for Rust types accepted when query nullability is best-effort.
 pub trait QueryMaybeNullableRowTyped<T> {}
 
-/// PostgreSQL `bool`.
-pub struct PgBool;
-/// PostgreSQL `char`.
-pub struct PgI8;
-/// PostgreSQL `smallint` and `smallserial`.
-pub struct PgI16;
-/// PostgreSQL `int` and `serial`.
-pub struct PgI32;
-/// PostgreSQL `bigint`, `bigserial`, and `oid`.
-pub struct PgI64;
-/// PostgreSQL `real`.
-pub struct PgF32;
-/// PostgreSQL `double precision`.
-pub struct PgF64;
-/// PostgreSQL text-like string types.
-pub struct PgString;
-/// PostgreSQL `bytea`.
-pub struct PgBytea;
-/// PostgreSQL `hstore`.
-pub struct PgHstore;
-/// PostgreSQL `timestamp`.
-pub struct PgTimestamp;
-/// PostgreSQL `timestamp with time zone`.
-pub struct PgTimestampTz;
-/// PostgreSQL `inet`.
-pub struct PgInet;
-/// PostgreSQL `date`.
-pub struct PgDate;
-/// PostgreSQL `time`.
-pub struct PgTime;
-/// PostgreSQL `uuid`.
-pub struct PgUuid;
-/// PostgreSQL `json` and `jsonb`.
-pub struct PgJson;
+macro_rules! marker_types {
+    ($( $(#[$meta:meta])* $name:ident; )+) => {
+        $(
+            $(#[$meta])*
+            #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+            pub struct $name;
+        )+
+    };
+}
+
+marker_types! {
+    /// PostgreSQL `bool`.
+    PgBool;
+    /// PostgreSQL `char`.
+    PgI8;
+    /// PostgreSQL `smallint` and `smallserial`.
+    PgI16;
+    /// PostgreSQL `int` and `serial`.
+    PgI32;
+    /// PostgreSQL `bigint`, `bigserial`, and `oid`.
+    PgI64;
+    /// PostgreSQL `real`.
+    PgF32;
+    /// PostgreSQL `double precision`.
+    PgF64;
+    /// PostgreSQL text-like string types.
+    PgString;
+    /// PostgreSQL `bytea`.
+    PgBytea;
+    /// PostgreSQL `hstore`.
+    PgHstore;
+    /// PostgreSQL `timestamp`.
+    PgTimestamp;
+    /// PostgreSQL `timestamp with time zone`.
+    PgTimestampTz;
+    /// PostgreSQL `inet`.
+    PgInet;
+    /// PostgreSQL `date`.
+    PgDate;
+    /// PostgreSQL `time`.
+    PgTime;
+    /// PostgreSQL `uuid`.
+    PgUuid;
+    /// PostgreSQL `json` and `jsonb`.
+    PgJson;
+}
 
 macro_rules! impl_query_types {
     ($( $marker:ty => param: $param:ty, row: $row:ty; )+ ) => {

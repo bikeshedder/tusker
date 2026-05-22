@@ -11,6 +11,7 @@ use crate::error::Error;
 use crate::file::MigrationFile;
 use crate::queries;
 
+#[derive(Debug)]
 pub(crate) struct Database {
     pub(crate) client: tokio_postgres::Client,
 }
@@ -110,7 +111,7 @@ impl Database {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct DbMigration {
     pub(crate) number: i32,
     pub(crate) name: String,
@@ -118,7 +119,7 @@ pub(crate) struct DbMigration {
     //applied: std::time::
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct DbMigrationLog {
     pub(crate) number: i32,
     pub(crate) name: String,

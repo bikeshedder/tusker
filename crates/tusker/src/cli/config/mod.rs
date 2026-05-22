@@ -8,7 +8,7 @@ pub(crate) struct ConfigCommand {
     #[command(subcommand)]
     command: ConfigSubcommand,
 }
-#[derive(Debug, Subcommand)]
+#[derive(Copy, Clone, Debug, Subcommand)]
 enum ConfigSubcommand {
     Default,
     Template,

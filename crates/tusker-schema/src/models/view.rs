@@ -55,6 +55,6 @@ impl TryFrom<Class> for View {
 }
 
 /// Error returned when a non-view relation is converted into a [`View`].
-#[derive(Debug, Error)]
+#[derive(Copy, Clone, Debug, Error)]
 #[error("Unsupported table for view: {0}")]
 pub struct InvalidRelkind(Relkind);

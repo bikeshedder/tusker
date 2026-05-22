@@ -4,6 +4,7 @@ use clap::Parser;
 use crate::{config::Config, db::DiffDatabase};
 
 #[derive(Debug, Parser)]
+#[derive(Copy, Clone)]
 pub(crate) struct CleanArgs {
     /// Don't actually perform the clean up operation but rather show
     /// which queries need to be executed.

@@ -8,7 +8,7 @@ use tusker_query::{FromRow, Query};
 
 use crate::models::{column::Column, constraint::ConstraintType};
 
-#[derive(Query)]
+#[derive(Copy, Clone, Debug, Default, Query)]
 #[query(sql="schemas", row=Schema)]
 pub(crate) struct Schemas {}
 
@@ -17,7 +17,7 @@ pub(crate) struct Schema {
     pub(crate) name: String,
 }
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql="classes", row=Class)]
 pub(crate) struct Classes {
     pub(crate) schema: String,
@@ -32,7 +32,7 @@ pub(crate) struct Class {
     pub(crate) viewdef: Option<String>,
 }
 
-#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub(crate) enum Relkind {
     #[serde(rename = "r")]
     OrdinaryTable,
@@ -89,7 +89,7 @@ impl FromSql<'_> for Relkind {
 #[error("Unsupported relkind value")]
 struct UnsupportedRelkind(Vec<u8>);
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql="constraints", row=Constraint)]
 pub(crate) struct Constraints {
     pub(crate) schema: String,
@@ -103,13 +103,13 @@ pub(crate) struct Constraint {
     pub(crate) def: String,
 }
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql = "routines", row = RoutineRow)]
 pub(crate) struct Routines {
     pub(crate) schema: String,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub(crate) enum RoutineKind {
     Function,
     Procedure,
@@ -156,7 +156,7 @@ pub(crate) struct RoutineDependencyRow {
     pub(crate) identity_arguments: String,
 }
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql = "enums", row = EnumRow)]
 pub(crate) struct Enums {
     pub(crate) schema: String,
@@ -169,7 +169,7 @@ pub(crate) struct EnumRow {
     pub(crate) labels: Vec<String>,
 }
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql = "domains", row = DomainRow)]
 pub(crate) struct Domains {
     pub(crate) schema: String,
@@ -186,7 +186,7 @@ pub(crate) struct DomainRow {
     pub(crate) constraint_definitions: Vec<String>,
 }
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql = "sequences", row = SequenceRow)]
 pub(crate) struct Sequences {
     pub(crate) schema: String,
@@ -205,7 +205,7 @@ pub(crate) struct SequenceRow {
     pub(crate) cache_size: i64,
 }
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql = "extensions", row = ExtensionRow)]
 pub(crate) struct Extensions {
     pub(crate) schema: String,
@@ -218,7 +218,7 @@ pub(crate) struct ExtensionRow {
     pub(crate) version: String,
 }
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql = "indexes", row = IndexRow)]
 pub(crate) struct Indexes {
     pub(crate) schema: String,
@@ -232,7 +232,7 @@ pub(crate) struct IndexRow {
     pub(crate) definition: String,
 }
 
-#[derive(Query)]
+#[derive(Debug, Query)]
 #[query(sql = "triggers", row = TriggerRow)]
 pub(crate) struct Triggers {
     pub(crate) schema: String,

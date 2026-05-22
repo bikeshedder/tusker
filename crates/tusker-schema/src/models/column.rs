@@ -204,7 +204,7 @@ impl Column {
 }
 
 /// Generated-column state reported by PostgreSQL.
-#[derive(Debug, Eq, PartialEq, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserialize)]
 pub enum Generated {
     /// Not a generated column.
     #[serde(rename = "")]
@@ -215,7 +215,7 @@ pub enum Generated {
 }
 
 /// Identity-column state reported by PostgreSQL.
-#[derive(Debug, Eq, PartialEq, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserialize)]
 pub enum Identity {
     /// Not an identity column.
     #[serde(rename = "")]

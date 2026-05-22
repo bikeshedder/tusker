@@ -10,6 +10,7 @@ pub(crate) enum MigrationStatus<'a> {
     FileMissing(&'a DbMigration),
 }
 
+#[derive(Debug)]
 pub(crate) struct Migration {
     pub(crate) number: i32,
     pub(crate) file: Option<MigrationFile>,
