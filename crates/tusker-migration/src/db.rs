@@ -156,7 +156,7 @@ pub(crate) fn to_sql_error(error: PgError, sql: &str) -> Error {
                 }
                 let prefix = format!("LINE {}: ", line_number);
                 let mut msg = format!("{}{}", prefix, &sql[line_begin..line_end]);
-                // The position is 1 indexed. Thus 1 needs to be subtracted
+                // The position is 1 indexed. Thus 1 needs to be subtracted.
                 for _ in 0..(prefix.len() + line_position - 1) {
                     msg += " ";
                 }
