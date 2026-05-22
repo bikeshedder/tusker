@@ -69,9 +69,6 @@ tusker --help
 
 ## Getting started
 
-> ⚠️ **WARNING**  
-> Diffing is in its very early stages. This documentation is merely a placeholder for how things are supposed to work in the future.
-
 At the moment Tusker can diff tables, constraints, normal functions, and enums.
 Enum handling is intentionally conservative: adding enum values is supported, but
 unsafe enum rewrites such as removing or reordering values are emitted as a
