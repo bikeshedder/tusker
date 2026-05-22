@@ -26,6 +26,8 @@
 )]
 #![allow(clippy::uninlined_format_args)]
 
+use std::error::Error;
+
 use deadpool_postgres::Runtime;
 use serde::Deserialize;
 use tokio_postgres::{GenericClient, NoTls};
@@ -62,8 +64,8 @@ struct Post {
 }
 
 #[tokio::main]
-async fn main() {
-    dotenvy::dotenv().ok();
+async fn main() -> Result<(), Box<dyn Error>> {
+    let _ = dotenvy::dotenv()?;
     let cfg = Config::from_env().unwrap();
     let pool = cfg.pg.create_pool(Some(Runtime::Tokio1), NoTls).unwrap();
     let db = pool.get().await.unwrap();
@@ -72,4 +74,5 @@ async fn main() {
         "[post.{}] {} <{}> {}",
         post.id, post.created, post.author, post.text
     );
+    Ok(())
 }
