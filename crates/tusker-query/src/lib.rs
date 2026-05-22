@@ -1,3 +1,6 @@
+#![deny(nonstandard_style, rust_2018_idioms)]
+#![forbid(non_ascii_idents, unsafe_code)]
+
 use tokio_postgres::{types::ToSql, GenericClient, Row};
 
 pub use tusker_query_derive::Query;

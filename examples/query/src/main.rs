@@ -1,3 +1,6 @@
+#![deny(nonstandard_style, rust_2018_idioms)]
+#![forbid(non_ascii_idents, unsafe_code)]
+
 use deadpool_postgres::Runtime;
 use serde::Deserialize;
 use tokio_postgres::{GenericClient, NoTls};

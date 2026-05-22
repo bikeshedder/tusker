@@ -1,3 +1,6 @@
+#![deny(nonstandard_style, rust_2018_idioms)]
+#![forbid(non_ascii_idents, unsafe_code)]
+
 use anyhow::Result;
 use config::Config;
 
