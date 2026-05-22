@@ -26,7 +26,7 @@ uses `tusker-query`.
 
 ## Example
 
-```rust
+```rust,ignore
 use tusker_query::{query_one, FromRow, Query};
 
 #[derive(Query)]
