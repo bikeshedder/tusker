@@ -1,5 +1,3 @@
-# ⚠️  This project is still work in progress and not in a useable state, yet. Please don't report missing or broken features. ⚠️
-
 # Tusker
 
 PostgreSQL specific migration tool
@@ -11,11 +9,6 @@ Do you want to write your database schema directly as SQL which is understood by
 Do you want to be able to make changes to this schema and generate the SQL which is required to migrate between the old and new schema version?
 
 Tusker does exactly this.
-
-## Progress
-
-This project aims to replace the [Python version of Tusker][pypi-tusker] with
-a complete rewrite in Rust. This project is in a very early stage.
 
 ### Schema Diff Support
 
