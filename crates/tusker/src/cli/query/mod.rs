@@ -43,7 +43,7 @@ pub async fn cmd(cfg: &Config, args: &QueryCommand) -> Result<()> {
 
 pub async fn cmd_inspect(cfg: &Config, args: &QueryInspectArgs) -> Result<()> {
     let client = cfg.database.connect().await?;
-    let query = inspect_query_file(&client, &Path::new(&args.filename)).await?;
+    let query = inspect_query_file(&client, Path::new(&args.filename)).await?;
     println!("{}", serde_json::to_string_pretty(&query)?);
     Ok(())
 }

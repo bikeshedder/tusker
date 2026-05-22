@@ -64,11 +64,11 @@ impl Routine {
         )
     }
 
-    fn create_order<'a>(routines: Vec<&'a Routine>) -> Vec<&'a Routine> {
+    fn create_order(routines: Vec<&Routine>) -> Vec<&Routine> {
         topological_order(routines, false)
     }
 
-    fn drop_order<'a>(routines: Vec<&'a Routine>) -> Vec<&'a Routine> {
+    fn drop_order(routines: Vec<&Routine>) -> Vec<&Routine> {
         topological_order(routines, true)
     }
 }
@@ -127,7 +127,7 @@ impl From<RoutineDependencyRow> for RoutineKey {
     }
 }
 
-fn topological_order<'a>(mut routines: Vec<&'a Routine>, reverse: bool) -> Vec<&'a Routine> {
+fn topological_order(mut routines: Vec<&Routine>, reverse: bool) -> Vec<&Routine> {
     routines.sort_by_key(|routine| routine.key());
 
     let routines_by_key = routines
