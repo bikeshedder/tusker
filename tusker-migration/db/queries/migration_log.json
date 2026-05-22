@@ -1,0 +1,26 @@
+{
+  "checksum": "8d939487bb6b5a6df30ab3bd2e1db4e92e3fc29ee7f698b251f28be4e099ea9924627ea637574eab03c6906367de587a48b4e9e6a8582feb0b0a1d93d364e05a",
+  "params": [],
+  "columns": [
+    {
+      "name": "number",
+      "type": "int4",
+      "notnull": true
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "notnull": true
+    },
+    {
+      "name": "timestamp",
+      "type": "timestamptz",
+      "notnull": null
+    },
+    {
+      "name": "operation",
+      "type": "text",
+      "notnull": null
+    }
+  ]
+}

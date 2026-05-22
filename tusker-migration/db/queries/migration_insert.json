@@ -1,0 +1,9 @@
+{
+  "checksum": "27868587cd414a52cd18d9b0a23927dbc791bdc8b2d424092ac450030a2c429bbbc6a502849d5aae6667377ec6720cf39314cff48926166b39e161c760f912ce",
+  "params": [
+    "int4",
+    "text",
+    "bytea"
+  ],
+  "columns": []
+}

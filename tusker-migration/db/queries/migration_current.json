@@ -1,0 +1,21 @@
+{
+  "checksum": "32114722a8087ab5fbd63768aba738c92a783b840fb9c21a04943ca3e1bf4526a0783fc48f522e17d272803f509799382832ab46c75e2de39b4e9236c10196ac",
+  "params": [],
+  "columns": [
+    {
+      "name": "number",
+      "type": "int4",
+      "notnull": true
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "notnull": true
+    },
+    {
+      "name": "hash",
+      "type": "bytea",
+      "notnull": true
+    }
+  ]
+}
