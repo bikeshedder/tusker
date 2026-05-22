@@ -12,7 +12,7 @@ CREATE TYPE migration_operation AS ENUM (
 CREATE TABLE IF NOT EXISTS "migration" (
     "number" INTEGER NOT NULL,
     "name" text NOT NULL DEFAULT '',
-    "hash" bytea,
+    "hash" bytea NOT NULL,
     "validity" tstzrange NOT NULL DEFAULT tstzrange(now(), NULL),
     "operation" migration_operation NOT NULL DEFAULT 'apply',
     "comment" text NOT NULL DEFAULT '',
