@@ -4,6 +4,15 @@ pub use tusker_query_derive::Query;
 
 pub mod types;
 
+#[doc(hidden)]
+pub mod __private {
+    pub trait RowFieldCount<const N: usize> {}
+
+    pub trait RowFieldType<const I: usize> {
+        type Ty;
+    }
+}
+
 pub trait Query: Sized {
     const SQL: &'static str;
     type Row: FromRow;
@@ -19,6 +28,8 @@ pub use tusker_query_derive::FromRow;
 impl FromRow for () {
     fn from_row(_: Row) -> Self {}
 }
+
+impl __private::RowFieldCount<0> for () {}
 
 pub async fn query_one<Q: Query>(
     client: &impl GenericClient,
