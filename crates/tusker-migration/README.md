@@ -78,17 +78,24 @@ That makes it easy to either:
 ### Embedding example
 
 ```rust
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 struct Args {
     #[command(subcommand)]
-    command: tusker_migration::cli::Command,
+    command: Command,
+}
+
+#[derive(Subcommand)]
+enum Command {
+    Migrate(tusker_migration::cli::Command),
 }
 
 async fn run(pg_config: &tokio_postgres::Config) -> Result<(), tusker_migration::error::Error> {
     let args = Args::parse();
-    tusker_migration::cli::cmd(pg_config, &args.command).await
+    match args.command {
+        Command::Migrate(command) => tusker_migration::cli::cmd(pg_config, &command).await,
+    }
 }
 ```
 
