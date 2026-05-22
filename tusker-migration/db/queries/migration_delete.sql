@@ -3,8 +3,8 @@ WITH closed AS (
     SET validity = tstzrange(lower(validity), now())
     WHERE now() <@ validity
       AND migration.number = $1
-    RETURNING number, name
+    RETURNING number, name, hash
 )
 INSERT INTO migration (number, name, hash, operation)
-SELECT number, name, NULL, 'delete'
+SELECT number, name, hash, 'delete'
 FROM closed;
