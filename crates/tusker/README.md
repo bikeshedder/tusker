@@ -252,14 +252,14 @@ Tusker also needs to create a temporary databases when diffing against the
 
 ## FAQ
 
-### How does it differ from Tusker at PyPI?
+### How does it differ from the archived Python version of Tusker?
 
-[Tusker was originally written in Python][pypi-tusker] with the only feature
-being schema diffing. It relies on [migra] and [schemainspect] to perform the
-actual diffing. This version of Tusker implements the diffing
-from scratch and also provides a type safe query system.
+[Tusker was originally written in Python][tusker-pypi] with the only
+feature being schema diffing. It relies on [migra] and [schemainspect] to
+perform the actual diffing. This version of Tusker implements the diffing from
+scratch and also provides a type safe query system.
 
-[pypi-tusker]: https://github.com/olivierlacan/keep-a-changelog/releases/tag/v0.0.1
+[tusker-pypi]: https://pypi.org/project/tusker/
 [migra]: https://pypi.org/project/migra/
 [schemainspect]: https://pypi.org/project/schemainspect/
 
