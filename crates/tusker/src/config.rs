@@ -7,32 +7,32 @@ use uzers::get_current_username;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Config {
+pub(crate) struct Config {
     #[serde(default)]
-    pub database: DatabaseConfig,
+    pub(crate) database: DatabaseConfig,
     #[serde(default)]
-    pub schema: SchemaConfig,
+    pub(crate) schema: SchemaConfig,
     #[serde(default)]
-    pub migrations: MigrationsConfig,
+    pub(crate) migrations: MigrationsConfig,
     #[serde(default)]
-    pub diff: DiffConfig,
+    pub(crate) diff: DiffConfig,
     #[serde(default)]
-    pub queries: QueriesConfig,
+    pub(crate) queries: QueriesConfig,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct DatabaseConfig {
-    pub url: Option<String>,
-    pub host: Option<String>,
-    pub port: Option<u16>,
-    pub user: Option<String>,
-    pub password: Option<String>,
-    pub dbname: String,
+pub(crate) struct DatabaseConfig {
+    pub(crate) url: Option<String>,
+    pub(crate) host: Option<String>,
+    pub(crate) port: Option<u16>,
+    pub(crate) user: Option<String>,
+    pub(crate) password: Option<String>,
+    pub(crate) dbname: String,
 }
 
 impl Config {
-    pub fn new() -> Result<Self> {
+    pub(crate) fn new() -> Result<Self> {
         ::config::Config::builder()
             .add_source(::config::File::with_name("tusker.toml").required(false))
             .add_source(::config::Environment::with_prefix("TUSKER").separator("_"))
@@ -40,7 +40,7 @@ impl Config {
             .try_deserialize()
             .context("Configuration error")
     }
-    pub fn template() -> Self {
+    pub(crate) fn template() -> Self {
         Self {
             database: DatabaseConfig {
                 url: Some("".into()),
@@ -68,7 +68,7 @@ impl Config {
 }
 
 impl DatabaseConfig {
-    pub fn pg_config(&self) -> Result<PgConfig> {
+    pub(crate) fn pg_config(&self) -> Result<PgConfig> {
         let mut cfg = if let Some(url) = &self.url {
             tokio_postgres::Config::from_str(url)?
         } else {
@@ -100,7 +100,7 @@ impl DatabaseConfig {
         cfg.dbname(&self.dbname);
         Ok(cfg)
     }
-    pub async fn connect(&self) -> Result<PgClient> {
+    pub(crate) async fn connect(&self) -> Result<PgClient> {
         let (client, connection) = self.pg_config()?.connect(NoTls).await?;
         tokio::spawn(connection);
         Ok(client)
@@ -108,11 +108,11 @@ impl DatabaseConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct DiffConfig {
+pub(crate) struct DiffConfig {
     #[serde(default = "default_diff_safe")]
-    pub safe: bool,
+    pub(crate) safe: bool,
     #[serde(default = "default_diff_privileges")]
-    pub privileges: bool,
+    pub(crate) privileges: bool,
 }
 
 fn default_diff_safe() -> bool {
@@ -133,9 +133,9 @@ impl Default for DiffConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SchemaConfig {
+pub(crate) struct SchemaConfig {
     #[serde(default = "default_schema_filename")]
-    pub filename: String,
+    pub(crate) filename: String,
 }
 
 fn default_schema_filename() -> String {
@@ -151,9 +151,9 @@ impl Default for SchemaConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct MigrationsConfig {
+pub(crate) struct MigrationsConfig {
     #[serde(default = "default_migrations_filename")]
-    pub filename: String,
+    pub(crate) filename: String,
 }
 
 fn default_migrations_filename() -> String {
@@ -169,9 +169,9 @@ impl Default for MigrationsConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct QueriesConfig {
+pub(crate) struct QueriesConfig {
     #[serde(default = "default_queries_filename")]
-    pub filename: String,
+    pub(crate) filename: String,
 }
 
 fn default_queries_filename() -> String {

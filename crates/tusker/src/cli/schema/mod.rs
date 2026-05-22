@@ -5,16 +5,16 @@ use crate::config::Config;
 
 use self::{check::CheckArgs, diff::DiffArgs};
 
-pub mod check;
-pub mod diff;
+pub(crate) mod check;
+pub(crate) mod diff;
 
 #[derive(Debug, Parser)]
-pub struct SchemaCommand {
+pub(crate) struct SchemaCommand {
     #[command(subcommand)]
-    pub command: SchemaSubcommand,
+    command: SchemaSubcommand,
 }
 #[derive(Debug, Subcommand)]
-pub enum SchemaSubcommand {
+enum SchemaSubcommand {
     /// Show differences between two schemas
     ///
     /// This command calculates the difference between two database schemas.
@@ -32,7 +32,7 @@ pub enum SchemaSubcommand {
     Check(CheckArgs),
 }
 
-pub async fn cmd(cfg: &Config, args: &SchemaCommand) -> Result<()> {
+pub(crate) async fn cmd(cfg: &Config, args: &SchemaCommand) -> Result<()> {
     match &args.command {
         SchemaSubcommand::Diff(cmd_args) => diff::cmd(cfg, cmd_args).await?,
         SchemaSubcommand::Check(cmd_args) => check::cmd(cfg, cmd_args).await?,
@@ -41,7 +41,7 @@ pub async fn cmd(cfg: &Config, args: &SchemaCommand) -> Result<()> {
 }
 
 #[derive(ValueEnum, Copy, Clone, Debug, PartialEq, Eq)]
-pub enum Backend {
+pub(crate) enum Backend {
     Migrations,
     Schema,
     Database,

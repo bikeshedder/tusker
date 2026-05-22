@@ -8,7 +8,7 @@ use crate::{config::Config, db::DiffDatabase};
 use super::{diff::inspect_backend, Backend};
 
 #[derive(Debug, Parser)]
-pub struct CheckArgs {
+pub(crate) struct CheckArgs {
     /// from-backend for the diff operation
     #[arg(default_value_t = Backend::Schema)]
     from: Backend,
@@ -26,7 +26,7 @@ pub struct CheckArgs {
     without_privileges: bool,
 }
 
-pub async fn cmd(cfg: &Config, args: &CheckArgs) -> Result<()> {
+pub(crate) async fn cmd(cfg: &Config, args: &CheckArgs) -> Result<()> {
     let mut db = DiffDatabase::new(&cfg.database).await?;
     db.create().await?;
     let from = inspect_backend(cfg, &mut db, args.from).await?;

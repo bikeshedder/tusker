@@ -11,12 +11,12 @@ use crate::error::Error;
 use crate::file::MigrationFile;
 use crate::queries;
 
-pub struct Database {
-    pub client: tokio_postgres::Client,
+pub(crate) struct Database {
+    pub(crate) client: tokio_postgres::Client,
 }
 
 impl Database {
-    pub async fn connect(pg_config: &tokio_postgres::Config) -> Result<Database, Error> {
+    pub(crate) async fn connect(pg_config: &tokio_postgres::Config) -> Result<Database, Error> {
         let (client, connection) = pg_config
             .connect(tokio_postgres::NoTls)
             .await
@@ -24,7 +24,7 @@ impl Database {
         tokio::spawn(connection);
         Ok(Database { client })
     }
-    pub async fn migration_table_exists(&self) -> Result<bool, PgError> {
+    pub(crate) async fn migration_table_exists(&self) -> Result<bool, PgError> {
         let stmt = self
             .client
             .prepare("SELECT to_regclass('migration')::bigint")
@@ -35,11 +35,11 @@ impl Database {
             None => false,
         })
     }
-    pub async fn init(&self) -> Result<(), PgError> {
+    pub(crate) async fn init(&self) -> Result<(), PgError> {
         let sql = include_str!("../db/schema.sql");
         self.client.simple_query(sql).await.map(|_| ())
     }
-    pub async fn get_migrations(&self) -> Result<Vec<DbMigration>, PgError> {
+    pub(crate) async fn get_migrations(&self) -> Result<Vec<DbMigration>, PgError> {
         Ok(query(&self.client, queries::MigrationCurrent {})
             .await?
             .iter()
@@ -50,7 +50,7 @@ impl Database {
             })
             .collect())
     }
-    pub async fn get_migration_log(&self) -> Result<Vec<DbMigrationLog>, PgError> {
+    pub(crate) async fn get_migration_log(&self) -> Result<Vec<DbMigrationLog>, PgError> {
         Ok(query(&self.client, queries::MigrationLog {})
             .await?
             .iter()
@@ -62,7 +62,7 @@ impl Database {
             })
             .collect())
     }
-    pub async fn update_migration(&self, migration_file: &MigrationFile) -> Result<(), PgError> {
+    pub(crate) async fn update_migration(&self, migration_file: &MigrationFile) -> Result<(), PgError> {
         query(
             &self.client,
             queries::MigrationUpdate {
@@ -74,7 +74,7 @@ impl Database {
         .await?;
         Ok(())
     }
-    pub async fn apply_migration(
+    pub(crate) async fn apply_migration(
         &self,
         migration_file: &MigrationFile,
         sql: &str,
@@ -92,7 +92,7 @@ impl Database {
         .await
         .map(|_| ())
     }
-    pub async fn fake_migration(&self, migration_file: &MigrationFile) -> Result<(), PgError> {
+    pub(crate) async fn fake_migration(&self, migration_file: &MigrationFile) -> Result<(), PgError> {
         query(
             &self.client,
             queries::MigrationFake {
@@ -104,29 +104,29 @@ impl Database {
         .await
         .map(|_| ())
     }
-    pub async fn remove_migration(&self, number: i32) -> Result<(), PgError> {
+    pub(crate) async fn remove_migration(&self, number: i32) -> Result<(), PgError> {
         query(&self.client, queries::MigrationDelete { number }).await?;
         Ok(())
     }
 }
 
 #[derive(Clone)]
-pub struct DbMigration {
-    pub number: i32,
-    pub name: String,
-    pub hash: Vec<u8>,
+pub(crate) struct DbMigration {
+    pub(crate) number: i32,
+    pub(crate) name: String,
+    pub(crate) hash: Vec<u8>,
     //applied: std::time::
 }
 
 #[derive(Clone)]
-pub struct DbMigrationLog {
-    pub number: i32,
-    pub name: String,
-    pub timestamp: OffsetDateTime,
-    pub operation: String,
+pub(crate) struct DbMigrationLog {
+    pub(crate) number: i32,
+    pub(crate) name: String,
+    pub(crate) timestamp: OffsetDateTime,
+    pub(crate) operation: String,
 }
 
-pub fn to_sql_error(error: PgError, sql: &str) -> Error {
+pub(crate) fn to_sql_error(error: PgError, sql: &str) -> Error {
     // FIXME This function is really ugly and only works if the newline
     // is only '\n'.
     match error.source().unwrap().downcast_ref::<DbError>() {

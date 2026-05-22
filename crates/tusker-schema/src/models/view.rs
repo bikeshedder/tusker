@@ -12,7 +12,7 @@ pub struct View {
     pub schema: String,
     /// View name.
     pub name: String,
-    pub kind: Relkind,
+    kind: Relkind,
     /// Whether this definition describes a materialized view.
     pub materialized: bool,
     /// SQL body used to define the view.

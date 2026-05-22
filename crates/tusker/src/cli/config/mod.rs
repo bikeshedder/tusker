@@ -4,18 +4,18 @@ use clap::{Parser, Subcommand};
 use crate::config::Config;
 
 #[derive(Debug, Parser)]
-pub struct ConfigCommand {
+pub(crate) struct ConfigCommand {
     #[command(subcommand)]
-    pub command: ConfigSubcommand,
+    command: ConfigSubcommand,
 }
 #[derive(Debug, Subcommand)]
-pub enum ConfigSubcommand {
+enum ConfigSubcommand {
     Default,
     Template,
     Show,
 }
 
-pub async fn cmd(cfg: &Config, args: &ConfigCommand) -> Result<()> {
+pub(crate) async fn cmd(cfg: &Config, args: &ConfigCommand) -> Result<()> {
     match args.command {
         ConfigSubcommand::Default => cmd_default().await?,
         ConfigSubcommand::Template => cmd_template().await?,

@@ -3,21 +3,21 @@ use clap::{Parser, Subcommand};
 
 use crate::config::Config;
 
-pub mod clean;
-pub mod config;
-pub mod query;
-pub mod schema;
+mod clean;
+mod config;
+mod query;
+mod schema;
 
 #[derive(Debug, Parser)]
 #[command(name = "tusker")]
 #[command(author, version, about, long_about = None)]
-pub struct Cli {
+struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
 
 #[derive(Debug, Subcommand)]
-pub enum Commands {
+enum Commands {
     /// Schema commands (diffing)
     #[command(alias = "s")]
     Schema(schema::SchemaCommand),
@@ -43,7 +43,7 @@ pub enum Commands {
     Migrate(tusker_migration::cli::RunArgs),
 }
 
-pub async fn run(cfg: &Config) -> Result<()> {
+pub(crate) async fn run(cfg: &Config) -> Result<()> {
     let args = Cli::parse();
     match &args.command {
         Commands::Schema(cmd_args) => {

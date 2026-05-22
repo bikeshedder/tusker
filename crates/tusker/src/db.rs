@@ -11,14 +11,14 @@ const TUSKER_COMMENT: &str = concat!(
     "running `tusker clean` or remove this database manually.",
 );
 
-pub struct DiffDatabase {
+pub(crate) struct DiffDatabase {
     client: Client,
     config: DatabaseConfig,
-    pub dbname: String,
+    pub(crate) dbname: String,
 }
 
 impl DiffDatabase {
-    pub async fn new(config: &DatabaseConfig) -> Result<Self> {
+    pub(crate) async fn new(config: &DatabaseConfig) -> Result<Self> {
         let client = DatabaseConfig {
             dbname: "template1".into(),
             ..config.clone()
@@ -34,7 +34,7 @@ impl DiffDatabase {
             dbname: format!("{}_diff_{}", config.dbname, timestamp),
         })
     }
-    pub async fn create(&self) -> Result<()> {
+    pub(crate) async fn create(&self) -> Result<()> {
         self.client
             .simple_query(&format!("CREATE DATABASE {}", &self.dbname))
             .await?;
@@ -46,7 +46,7 @@ impl DiffDatabase {
             .await?;
         Ok(())
     }
-    pub async fn connect(&self) -> Result<Client> {
+    pub(crate) async fn connect(&self) -> Result<Client> {
         DatabaseConfig {
             dbname: self.dbname.clone(),
             ..self.config.clone()
@@ -54,16 +54,16 @@ impl DiffDatabase {
         .connect()
         .await
     }
-    pub async fn drop(&self) -> Result<()> {
+    pub(crate) async fn drop(&self) -> Result<()> {
         self.drop_dbname(&self.dbname).await
     }
-    pub async fn drop_dbname(&self, dbname: &str) -> Result<()> {
+    pub(crate) async fn drop_dbname(&self, dbname: &str) -> Result<()> {
         self.client
             .execute(&format!("DROP DATABASE {}", dbname), &[])
             .await?;
         Ok(())
     }
-    pub async fn leftover_database(&self) -> Result<Vec<String>> {
+    pub(crate) async fn leftover_database(&self) -> Result<Vec<String>> {
         let rows = self
             .client
             .query(

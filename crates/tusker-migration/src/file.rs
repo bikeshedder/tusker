@@ -9,15 +9,15 @@ use sha2::{Digest, Sha512};
 use crate::error::Error;
 
 #[derive(Clone)]
-pub struct MigrationFile {
-    pub path: PathBuf,
-    pub number: i32,
-    pub name: String,
-    pub hash: Vec<u8>,
+pub(crate) struct MigrationFile {
+    pub(crate) path: PathBuf,
+    pub(crate) number: i32,
+    pub(crate) name: String,
+    pub(crate) hash: Vec<u8>,
 }
 
 impl MigrationFile {
-    pub fn from_path(path: &Path) -> Result<MigrationFile, Error> {
+    pub(crate) fn from_path(path: &Path) -> Result<MigrationFile, Error> {
         let file_stem = path
             .file_stem()
             .map(|name| name.to_string_lossy().into())
@@ -31,10 +31,10 @@ impl MigrationFile {
             hash: calculate_hash(path)?,
         })
     }
-    pub fn open(&self) -> io::Result<File> {
+    pub(crate) fn open(&self) -> io::Result<File> {
         File::open(&self.path)
     }
-    pub fn read(&self) -> io::Result<String> {
+    pub(crate) fn read(&self) -> io::Result<String> {
         let mut sql = String::new();
         self.open()?.read_to_string(&mut sql)?;
         Ok(sql)
@@ -70,7 +70,7 @@ fn calculate_hash(path: &Path) -> Result<Vec<u8>, Error> {
     Ok(hasher.finalize().to_vec())
 }
 
-pub fn load_migration_files(path: &Path) -> Result<Vec<MigrationFile>, Error> {
+pub(crate) fn load_migration_files(path: &Path) -> Result<Vec<MigrationFile>, Error> {
     let mut migrations: Vec<MigrationFile> = Vec::new();
     let mut number_set: HashSet<i32> = HashSet::new();
     let dir_entries = read_dir(path).map_err(|e| {

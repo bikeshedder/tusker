@@ -16,7 +16,7 @@ pub struct Table {
     pub schema: String,
     /// Table name.
     pub name: String,
-    pub kind: Relkind,
+    kind: Relkind,
     /// Columns in declaration order.
     pub columns: Vec<Column>,
 }

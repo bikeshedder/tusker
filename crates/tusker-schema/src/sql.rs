@@ -1,18 +1,18 @@
 use std::fmt;
 
 #[derive(Debug, Default)]
-pub struct StatementBuilder {
+pub(crate) struct StatementBuilder {
     parts: Vec<String>,
 }
 
 impl StatementBuilder {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self::default()
     }
-    pub fn part(&mut self, s: impl ToString) {
+    pub(crate) fn part(&mut self, s: impl ToString) {
         self.parts.push(s.to_string());
     }
-    pub fn ident(&mut self, s: impl ToString) {
+    pub(crate) fn ident(&mut self, s: impl ToString) {
         self.part(quote_ident(&s.to_string()));
     }
 }
@@ -23,7 +23,7 @@ impl fmt::Display for StatementBuilder {
     }
 }
 
-pub fn quote_ident(ident: &str) -> String {
+pub(crate) fn quote_ident(ident: &str) -> String {
     format!("\"{}\"", ident.replace('"', "\"\""))
 }
 

@@ -23,9 +23,9 @@
 
 /// Public CLI types and helpers for embedding the migration runner.
 pub mod cli;
-pub mod db;
+pub(crate) mod db;
 /// Error types returned by migration operations.
 pub mod error;
-pub mod file;
-pub mod models;
-pub mod queries;
+pub(crate) mod file;
+pub(crate) mod models;
+pub(crate) mod queries;

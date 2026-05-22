@@ -11,7 +11,7 @@ use crate::{
 use super::Backend;
 
 #[derive(Debug, Parser)]
-pub struct DiffArgs {
+pub(crate) struct DiffArgs {
     /// from-backend for the diff operation
     #[arg(default_value_t = Backend::Migrations)]
     from: Backend,
@@ -56,7 +56,7 @@ async fn inspect_db(cfg: &DatabaseConfig) -> Result<Inspection> {
     tusker_schema::inspect(&client).await
 }
 
-pub async fn inspect_backend(
+pub(crate) async fn inspect_backend(
     cfg: &Config,
     db: &mut DiffDatabase,
     backend: Backend,
@@ -68,7 +68,7 @@ pub async fn inspect_backend(
     }
 }
 
-pub async fn cmd(cfg: &Config, args: &DiffArgs) -> Result<()> {
+pub(crate) async fn cmd(cfg: &Config, args: &DiffArgs) -> Result<()> {
     let (from, to) = if args.reverse {
         (args.to, args.from)
     } else {

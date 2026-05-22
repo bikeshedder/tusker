@@ -19,7 +19,7 @@ pub struct Command {
 }
 
 #[derive(Debug, Args)]
-pub struct MigrationArgs {
+struct MigrationArgs {
     #[clap(
         long,
         short,
@@ -31,7 +31,7 @@ pub struct MigrationArgs {
 }
 
 #[derive(Debug, Subcommand)]
-pub enum Subcommands {
+enum Subcommands {
     #[clap(aliases = &["ls", "list"], about = "List migrations and show their current status")]
     Status(MigrationArgs),
 
@@ -67,7 +67,7 @@ pub struct RunArgs {
 }
 
 #[derive(Debug, Args)]
-pub struct FixArgs {
+struct FixArgs {
     #[clap(
         long,
         short,
@@ -154,7 +154,7 @@ pub async fn cmd(pg_config: &Config, cmd: &Command) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn status(pg_config: &Config, args: &MigrationArgs) -> Result<(), Error> {
+async fn status(pg_config: &Config, args: &MigrationArgs) -> Result<(), Error> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     let colors = Colors::new();
     let db = Database::connect(pg_config).await?;
@@ -219,7 +219,7 @@ pub async fn status(pg_config: &Config, args: &MigrationArgs) -> Result<(), Erro
     Ok(())
 }
 
-pub async fn log(pg_config: &Config) -> Result<(), Error> {
+async fn log(pg_config: &Config) -> Result<(), Error> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     let db = Database::connect(pg_config).await?;
     let colors = Colors::new();
@@ -262,7 +262,7 @@ pub async fn log(pg_config: &Config) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn check(pg_config: &Config, args: &MigrationArgs) -> Result<(), Error> {
+async fn check(pg_config: &Config, args: &MigrationArgs) -> Result<(), Error> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     let db = Database::connect(pg_config).await?;
     let colors = Colors::new();
@@ -339,7 +339,7 @@ pub async fn run(pg_config: &Config, args: &RunArgs) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn fix(pg_config: &Config, args: &FixArgs) -> Result<(), Error> {
+async fn fix(pg_config: &Config, args: &FixArgs) -> Result<(), Error> {
     let db = Database::connect(pg_config).await?;
     let migrations = load_migrations(&db, &args.migrations_dir).await?;
     let index = migrations.binary_search_by_key(&args.number, |m| m.number);

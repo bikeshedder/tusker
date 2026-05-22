@@ -30,7 +30,7 @@ pub struct Routine {
     pub schema: String,
     /// Routine name.
     pub name: String,
-    pub kind: RoutineKind,
+    kind: RoutineKind,
     /// PostgreSQL identity argument string used to disambiguate overloads.
     pub identity_arguments: String,
     /// Raw `CREATE OR REPLACE` definition returned by PostgreSQL.

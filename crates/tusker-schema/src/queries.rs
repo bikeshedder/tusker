@@ -10,30 +10,30 @@ use crate::models::{column::Column, constraint::ConstraintType};
 
 #[derive(Query)]
 #[query(sql="schemas", row=Schema)]
-pub struct Schemas {}
+pub(crate) struct Schemas {}
 
 #[derive(Debug, FromRow)]
-pub struct Schema {
-    pub name: String,
+pub(crate) struct Schema {
+    pub(crate) name: String,
 }
 
 #[derive(Query)]
 #[query(sql="classes", row=Class)]
-pub struct Classes {
-    pub schema: String,
+pub(crate) struct Classes {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, FromRow)]
-pub struct Class {
-    pub schema: String,
-    pub name: String,
-    pub relkind: Relkind,
-    pub columns: Json<Vec<Column>>,
-    pub viewdef: Option<String>,
+pub(crate) struct Class {
+    pub(crate) schema: String,
+    pub(crate) name: String,
+    pub(crate) relkind: Relkind,
+    pub(crate) columns: Json<Vec<Column>>,
+    pub(crate) viewdef: Option<String>,
 }
 
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub enum Relkind {
+pub(crate) enum Relkind {
     #[serde(rename = "r")]
     OrdinaryTable,
     #[serde(rename = "i")]
@@ -91,26 +91,26 @@ struct UnsupportedRelkind(Vec<u8>);
 
 #[derive(Query)]
 #[query(sql="constraints", row=Constraint)]
-pub struct Constraints {
-    pub schema: String,
+pub(crate) struct Constraints {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, FromRow)]
-pub struct Constraint {
-    pub table: String,
-    pub name: String,
-    pub r#type: ConstraintType,
-    pub def: String,
+pub(crate) struct Constraint {
+    pub(crate) table: String,
+    pub(crate) name: String,
+    pub(crate) r#type: ConstraintType,
+    pub(crate) def: String,
 }
 
 #[derive(Query)]
 #[query(sql = "routines", row = RoutineRow)]
-pub struct Routines {
-    pub schema: String,
+pub(crate) struct Routines {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum RoutineKind {
+pub(crate) enum RoutineKind {
     Function,
     Procedure,
     Aggregate,
@@ -140,109 +140,109 @@ impl FromSql<'_> for RoutineKind {
 struct UnsupportedRoutineKind(Vec<u8>);
 
 #[derive(Debug, FromRow)]
-pub struct RoutineRow {
-    pub schema: String,
-    pub name: String,
-    pub kind: RoutineKind,
-    pub identity_arguments: String,
-    pub definition: String,
-    pub dependencies: Json<Vec<RoutineDependencyRow>>,
+pub(crate) struct RoutineRow {
+    pub(crate) schema: String,
+    pub(crate) name: String,
+    pub(crate) kind: RoutineKind,
+    pub(crate) identity_arguments: String,
+    pub(crate) definition: String,
+    pub(crate) dependencies: Json<Vec<RoutineDependencyRow>>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Deserialize, Serialize)]
-pub struct RoutineDependencyRow {
-    pub schema: String,
-    pub name: String,
-    pub identity_arguments: String,
+pub(crate) struct RoutineDependencyRow {
+    pub(crate) schema: String,
+    pub(crate) name: String,
+    pub(crate) identity_arguments: String,
 }
 
 #[derive(Query)]
 #[query(sql = "enums", row = EnumRow)]
-pub struct Enums {
-    pub schema: String,
+pub(crate) struct Enums {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, FromRow)]
-pub struct EnumRow {
-    pub schema: String,
-    pub name: String,
-    pub labels: Vec<String>,
+pub(crate) struct EnumRow {
+    pub(crate) schema: String,
+    pub(crate) name: String,
+    pub(crate) labels: Vec<String>,
 }
 
 #[derive(Query)]
 #[query(sql = "domains", row = DomainRow)]
-pub struct Domains {
-    pub schema: String,
+pub(crate) struct Domains {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, FromRow)]
-pub struct DomainRow {
-    pub schema: String,
-    pub name: String,
-    pub base_type: String,
-    pub default: Option<String>,
-    pub notnull: bool,
-    pub constraint_names: Vec<String>,
-    pub constraint_definitions: Vec<String>,
+pub(crate) struct DomainRow {
+    pub(crate) schema: String,
+    pub(crate) name: String,
+    pub(crate) base_type: String,
+    pub(crate) default: Option<String>,
+    pub(crate) notnull: bool,
+    pub(crate) constraint_names: Vec<String>,
+    pub(crate) constraint_definitions: Vec<String>,
 }
 
 #[derive(Query)]
 #[query(sql = "sequences", row = SequenceRow)]
-pub struct Sequences {
-    pub schema: String,
+pub(crate) struct Sequences {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, FromRow)]
-pub struct SequenceRow {
-    pub schema: String,
-    pub name: String,
-    pub data_type: String,
-    pub start_value: i64,
-    pub min_value: i64,
-    pub max_value: i64,
-    pub increment_by: i64,
-    pub cycle: bool,
-    pub cache_size: i64,
+pub(crate) struct SequenceRow {
+    pub(crate) schema: String,
+    pub(crate) name: String,
+    pub(crate) data_type: String,
+    pub(crate) start_value: i64,
+    pub(crate) min_value: i64,
+    pub(crate) max_value: i64,
+    pub(crate) increment_by: i64,
+    pub(crate) cycle: bool,
+    pub(crate) cache_size: i64,
 }
 
 #[derive(Query)]
 #[query(sql = "extensions", row = ExtensionRow)]
-pub struct Extensions {
-    pub schema: String,
+pub(crate) struct Extensions {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, FromRow)]
-pub struct ExtensionRow {
-    pub schema: String,
-    pub name: String,
-    pub version: String,
+pub(crate) struct ExtensionRow {
+    pub(crate) schema: String,
+    pub(crate) name: String,
+    pub(crate) version: String,
 }
 
 #[derive(Query)]
 #[query(sql = "indexes", row = IndexRow)]
-pub struct Indexes {
-    pub schema: String,
+pub(crate) struct Indexes {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, FromRow)]
-pub struct IndexRow {
-    pub schema: String,
-    pub table_name: String,
-    pub name: String,
-    pub definition: String,
+pub(crate) struct IndexRow {
+    pub(crate) schema: String,
+    pub(crate) table_name: String,
+    pub(crate) name: String,
+    pub(crate) definition: String,
 }
 
 #[derive(Query)]
 #[query(sql = "triggers", row = TriggerRow)]
-pub struct Triggers {
-    pub schema: String,
+pub(crate) struct Triggers {
+    pub(crate) schema: String,
 }
 
 #[derive(Debug, FromRow)]
-pub struct TriggerRow {
-    pub schema: String,
-    pub table_name: String,
-    pub name: String,
-    pub definition: String,
-    pub enabled: String,
+pub(crate) struct TriggerRow {
+    pub(crate) schema: String,
+    pub(crate) table_name: String,
+    pub(crate) name: String,
+    pub(crate) definition: String,
+    pub(crate) enabled: String,
 }

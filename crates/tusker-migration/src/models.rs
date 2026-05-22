@@ -3,21 +3,21 @@ use std::collections::BTreeMap;
 use crate::db::DbMigration;
 use crate::file::MigrationFile;
 
-pub enum MigrationStatus<'a> {
+pub(crate) enum MigrationStatus<'a> {
     Ok(&'a MigrationFile, &'a DbMigration),
     Mismatch(&'a MigrationFile, &'a DbMigration),
     NotApplied(&'a MigrationFile),
     FileMissing(&'a DbMigration),
 }
 
-pub struct Migration {
-    pub number: i32,
-    pub file: Option<MigrationFile>,
-    pub db: Option<DbMigration>,
+pub(crate) struct Migration {
+    pub(crate) number: i32,
+    pub(crate) file: Option<MigrationFile>,
+    pub(crate) db: Option<DbMigration>,
 }
 
 impl Migration {
-    pub fn get_status(&self) -> MigrationStatus<'_> {
+    pub(crate) fn get_status(&self) -> MigrationStatus<'_> {
         match (&self.file, &self.db) {
             (Some(file), Some(db)) => {
                 if file.name == db.name && file.hash == db.hash {
@@ -35,7 +35,7 @@ impl Migration {
     }
 }
 
-pub fn combine_migrations(
+pub(crate) fn combine_migrations(
     migration_files: &[MigrationFile],
     db_migrations: &[DbMigration],
 ) -> Vec<Migration> {

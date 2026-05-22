@@ -24,9 +24,9 @@
 use anyhow::Result;
 use config::Config;
 
-pub mod cli;
-pub mod config;
-pub mod db;
+mod cli;
+mod config;
+mod db;
 
 #[tokio::main]
 async fn main() -> Result<()> {

@@ -9,12 +9,12 @@ use tusker_query_models::Column;
 use crate::config::Config;
 
 #[derive(Debug, Parser)]
-pub struct QueryCommand {
+pub(crate) struct QueryCommand {
     #[command(subcommand)]
     command: QuerySubcommand,
 }
 #[derive(Debug, Subcommand)]
-pub enum QuerySubcommand {
+enum QuerySubcommand {
     /// Inspect one query file and print inferred type metadata as JSON
     Inspect(QueryInspectArgs),
     /// Sync JSON sidecar files for a query glob or the configured query glob
@@ -22,18 +22,18 @@ pub enum QuerySubcommand {
 }
 
 #[derive(Debug, Parser)]
-pub struct QueryInspectArgs {
+struct QueryInspectArgs {
     /// SQL file to inspect
     filename: OsString,
 }
 
 #[derive(Debug, Parser)]
-pub struct QuerySyncArgs {
+struct QuerySyncArgs {
     /// Glob pattern of query files to sync. Defaults to queries.filename from config.
     path: Option<String>,
 }
 
-pub async fn cmd(cfg: &Config, args: &QueryCommand) -> Result<()> {
+pub(crate) async fn cmd(cfg: &Config, args: &QueryCommand) -> Result<()> {
     match &args.command {
         QuerySubcommand::Inspect(args) => cmd_inspect(cfg, args).await?,
         QuerySubcommand::Sync(args) => cmd_sync(cfg, args).await?,
@@ -41,14 +41,14 @@ pub async fn cmd(cfg: &Config, args: &QueryCommand) -> Result<()> {
     Ok(())
 }
 
-pub async fn cmd_inspect(cfg: &Config, args: &QueryInspectArgs) -> Result<()> {
+async fn cmd_inspect(cfg: &Config, args: &QueryInspectArgs) -> Result<()> {
     let client = cfg.database.connect().await?;
     let query = inspect_query_file(&client, Path::new(&args.filename)).await?;
     println!("{}", serde_json::to_string_pretty(&query)?);
     Ok(())
 }
 
-pub async fn cmd_sync(cfg: &Config, args: &QuerySyncArgs) -> Result<()> {
+async fn cmd_sync(cfg: &Config, args: &QuerySyncArgs) -> Result<()> {
     let client = cfg.database.connect().await?;
     let pattern = args.path.as_deref().unwrap_or(&cfg.queries.filename);
     let query_files = glob::glob(pattern)

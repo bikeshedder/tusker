@@ -39,7 +39,7 @@ use crate::models::constraint::ConstraintType;
 pub mod diff;
 /// PostgreSQL schema model types used for inspection and comparison.
 pub mod models;
-pub mod queries;
+pub(crate) mod queries;
 pub(crate) mod sql;
 
 #[derive(Debug, Eq, PartialEq)]
