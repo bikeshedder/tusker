@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(
     nonstandard_style,
     rust_2018_idioms,
@@ -34,22 +35,28 @@ use tokio_postgres::Client;
 
 use crate::models::constraint::ConstraintType;
 
+/// Diff primitives and SQL emission helpers used by the schema engine.
 pub mod diff;
+/// PostgreSQL schema model types used for inspection and comparison.
 pub mod models;
 pub mod queries;
 pub(crate) mod sql;
 
 #[derive(Debug, Eq, PartialEq)]
+/// In-memory representation of inspected PostgreSQL schemas.
 pub struct Inspection {
+    /// Schemas keyed by schema name.
     pub schemas: HashMap<String, Schema>,
 }
 
 impl Inspection {
+    /// Creates an empty inspection result.
     pub fn empty() -> Self {
         Self {
             schemas: Default::default(),
         }
     }
+    /// Computes the schema-level diff against another inspection result.
     pub fn diff<'a>(&'a self, other: &'a Self) -> Diff<'a, Schema> {
         diff(
             self.schemas.values().sorted_by(|a, b| a.name.cmp(&b.name)),
@@ -59,6 +66,7 @@ impl Inspection {
     }
 }
 
+/// Inspects the connected PostgreSQL database and returns its schema state.
 pub async fn inspect(client: &Client) -> Result<Inspection> {
     let mut schemas: HashMap<String, Schema> = HashMap::new();
     let rows = tusker_query::query(client, queries::Schemas {}).await?;

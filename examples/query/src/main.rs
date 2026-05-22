@@ -1,3 +1,10 @@
+//! Example application that executes a checked Tusker query through a
+//! `deadpool-postgres` pool.
+//!
+//! It shows how to load connection settings from the environment, create a
+//! connection pool, and run a generated Tusker query type.
+
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(
     nonstandard_style,
     rust_2018_idioms,

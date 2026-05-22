@@ -6,15 +6,21 @@ use crate::{
 };
 
 #[derive(Debug, Eq, PartialEq)]
+/// A PostgreSQL view or materialized view definition.
 pub struct View {
+    /// Schema that owns the view.
     pub schema: String,
+    /// View name.
     pub name: String,
     pub kind: Relkind,
+    /// Whether this definition describes a materialized view.
     pub materialized: bool,
+    /// SQL body used to define the view.
     pub viewdef: String,
 }
 
 impl View {
+    /// Renders a `CREATE OR REPLACE VIEW` statement for the view.
     pub fn create(&self) -> String {
         format!(
             "CREATE OR REPLACE {}VIEW {}.{} AS\n{};\n",
@@ -48,6 +54,7 @@ impl TryFrom<Class> for View {
     }
 }
 
+/// Error returned when a non-view relation is converted into a [`View`].
 #[derive(Debug, Error)]
 #[error("Unsupported table for view: {0}")]
 pub struct InvalidRelkind(Relkind);

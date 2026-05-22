@@ -10,27 +10,41 @@ use super::{
 };
 
 #[derive(Debug, Default, Eq, PartialEq)]
+/// All diffable objects within a single PostgreSQL schema.
 pub struct Schema {
+    /// Schema name.
     pub name: String,
+    /// Enum types keyed by name.
     pub enums: HashMap<String, Enum>,
+    /// Domains keyed by name.
     pub domains: HashMap<String, Domain>,
+    /// Sequences keyed by name.
     pub sequences: HashMap<String, Sequence>,
+    /// Extensions keyed by name.
     pub extensions: HashMap<String, Extension>,
+    /// Standalone indexes keyed by name.
     pub indexes: HashMap<String, Index>,
+    /// Tables keyed by name.
     pub tables: HashMap<String, Table>,
+    /// Views and materialized views keyed by name.
     pub views: HashMap<String, View>,
+    /// Routines keyed by `(name, identity_arguments)`.
     pub routines: HashMap<(String, String), Routine>,
+    /// Triggers keyed by `(table_name, trigger_name)`.
     pub triggers: HashMap<(String, String), Trigger>,
+    /// Constraints keyed by `(table_name, constraint_name)`.
     pub constraints: HashMap<(String, String), Constraint>,
 }
 
 impl Schema {
+    /// Creates an empty schema model with the given name.
     pub fn new(name: &str) -> Self {
         Self {
             name: name.to_owned(),
             ..Default::default()
         }
     }
+    /// Diffs the schema tables against another schema.
     pub fn diff_tables<'a>(&'a self, other: &'a Self) -> Diff<'a, Table> {
         diff(
             self.tables.values().sorted_by(|a, b| a.name.cmp(&b.name)),
@@ -38,6 +52,7 @@ impl Schema {
             |table| &table.name,
         )
     }
+    /// Diffs the schema enums against another schema.
     pub fn diff_enums<'a>(&'a self, other: &'a Self) -> Diff<'a, Enum> {
         diff(
             self.enums.values().sorted_by(|a, b| a.name.cmp(&b.name)),
@@ -45,6 +60,7 @@ impl Schema {
             |e| &e.name,
         )
     }
+    /// Diffs the schema domains against another schema.
     pub fn diff_domains<'a>(&'a self, other: &'a Self) -> Diff<'a, Domain> {
         diff(
             self.domains.values().sorted_by(|a, b| a.name.cmp(&b.name)),
@@ -52,6 +68,7 @@ impl Schema {
             |d| &d.name,
         )
     }
+    /// Diffs the schema sequences against another schema.
     pub fn diff_sequences<'a>(&'a self, other: &'a Self) -> Diff<'a, Sequence> {
         diff(
             self.sequences
@@ -64,6 +81,7 @@ impl Schema {
             |s| &s.name,
         )
     }
+    /// Diffs the schema extensions against another schema.
     pub fn diff_extensions<'a>(&'a self, other: &'a Self) -> Diff<'a, Extension> {
         diff(
             self.extensions
@@ -76,6 +94,7 @@ impl Schema {
             |e| &e.name,
         )
     }
+    /// Diffs the schema indexes against another schema.
     pub fn diff_indexes<'a>(&'a self, other: &'a Self) -> Diff<'a, Index> {
         diff(
             self.indexes.values().sorted_by(|a, b| a.name.cmp(&b.name)),
@@ -83,6 +102,7 @@ impl Schema {
             |index| &index.name,
         )
     }
+    /// Diffs the schema constraints against another schema.
     pub fn diff_constraints<'a>(&'a self, other: &'a Self) -> Diff<'a, Constraint> {
         diff(
             self.constraints
@@ -95,6 +115,7 @@ impl Schema {
             |c| (&c.table, &c.name),
         )
     }
+    /// Diffs the schema routines against another schema.
     pub fn diff_routines<'a>(&'a self, other: &'a Self) -> Diff<'a, Routine> {
         diff(
             self.routines.values().sorted_by(|a, b| {
@@ -106,6 +127,7 @@ impl Schema {
             |f| (&f.name, &f.identity_arguments),
         )
     }
+    /// Diffs the schema triggers against another schema.
     pub fn diff_triggers<'a>(&'a self, other: &'a Self) -> Diff<'a, Trigger> {
         diff(
             self.triggers
@@ -145,6 +167,7 @@ impl DiffSql for Diff<'_, Schema> {
     }
 }
 
+/// Joins ordered SQL fragments into a single migration script.
 pub fn join_sql(v: Vec<(ChangeType, String)>) -> String {
     v.into_iter()
         .sorted_by(|a, b| a.0.cmp(&b.0))

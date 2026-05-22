@@ -5,9 +5,13 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+/// A PostgreSQL extension definition.
 pub struct Extension {
+    /// Schema where the extension is installed.
     pub schema: String,
+    /// Extension name.
     pub name: String,
+    /// Installed extension version.
     pub version: String,
 }
 

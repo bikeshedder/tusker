@@ -3,44 +3,48 @@ use std::{collections::HashMap, net::IpAddr, time::SystemTime};
 /// This is merely a marker interface.
 pub trait FromSqlTyped<'a, T> {}
 
+/// Marker trait for Rust types accepted as bind parameters for a PostgreSQL type.
 pub trait QueryParamTyped<T> {}
+/// Marker trait for Rust types accepted as non-null result values for a PostgreSQL type.
 pub trait QueryRowTyped<T> {}
+/// Marker trait for Rust types accepted as nullable result values for a PostgreSQL type.
 pub trait QueryNullableRowTyped<T> {}
+/// Marker trait for Rust types accepted when query nullability is best-effort.
 pub trait QueryMaybeNullableRowTyped<T> {}
 
-/// BOOL
+/// PostgreSQL `bool`.
 pub struct PgBool;
-/// CHAR
+/// PostgreSQL `char`.
 pub struct PgI8;
-/// SMALLINT, SMALLSERIAL
+/// PostgreSQL `smallint` and `smallserial`.
 pub struct PgI16;
-/// INT, SERIAL
+/// PostgreSQL `int` and `serial`.
 pub struct PgI32;
-/// BIGINT, BIGSERIAL, OID
+/// PostgreSQL `bigint`, `bigserial`, and `oid`.
 pub struct PgI64;
-/// REAL
+/// PostgreSQL `real`.
 pub struct PgF32;
-/// DOUBLE PRECISION
+/// PostgreSQL `double precision`.
 pub struct PgF64;
-/// VARCHAR, CHAR(n), TEXT, CITEXT, NAME, UNKNOWN, LTREE, LQUERY, LTXTQUERY
+/// PostgreSQL text-like string types.
 pub struct PgString;
-/// BYTEA
+/// PostgreSQL `bytea`.
 pub struct PgBytea;
-/// HSTORE
+/// PostgreSQL `hstore`.
 pub struct PgHstore;
-/// TIMESTAMP
+/// PostgreSQL `timestamp`.
 pub struct PgTimestamp;
-/// TIMESTAMP WITH TIME ZONE
+/// PostgreSQL `timestamp with time zone`.
 pub struct PgTimestampTz;
-/// INET
+/// PostgreSQL `inet`.
 pub struct PgInet;
-/// DATE
+/// PostgreSQL `date`.
 pub struct PgDate;
-/// TIME
+/// PostgreSQL `time`.
 pub struct PgTime;
-/// UUID
+/// PostgreSQL `uuid`.
 pub struct PgUuid;
-/// JSON, JSONB
+/// PostgreSQL `json` and `jsonb`.
 pub struct PgJson;
 
 macro_rules! impl_query_types {

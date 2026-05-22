@@ -10,10 +10,14 @@ use crate::{
 use super::column::Column;
 
 #[derive(Debug, Eq, PartialEq)]
+/// A PostgreSQL table definition.
 pub struct Table {
+    /// Schema that owns the table.
     pub schema: String,
+    /// Table name.
     pub name: String,
     pub kind: Relkind,
+    /// Columns in declaration order.
     pub columns: Vec<Column>,
 }
 
@@ -29,11 +33,13 @@ impl TryFrom<Class> for Table {
     }
 }
 
+/// Error returned when a non-table relation is converted into a [`Table`].
 #[derive(Debug, Error)]
 #[error("Unsupported table for table: {0}")]
 pub struct InvalidRelkind(Relkind);
 
 impl Table {
+    /// Renders a `CREATE TABLE` statement for the table.
     pub fn create(&self) -> String {
         let cols = self.columns.iter().map(|col| col.sql()).join(",\n    ");
         format!(
@@ -43,6 +49,7 @@ impl Table {
             cols
         )
     }
+    /// Renders a `DROP TABLE` statement for the table.
     pub fn drop(&self) -> String {
         format!(
             "DROP TABLE {}.{};\n",
@@ -50,6 +57,7 @@ impl Table {
             quote_ident(&self.name),
         )
     }
+    /// Wraps column-level changes into a single table alteration script.
     pub fn alter_sql(&self, col_sql: Vec<(ChangeType, String)>) -> String {
         let mut output = Vec::new();
         let (errors, alter_clauses): (Vec<_>, Vec<_>) = col_sql
@@ -84,6 +92,7 @@ $$;\n",
 
         output.join("\n")
     }
+    /// Diffs the table columns against another table definition.
     pub fn diff_columns<'a>(&'a self, other: &'a Self) -> Diff<'a, Column> {
         diff(self.columns.iter(), other.columns.iter(), |c| &c.name)
     }

@@ -5,18 +5,28 @@ use crate::{
 };
 
 #[derive(Debug, Eq, PartialEq)]
+/// A PostgreSQL domain definition.
 pub struct Domain {
+    /// Schema that owns the domain.
     pub schema: String,
+    /// Domain name.
     pub name: String,
+    /// Underlying PostgreSQL base type.
     pub base_type: String,
+    /// Default expression applied by the domain.
     pub default: Option<String>,
+    /// Whether the domain enforces `NOT NULL`.
     pub not_null: bool,
+    /// Constraints attached to the domain.
     pub constraints: Vec<DomainConstraint>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
+/// A named constraint attached to a PostgreSQL domain.
 pub struct DomainConstraint {
+    /// Constraint name.
     pub name: String,
+    /// Raw PostgreSQL constraint definition.
     pub definition: String,
 }
 

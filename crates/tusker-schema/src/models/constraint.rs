@@ -9,11 +9,17 @@ use crate::{
 };
 
 #[derive(Debug, Eq, PartialEq)]
+/// A table constraint as returned by PostgreSQL catalog inspection.
 pub struct Constraint {
+    /// Schema that owns the constrained table.
     pub schema: String,
+    /// Table name that owns the constraint.
     pub table: String,
+    /// Constraint name.
     pub name: String,
+    /// Constraint classification used for ordering.
     pub r#type: ConstraintType,
+    /// Raw PostgreSQL constraint definition.
     pub definition: String,
 }
 
@@ -38,15 +44,23 @@ impl Constraint {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+/// Constraint kinds supported by the diff engine.
 pub enum ConstraintType {
+    /// `CHECK (...)`
     Check,
+    /// Named `NOT NULL` constraint metadata.
     NotNull,
+    /// `PRIMARY KEY`
     PrimaryKey,
+    /// `UNIQUE`
     Unique,
+    /// Trigger-backed constraint metadata.
     Trigger,
+    /// `EXCLUDE`
     Exclusion,
     // Foreign keys need to be created last as they depend on unique
     // constraints or primary keys.
+    /// `FOREIGN KEY`
     ForeignKey,
 }
 

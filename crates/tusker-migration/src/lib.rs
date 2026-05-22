@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(
     nonstandard_style,
     rust_2018_idioms,
@@ -20,8 +21,10 @@
 )]
 #![allow(clippy::uninlined_format_args)]
 
+/// Public CLI types and helpers for embedding the migration runner.
 pub mod cli;
 pub mod db;
+/// Error types returned by migration operations.
 pub mod error;
 pub mod file;
 pub mod models;

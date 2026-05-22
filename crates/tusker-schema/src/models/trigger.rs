@@ -5,11 +5,17 @@ use crate::{
 };
 
 #[derive(Debug, Eq, PartialEq)]
+/// A PostgreSQL trigger definition.
 pub struct Trigger {
+    /// Schema that owns the table the trigger is attached to.
     pub schema: String,
+    /// Table that owns the trigger.
     pub table_name: String,
+    /// Trigger name.
     pub name: String,
+    /// PostgreSQL trigger enable-state code.
     pub enabled: String,
+    /// Raw `CREATE TRIGGER` definition returned by PostgreSQL.
     pub definition: String,
 }
 

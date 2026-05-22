@@ -5,10 +5,15 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+/// A standalone PostgreSQL index definition.
 pub struct Index {
+    /// Schema that owns the index.
     pub schema: String,
+    /// Table referenced by the index.
     pub table_name: String,
+    /// Index name.
     pub name: String,
+    /// Raw PostgreSQL `CREATE INDEX` statement.
     pub definition: String,
 }
 

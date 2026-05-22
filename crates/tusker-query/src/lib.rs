@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(
     nonstandard_style,
     rust_2018_idioms,
@@ -24,6 +25,7 @@ use tokio_postgres::{types::ToSql, GenericClient, Row};
 
 pub use tusker_query_derive::Query;
 
+/// Marker traits and PostgreSQL type markers used by checked query validation.
 pub mod types;
 
 #[doc(hidden)]
@@ -35,13 +37,19 @@ pub mod __private {
     }
 }
 
+/// A typed SQL query that can be executed through `tokio-postgres`.
 pub trait Query: Sized {
+    /// SQL text loaded from the query file.
     const SQL: &'static str;
+    /// Row type returned by the query.
     type Row: FromRow;
+    /// Query bind parameters in positional order.
     fn as_params(&self) -> Box<[&(dyn ToSql + Sync)]>;
 }
 
+/// Converts a `tokio-postgres` row into a strongly typed Rust value.
 pub trait FromRow {
+    /// Builds `Self` from a single database row.
     fn from_row(row: Row) -> Self;
 }
 
@@ -53,6 +61,7 @@ impl FromRow for () {
 
 impl __private::RowFieldCount<0> for () {}
 
+/// Executes a query that must return exactly one row.
 pub async fn query_one<Q: Query>(
     client: &impl GenericClient,
     query: Q,
@@ -63,6 +72,7 @@ pub async fn query_one<Q: Query>(
     ))
 }
 
+/// Executes a query and collects all returned rows.
 pub async fn query<Q: Query>(
     client: &impl GenericClient,
     query: Q,

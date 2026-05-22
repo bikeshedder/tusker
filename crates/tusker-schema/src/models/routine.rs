@@ -24,11 +24,16 @@ impl RoutineKey {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+/// A PostgreSQL function or procedure definition.
 pub struct Routine {
+    /// Schema that owns the routine.
     pub schema: String,
+    /// Routine name.
     pub name: String,
     pub kind: RoutineKind,
+    /// PostgreSQL identity argument string used to disambiguate overloads.
     pub identity_arguments: String,
+    /// Raw `CREATE OR REPLACE` definition returned by PostgreSQL.
     pub definition: String,
     dependencies: Vec<RoutineKey>,
 }

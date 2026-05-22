@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(
     nonstandard_style,
     rust_2018_idioms,
@@ -22,20 +23,28 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Offline metadata for a checked SQL query.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Query {
     #[serde(
         serialize_with = "hex::serde::serialize",
         deserialize_with = "hex::serde::deserialize"
     )]
+    /// SHA-512 digest of the SQL file contents.
     pub checksum: Vec<u8>,
+    /// PostgreSQL parameter type names in bind order.
     pub params: Vec<String>,
+    /// Result columns returned by the query.
     pub columns: Vec<Column>,
 }
 
+/// Offline metadata for a single result column.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Column {
+    /// Column name as reported by PostgreSQL.
     pub name: String,
+    /// PostgreSQL type name for the column.
     pub r#type: String,
+    /// Nullability hint, when PostgreSQL could determine one.
     pub notnull: Option<bool>,
 }

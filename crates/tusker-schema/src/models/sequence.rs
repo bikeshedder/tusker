@@ -5,15 +5,25 @@ use crate::{
 };
 
 #[derive(Debug, Eq, PartialEq)]
+/// A PostgreSQL sequence definition.
 pub struct Sequence {
+    /// Schema that owns the sequence.
     pub schema: String,
+    /// Sequence name.
     pub name: String,
+    /// Sequence storage type.
     pub data_type: String,
+    /// Initial sequence value.
     pub start_value: i64,
+    /// Minimum sequence value.
     pub min_value: i64,
+    /// Maximum sequence value.
     pub max_value: i64,
+    /// Increment step between generated values.
     pub increment_by: i64,
+    /// Whether the sequence cycles after reaching its limit.
     pub cycle: bool,
+    /// Sequence cache size.
     pub cache_size: i64,
 }
 

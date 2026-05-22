@@ -7,9 +7,13 @@ use crate::{
 };
 
 #[derive(Debug, Eq, PartialEq)]
+/// A PostgreSQL enum type definition.
 pub struct Enum {
+    /// Schema that owns the enum.
     pub schema: String,
+    /// Enum type name.
     pub name: String,
+    /// Ordered enum labels.
     pub labels: Vec<String>,
 }
 

@@ -12,6 +12,7 @@ use crate::models::{combine_migrations, Migration, MigrationStatus};
 
 #[derive(Debug, Args)]
 #[clap(about = "Manage database migrations")]
+/// Top-level migration command used by embedding CLIs.
 pub struct Command {
     #[clap(subcommand)]
     subcommand: Subcommands,
@@ -47,6 +48,7 @@ pub enum Subcommands {
 }
 
 #[derive(Debug, Args)]
+/// Arguments for applying migrations.
 pub struct RunArgs {
     #[clap(
         long,
@@ -140,6 +142,7 @@ async fn load_migrations(db: &Database, dir: &Path) -> Result<Vec<Migration>, Er
     Ok(combine_migrations(&migration_files, &db_migrations))
 }
 
+/// Dispatches a migration subcommand using the given PostgreSQL configuration.
 pub async fn cmd(pg_config: &Config, cmd: &Command) -> Result<(), Error> {
     match &cmd.subcommand {
         Subcommands::Status(args) => status(pg_config, args).await?,
@@ -283,6 +286,7 @@ pub async fn check(pg_config: &Config, args: &MigrationArgs) -> Result<(), Error
     Ok(())
 }
 
+/// Applies all outstanding migrations in order.
 pub async fn run(pg_config: &Config, args: &RunArgs) -> Result<(), Error> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     let db = Database::connect(pg_config).await?;

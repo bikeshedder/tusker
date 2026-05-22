@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(
     nonstandard_style,
     rust_2018_idioms,
@@ -39,6 +40,7 @@ struct QueryTraitOpts {
 }
 
 #[proc_macro_derive(Query, attributes(query))]
+/// Derives `tusker_query::Query` for a named struct.
 pub fn derive_query(input: TokenStream) -> TokenStream {
     let ast: DeriveInput = syn::parse(input).unwrap();
     let opts = match QueryTraitOpts::from_derive_input(&ast) {
@@ -323,6 +325,7 @@ struct FromRowTraitOpts {
 }
 
 #[proc_macro_derive(FromRow)]
+/// Derives `tusker_query::FromRow` for a named struct.
 pub fn derive_from_row(input: TokenStream) -> TokenStream {
     let ast: DeriveInput = syn::parse(input).unwrap();
     let opts = match FromRowTraitOpts::from_derive_input(&ast) {
