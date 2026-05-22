@@ -143,7 +143,9 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         for cls in rows {
             match cls.relkind {
                 Relkind::OrdinaryTable => {
-                    let _ = schema.tables.insert(cls.name.clone(), Table::try_from(cls)?);
+                    let _ = schema
+                        .tables
+                        .insert(cls.name.clone(), Table::try_from(cls)?);
                 }
                 Relkind::Index => {}
                 Relkind::Sequence => {}

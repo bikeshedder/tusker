@@ -63,8 +63,11 @@ impl Database {
             })
             .collect())
     }
-    pub(crate) async fn update_migration(&self, migration_file: &MigrationFile) -> Result<(), PgError> {
-        query(
+    pub(crate) async fn update_migration(
+        &self,
+        migration_file: &MigrationFile,
+    ) -> Result<(), PgError> {
+        let _ = query(
             &self.client,
             queries::MigrationUpdate {
                 number: migration_file.number,
@@ -93,7 +96,10 @@ impl Database {
         .await
         .map(|_| ())
     }
-    pub(crate) async fn fake_migration(&self, migration_file: &MigrationFile) -> Result<(), PgError> {
+    pub(crate) async fn fake_migration(
+        &self,
+        migration_file: &MigrationFile,
+    ) -> Result<(), PgError> {
         query(
             &self.client,
             queries::MigrationFake {
@@ -106,7 +112,7 @@ impl Database {
         .map(|_| ())
     }
     pub(crate) async fn remove_migration(&self, number: i32) -> Result<(), PgError> {
-        query(&self.client, queries::MigrationDelete { number }).await?;
+        let _ = query(&self.client, queries::MigrationDelete { number }).await?;
         Ok(())
     }
 }
