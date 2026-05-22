@@ -29,6 +29,8 @@ struct Post {
     pub author: String,
     pub text: String,
     pub created: time::OffsetDateTime,
+    #[allow(dead_code)]
+    pub deleted: Option<time::OffsetDateTime>,
 }
 
 #[tokio::main]

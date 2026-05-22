@@ -1,0 +1,8 @@
+[database]
+host = "postgres"
+user = "tusker"
+password = "tusker123"
+dbname = "tusker"
+
+[diff]
+safe = false
