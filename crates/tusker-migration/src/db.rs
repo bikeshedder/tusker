@@ -22,7 +22,7 @@ impl Database {
             .connect(tokio_postgres::NoTls)
             .await
             .map_err(|e| Error::Pg("Unable to connect to database".into(), e))?;
-        tokio::spawn(connection);
+        drop(tokio::spawn(connection));
         Ok(Database { client })
     }
     pub(crate) async fn migration_table_exists(&self) -> Result<bool, PgError> {

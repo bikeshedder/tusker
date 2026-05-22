@@ -82,7 +82,7 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         .await?;
         for row in rows {
             let e = Enum::from(row);
-            schema.enums.insert(e.name.clone(), e);
+            let _ = schema.enums.insert(e.name.clone(), e);
         }
         // Domains
         let rows = tusker_query::query(
@@ -94,7 +94,7 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         .await?;
         for row in rows {
             let domain = Domain::from(row);
-            schema.domains.insert(domain.name.clone(), domain);
+            let _ = schema.domains.insert(domain.name.clone(), domain);
         }
         // Sequences
         let rows = tusker_query::query(
@@ -106,7 +106,7 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         .await?;
         for row in rows {
             let sequence = Sequence::from(row);
-            schema.sequences.insert(sequence.name.clone(), sequence);
+            let _ = schema.sequences.insert(sequence.name.clone(), sequence);
         }
         // Extensions
         let rows = tusker_query::query(
@@ -118,7 +118,7 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         .await?;
         for row in rows {
             let extension = Extension::from(row);
-            schema.extensions.insert(extension.name.clone(), extension);
+            let _ = schema.extensions.insert(extension.name.clone(), extension);
         }
         // Indexes
         let rows = tusker_query::query(
@@ -130,7 +130,7 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         .await?;
         for row in rows {
             let index = models::index::Index::from(row);
-            schema.indexes.insert(index.name.clone(), index);
+            let _ = schema.indexes.insert(index.name.clone(), index);
         }
         // Tables
         let rows = tusker_query::query(
@@ -143,18 +143,16 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         for cls in rows {
             match cls.relkind {
                 Relkind::OrdinaryTable => {
-                    schema
-                        .tables
-                        .insert(cls.name.clone(), Table::try_from(cls)?);
+                    let _ = schema.tables.insert(cls.name.clone(), Table::try_from(cls)?);
                 }
                 Relkind::Index => {}
                 Relkind::Sequence => {}
                 Relkind::ToastTable => {}
                 Relkind::View => {
-                    schema.views.insert(cls.name.clone(), View::try_from(cls)?);
+                    let _ = schema.views.insert(cls.name.clone(), View::try_from(cls)?);
                 }
                 Relkind::MaterializedView => {
-                    schema.views.insert(cls.name.clone(), View::try_from(cls)?);
+                    let _ = schema.views.insert(cls.name.clone(), View::try_from(cls)?);
                 }
                 Relkind::CompositeType => {}
                 Relkind::ForeignTable => {}
@@ -185,7 +183,7 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
                 // the query but here in the code.
                 continue;
             }
-            schema.constraints.insert(
+            let _ = schema.constraints.insert(
                 (constraint.table.clone(), constraint.name.clone()),
                 constraint,
             );
@@ -200,7 +198,7 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         .await?;
         for row in rows {
             let routine = Routine::from(row);
-            schema.routines.insert(
+            let _ = schema.routines.insert(
                 (routine.name.clone(), routine.identity_arguments.clone()),
                 routine,
             );
@@ -215,11 +213,11 @@ pub async fn inspect(client: &Client) -> Result<Inspection> {
         .await?;
         for row in rows {
             let trigger = Trigger::from(row);
-            schema
+            let _ = schema
                 .triggers
                 .insert((trigger.table_name.clone(), trigger.name.clone()), trigger);
         }
-        schemas.insert(schema.name.clone(), schema);
+        let _ = schemas.insert(schema.name.clone(), schema);
     }
 
     Ok(Inspection { schemas })

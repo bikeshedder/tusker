@@ -75,17 +75,17 @@ impl DatabaseConfig {
             tokio_postgres::Config::new()
         };
         if let Some(host) = &self.host {
-            cfg.host(host);
+            let _ = cfg.host(host);
         } else {
-            cfg.host_path("/var/run/postgresql");
+            let _ = cfg.host_path("/var/run/postgresql");
         }
         if let Some(port) = self.port {
-            cfg.port(port);
+            let _ = cfg.port(port);
         }
         if let Some(user) = &self.user {
-            cfg.user(user);
+            let _ = cfg.user(user);
         } else {
-            cfg.user(
+            let _ = cfg.user(
                 get_current_username()
                     .with_context(|| {
                         "No database user specified. Fallback to system user name failed."
@@ -95,14 +95,14 @@ impl DatabaseConfig {
             );
         }
         if let Some(password) = &self.password {
-            cfg.password(password);
+            let _ = cfg.password(password);
         }
-        cfg.dbname(&self.dbname);
+        let _ = cfg.dbname(&self.dbname);
         Ok(cfg)
     }
     pub(crate) async fn connect(&self) -> Result<PgClient> {
         let (client, connection) = self.pg_config()?.connect(NoTls).await?;
-        tokio::spawn(connection);
+        drop(tokio::spawn(connection));
         Ok(client)
     }
 }

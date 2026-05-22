@@ -176,7 +176,7 @@ fn topological_order(mut routines: Vec<&Routine>, reverse: bool) -> Vec<&Routine
                     .expect("dependent routine should have indegree");
                 *degree -= 1;
                 if *degree == 0 {
-                    ready.insert(dependent.clone());
+                    let _ = ready.insert(dependent.clone());
                 }
             }
         }

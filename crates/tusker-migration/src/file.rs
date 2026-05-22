@@ -36,7 +36,7 @@ impl MigrationFile {
     }
     pub(crate) fn read(&self) -> io::Result<String> {
         let mut sql = String::new();
-        self.open()?.read_to_string(&mut sql)?;
+        let _ = self.open()?.read_to_string(&mut sql)?;
         Ok(sql)
     }
 }
@@ -87,13 +87,12 @@ pub(crate) fn load_migration_files(path: &Path) -> Result<Vec<MigrationFile>, Er
             continue;
         }
         let migration_file = MigrationFile::from_path(&entry.path())?;
-        if number_set.contains(&migration_file.number) {
+        if !number_set.insert(migration_file.number) {
             return Err(Error::Misc(format!(
                 "Migration folder contains multiple files for number {}",
                 migration_file.number
             )));
         }
-        number_set.insert(migration_file.number);
         migrations.push(migration_file);
     }
     Ok(migrations)

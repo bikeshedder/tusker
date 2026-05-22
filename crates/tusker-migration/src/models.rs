@@ -42,7 +42,7 @@ pub(crate) fn combine_migrations(
 ) -> Vec<Migration> {
     let mut map: BTreeMap<i32, Migration> = BTreeMap::new();
     for migration_file in migration_files {
-        map.insert(
+        let _ = map.insert(
             migration_file.number,
             Migration {
                 number: migration_file.number,
@@ -53,9 +53,9 @@ pub(crate) fn combine_migrations(
     }
     for db_migration in db_migrations {
         if let Some(migration) = map.get_mut(&db_migration.number) {
-            migration.db.replace(db_migration.clone());
+            let _ = migration.db.replace(db_migration.clone());
         } else {
-            map.insert(
+            let _ = map.insert(
                 db_migration.number,
                 Migration {
                     number: db_migration.number,

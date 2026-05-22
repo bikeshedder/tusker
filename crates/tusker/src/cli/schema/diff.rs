@@ -41,10 +41,10 @@ async fn inspect_sql(db: &DiffDatabase, filename: &str) -> Result<Inspection> {
         let filename = filename?;
         let mut file = File::open(filename).await?;
         let mut contents = vec![];
-        file.read_to_end(&mut contents).await?;
+        let _ = file.read_to_end(&mut contents).await?;
         let sql = String::from_utf8(contents)?;
         // FIXME error handling
-        txn.simple_query(&sql).await?;
+        let _ = txn.simple_query(&sql).await?;
     }
     let inspection = tusker_schema::inspect(txn.client()).await?;
     txn.rollback().await?;

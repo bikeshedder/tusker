@@ -36,10 +36,12 @@ impl DiffDatabase {
         })
     }
     pub(crate) async fn create(&self) -> Result<()> {
-        self.client
+        let _ = self
+            .client
             .simple_query(&format!("CREATE DATABASE {}", &self.dbname))
             .await?;
-        self.client
+        let _ = self
+            .client
             .simple_query(&format!(
                 "COMMENT ON DATABASE {} IS '{}'",
                 &self.dbname, TUSKER_COMMENT
@@ -59,7 +61,8 @@ impl DiffDatabase {
         self.drop_dbname(&self.dbname).await
     }
     pub(crate) async fn drop_dbname(&self, dbname: &str) -> Result<()> {
-        self.client
+        let _ = self
+            .client
             .execute(&format!("DROP DATABASE {}", dbname), &[])
             .await?;
         Ok(())

@@ -101,7 +101,7 @@ mod tests {
     fn creates_extensions() {
         let from = Schema::new("public");
         let mut to = Schema::new("public");
-        to.extensions.insert(
+        let _ = to.extensions.insert(
             "hstore".into(),
             Extension {
                 schema: "public".into(),
@@ -123,7 +123,7 @@ mod tests {
     #[test]
     fn alters_extension_schema_and_version() {
         let mut from = Schema::new("public");
-        from.extensions.insert(
+        let _ = from.extensions.insert(
             "postgis".into(),
             Extension {
                 schema: "public".into(),
@@ -132,7 +132,7 @@ mod tests {
             },
         );
         let mut to = Schema::new("extensions");
-        to.extensions.insert(
+        let _ = to.extensions.insert(
             "postgis".into(),
             Extension {
                 schema: "extensions".into(),
@@ -159,7 +159,7 @@ mod tests {
     #[test]
     fn drops_extensions() {
         let mut from = Schema::new("public");
-        from.extensions.insert(
+        let _ = from.extensions.insert(
             "hstore".into(),
             Extension {
                 schema: "public".into(),

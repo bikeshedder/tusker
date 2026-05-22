@@ -93,31 +93,31 @@ impl Colors {
         Self {
             bold: {
                 let mut c = ColorSpec::new();
-                c.set_bold(true);
+                let _ = c.set_bold(true);
                 c
             },
             ok: {
                 let mut c = ColorSpec::new();
-                c.set_fg(Some(Color::Green));
-                c.set_bold(true);
+                let _ = c.set_fg(Some(Color::Green));
+                let _ = c.set_bold(true);
                 c
             },
             error: {
                 let mut c = ColorSpec::new();
-                c.set_fg(Some(Color::Red));
-                c.set_bold(true);
+                let _ = c.set_fg(Some(Color::Red));
+                let _ = c.set_bold(true);
                 c
             },
             new: {
                 let mut c = ColorSpec::new();
-                c.set_fg(Some(Color::Cyan));
-                c.set_bold(true);
+                let _ = c.set_fg(Some(Color::Cyan));
+                let _ = c.set_bold(true);
                 c
             },
             modified: {
                 let mut c = ColorSpec::new();
-                c.set_fg(Some(Color::Yellow));
-                c.set_bold(true);
+                let _ = c.set_fg(Some(Color::Yellow));
+                let _ = c.set_bold(true);
                 c
             },
         }
