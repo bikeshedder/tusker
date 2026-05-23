@@ -5,6 +5,8 @@ edition = "2021"
 description = "Shared models for checked SQL query metadata sidecar files"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/bikeshedder/tusker"
+keywords = ["postgresql", "query", "metadata", "types", "json"]
+categories = ["data-structures", "database"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

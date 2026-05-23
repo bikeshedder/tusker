@@ -5,6 +5,8 @@ edition = "2021"
 description = "PostgreSQL specific schema migration tool"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/bikeshedder/tusker"
+keywords = ["postgresql", "schema", "migration", "diff", "cli"]
+categories = ["command-line-utilities", "database"]
 rust-version = "1.88"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

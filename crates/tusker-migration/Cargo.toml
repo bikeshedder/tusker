@@ -5,6 +5,8 @@ edition = "2021"
 description = "PostgreSQL specific database migration manager"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/bikeshedder/tusker"
+keywords = ["postgresql", "migration", "database", "sql", "runner"]
+categories = ["database"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
