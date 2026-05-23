@@ -4,6 +4,7 @@ version = "0.2.0"
 edition = "2021"
 description = "Lightweight query layer for tokio-postgres with derive-based SQL bindings"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/bikeshedder/tusker"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
