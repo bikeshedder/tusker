@@ -10,7 +10,7 @@ license = "MIT OR Apache-2.0"
 [features]
 with-time-0_3 = ["time_03"]
 with-uuid-1 = ["uuid_1"]
-with-serde_json-1 = ["serde_json_1"]
+with-serde_json-1 = ["serde_json_1", "tokio-postgres/with-serde_json-1"]
 
 [dependencies]
 time_03 = { package = "time", version = "0.3", optional = true }

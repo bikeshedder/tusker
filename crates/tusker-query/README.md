@@ -17,7 +17,7 @@ Feature | Description | Extra dependencies | Default
 --- | --- | --- | ---
 `with-time-0_3` | Enable typed query checks for `time` 0.3 date/time types | `time` | no
 `with-uuid-1` | Enable typed query checks for `uuid` 1 types | `uuid` | no
-`with-serde_json-1` | Enable typed query checks for `serde_json::Value` | `serde_json` | no
+`with-serde_json-1` | Enable typed query checks for `serde_json::Value` and `Json<T>` wrappers | `serde_json` | no
 
 These feature flags only affect the Rust types accepted by the compile-time
 query checker. If a query sidecar references a PostgreSQL type that maps to an
@@ -130,7 +130,7 @@ Examples:
 - `bytea` -> `Vec<u8>`, `&[u8]`
 - `timestamptz` -> `time::OffsetDateTime` with `with-time-0_3`
 - `uuid` -> `uuid::Uuid` with `with-uuid-1`
-- `json` / `jsonb` -> `serde_json::Value` with `with-serde_json-1`
+- `json` / `jsonb` -> `serde_json::Value` or `tusker_query::types::Json<T>` with `with-serde_json-1`
 
 This mapping is intentionally conservative. If a sidecar references a type that
 is not supported yet, the derive fails with a compile error instead of quietly

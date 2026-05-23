@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support `tusker_query::types::Json<T>` for checked `json` and `jsonb` query parameters and row types
+
 ## [0.1.0] - 2026-05-22
 
 ### Added
