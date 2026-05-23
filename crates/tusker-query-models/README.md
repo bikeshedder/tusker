@@ -1,14 +1,17 @@
 # tusker-query-models
 
-`tusker-query-models` contains the shared data structures for Tusker's checked query metadata.
+`tusker-query-models` contains the shared data structures for Tusker's checked
+query metadata.
 
-It defines the serde-serializable models used for `.json` sidecar files next to SQL queries, including:
+It defines the serde-serializable models used for `.json` sidecar metadata
+files next to SQL queries, including:
 
 - query checksums
 - parameter PostgreSQL types
 - result column names, types, and nullability
 
-This crate is primarily used by `tusker-query-derive` and the tooling that reads or writes query metadata.
+This crate is primarily used by `tusker-query-derive` and the tooling that
+reads or writes query metadata and type information.
 
 ## License
 

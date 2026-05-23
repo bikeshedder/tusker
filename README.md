@@ -20,7 +20,7 @@ with derive-based SQL bindings.
 - [`tusker-query-derive`](crates/tusker-query-derive/): proc-macro
   derives for `tusker-query`
 - [`tusker-query-models`](crates/tusker-query-models/): shared models
-  for checked query sidecar metadata
+  for checked query metadata and type information
 
 ## Project Layout
 

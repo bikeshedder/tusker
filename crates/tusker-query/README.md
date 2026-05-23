@@ -2,14 +2,14 @@
 
 `tusker-query` is a small query layer for `tokio-postgres` with derive-based
 query definitions and optional compile-time validation from checked `.json`
-sidecar files.
+sidecar metadata files.
 
 This crate provides:
 
 - `#[derive(Query)]` for binding Rust structs to SQL files in `db/queries/`
 - `#[derive(FromRow)]` for decoding rows into Rust structs
 - `query()` and `query_one()` helpers on top of `tokio-postgres`
-- sidecar-driven query checks similar in spirit to SQLx offline metadata
+- metadata-driven query checks similar in spirit to SQLx offline metadata
 
 ## Features
 
@@ -21,7 +21,7 @@ Feature | Description | Extra dependencies | Default
 `with-serde_json-1` | Enable typed query checks for `serde_json::Value` and `Json<T>` wrappers | `serde_json` | no
 
 These feature flags only affect the Rust types accepted by the compile-time
-query checker. If a query sidecar references a PostgreSQL type that maps to an
+query checker. If query metadata references a PostgreSQL type that maps to an
 optional feature, the corresponding feature must be enabled in the crate that
 uses `tusker-query`.
 
@@ -87,7 +87,7 @@ client path.
 
 ## Checked query metadata
 
-If a matching sidecar file exists next to the SQL file:
+If a matching sidecar metadata file exists next to the SQL file:
 
 ```text
 db/queries/get_post_by_id.json
@@ -105,7 +105,8 @@ then `#[derive(Query)]` uses it at compile time to validate:
 If the sidecar checksum does not match the SQL file, the derive emits a compile
 error asking you to refresh the metadata.
 
-Queries without a sidecar still compile; they just skip this extra validation.
+Queries without sidecar metadata still compile; they just skip this extra
+validation.
 
 ## Generating sidecars
 
@@ -121,7 +122,7 @@ Or for a specific glob:
 tusker query sync 'db/queries/**/*.sql'
 ```
 
-To inspect a single query without writing the sidecar:
+To inspect a single query without writing the sidecar metadata file:
 
 ```shell
 tusker query inspect db/queries/get_post_by_id.sql
@@ -141,16 +142,16 @@ Examples:
 - `uuid` -> `uuid::Uuid` with `with-uuid-1`
 - `json` / `jsonb` -> `serde_json::Value` or `tusker_query::types::Json<T>` with `with-serde_json-1`
 
-This mapping is intentionally conservative. If a sidecar references a type that
-is not supported yet, the derive fails with a compile error instead of quietly
-accepting a potentially wrong mapping.
+This mapping is intentionally conservative. If query metadata references a type
+that is not supported yet, the derive fails with a compile error instead of
+quietly accepting a potentially wrong mapping.
 
 ## Limitations
 
 - SQL files are resolved relative to `db/queries/`
 - bind parameters are matched by Rust field order
 - row decoding is matched by Rust field order
-- compile-time checking only runs when a `.json` sidecar exists
+- compile-time checking only runs when a `.json` sidecar metadata file exists
 - the nullability signal comes from query metadata and is currently best-effort
 
 ## Relationship to `tokio-postgres`
@@ -159,8 +160,8 @@ accepting a potentially wrong mapping.
 top of it:
 
 - `tokio-postgres` still handles connections, prepared statements, and decoding
-- `tusker-query` adds query definitions, row mapping derives, and checked
-  sidecar metadata
+- `tusker-query` adds query definitions, row mapping derives, and checked query
+  metadata
 
 If you already use `tokio-postgres` directly, this crate is meant to give you a
 lighter-weight, file-based alternative to handwritten SQL wrappers.

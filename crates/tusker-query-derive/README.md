@@ -6,7 +6,7 @@ It exports:
 
 - `#[derive(Query)]` for binding a named Rust struct to a SQL file in `db/queries/`
 - `#[derive(FromRow)]` for decoding a `tokio_postgres::Row` into a named Rust struct
-- optional compile-time validation when a matching `.json` sidecar exists next to the SQL file
+- optional compile-time validation when matching `.json` sidecar metadata exists next to the SQL file
 
 This crate is usually consumed through `tusker-query` rather than as a direct dependency.
 
