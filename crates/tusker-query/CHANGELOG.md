@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-23
+
 ### Added
 
 - Support `tusker_query::types::Json<T>` for checked `json` and `jsonb` query parameters and row types
@@ -22,5 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/bikeshedder/tusker/compare/tusker-query-v0.1.0...HEAD
+[unreleased]: https://github.com/bikeshedder/tusker/compare/tusker-query-v0.2.0...HEAD
+[0.2.0]: https://github.com/bikeshedder/tusker/releases/tag/tusker-query-v0.2.0
 [0.1.0]: https://github.com/bikeshedder/tusker/releases/tag/tusker-query-v0.1.0

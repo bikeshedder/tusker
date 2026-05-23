@@ -1552,7 +1552,7 @@ dependencies = [
 
 [[package]]
 name = "tusker"
-version = "0.1.0"
+version = "0.6.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1586,7 +1586,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-migration"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "sha2 0.11.0",
@@ -1599,8 +1599,9 @@ dependencies = [
 
 [[package]]
 name = "tusker-query"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
+ "deadpool-postgres",
  "serde_json",
  "time",
  "tokio-postgres",
@@ -1631,7 +1632,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-schema"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "itertools",

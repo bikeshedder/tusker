@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-05-23
+
+### Fixed
+
+- Improve the README for the Rust CLI release
+
 ## [0.6.0] - 2026-05-22
 
 This is the first release of the Rust implementation of Tusker. It starts at
@@ -17,5 +23,6 @@ implementation on [PyPI](https://pypi.org/project/tusker/).
 
 - Initial release
 
-[unreleased]: https://github.com/bikeshedder/tusker/compare/tusker-v0.6.0...HEAD
+[unreleased]: https://github.com/bikeshedder/tusker/compare/tusker-v0.6.1...HEAD
+[0.6.1]: https://github.com/bikeshedder/tusker/releases/tag/tusker-v0.6.1
 [0.6.0]: https://github.com/bikeshedder/tusker/releases/tag/tusker-v0.6.0
