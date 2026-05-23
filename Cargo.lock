@@ -1599,7 +1599,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-query"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "deadpool-postgres",
  "serde_json",
@@ -1611,7 +1611,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-query-derive"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -1624,7 +1624,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-query-models"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "hex",
  "serde",

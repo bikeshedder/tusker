@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Improve the README for the Rust CLI release
 
+### Changed
+
+- Improve crate metadata with repository, keywords, and categories
+
 ## [0.6.0] - 2026-05-22
 
 This is the first release of the Rust implementation of Tusker. It starts at

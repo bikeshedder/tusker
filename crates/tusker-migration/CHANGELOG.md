@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update to `tusker-query` 0.2.0
+- Improve crate metadata with repository, keywords, and categories
 
 ## [0.1.0] - 2026-05-22
 

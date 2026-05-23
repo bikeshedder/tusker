@@ -1,6 +1,6 @@
 [package]
 name = "tusker-query-models"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Shared models for checked SQL query metadata and type information"
 license = "MIT OR Apache-2.0"

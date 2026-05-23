@@ -22,7 +22,7 @@ sha2 = "0.11"
 tokio = { version = "1.34.0", features = ["fs", "macros", "rt-multi-thread"] }
 tokio-postgres = "0.7.12"
 toml = "1"
-tusker-migration = { version = "0.1.1", path = "../tusker-migration" }
+tusker-migration = { version = "0.1.0", path = "../tusker-migration" }
 tusker-query-models = { version = "0.1.0", path = "../tusker-query-models" }
-tusker-schema = { version = "0.1.1", path = "../tusker-schema" }
+tusker-schema = { version = "0.1.0", path = "../tusker-schema" }
 uzers = "0.12.1"

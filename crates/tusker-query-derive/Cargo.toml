@@ -1,6 +1,6 @@
 [package]
 name = "tusker-query-derive"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Derive macros for tusker-query query and row bindings"
 license = "MIT OR Apache-2.0"
