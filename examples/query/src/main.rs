@@ -30,7 +30,7 @@ use std::error::Error;
 
 use deadpool_postgres::Runtime;
 use serde::Deserialize;
-use tokio_postgres::{GenericClient, NoTls};
+use tokio_postgres::NoTls;
 use tusker_query::{query_one, FromRow, Query};
 
 #[derive(Debug, Deserialize)]
@@ -69,7 +69,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let cfg = Config::from_env().unwrap();
     let pool = cfg.pg.create_pool(Some(Runtime::Tokio1), NoTls).unwrap();
     let db = pool.get().await.unwrap();
-    let post = query_one(db.client(), GetPostById { id: 1 }).await.unwrap();
+    // Pass the pooled client wrapper directly so `tusker-query` can use
+    // `prepare_cached()` instead of the raw `tokio-postgres` path.
+    let post = query_one(&db, GetPostById { id: 1 }).await.unwrap();
     println!(
         "[post.{}] {} <{}> {}",
         post.id, post.created, post.author, post.text

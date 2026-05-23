@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support `tusker_query::types::Json<T>` for checked `json` and `jsonb` query parameters and row types
+- Add a `deadpool` feature so `query()` and `query_one()` use `prepare_cached()` with `deadpool-postgres` clients
+
+### Changed
+
+- Make the deadpool client abstraction internal; callers should pass supported client types directly instead of naming a public `QueryClient` bound
 
 ## [0.1.0] - 2026-05-22
 

@@ -15,6 +15,7 @@ This crate provides:
 
 Feature | Description | Extra dependencies | Default
 --- | --- | --- | ---
+`deadpool` | Enable `deadpool-postgres` client support with cached prepared statements in `query()` and `query_one()` | `deadpool-postgres` | no
 `with-time-0_3` | Enable typed query checks for `time` 0.3 date/time types | `time` | no
 `with-uuid-1` | Enable typed query checks for `uuid` 1 types | `uuid` | no
 `with-serde_json-1` | Enable typed query checks for `serde_json::Value` and `Json<T>` wrappers | `serde_json` | no
@@ -43,7 +44,7 @@ struct Post {
 }
 
 async fn load_post(
-    client: &impl tokio_postgres::GenericClient,
+    client: &tokio_postgres::Client,
     id: i32,
 ) -> Result<Post, tokio_postgres::Error> {
     query_one(client, GetPostById { id }).await
@@ -75,6 +76,14 @@ Each struct field is decoded from the row by index in declaration order.
 At runtime, `query()` and `query_one()` prepare the SQL, bind the values from
 the query struct, execute the statement, and map the result rows through the
 generated `FromRow` implementation.
+
+When the `deadpool` feature is enabled and you pass a `deadpool-postgres`
+client or transaction directly, these helpers use `prepare_cached()` instead of
+`prepare()`.
+
+For example, `query_one(&db, ...)` uses the deadpool statement cache, while
+`query_one(db.client(), ...)` bypasses it and uses the raw `tokio-postgres`
+client path.
 
 ## Checked query metadata
 
@@ -155,6 +164,11 @@ top of it:
 
 If you already use `tokio-postgres` directly, this crate is meant to give you a
 lighter-weight, file-based alternative to handwritten SQL wrappers.
+
+If you use `deadpool-postgres`, enable the `deadpool` feature and pass the pool
+client itself to `query()` / `query_one()` to reuse the statement cache. If you
+intentionally extract the raw client with `db.client()`, the helpers fall back
+to the uncached `tokio-postgres` path.
 
 ## License
 

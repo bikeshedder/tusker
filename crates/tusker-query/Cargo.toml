@@ -8,11 +8,13 @@ license = "MIT OR Apache-2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
+deadpool = ["dep:deadpool-postgres"]
 with-time-0_3 = ["time_03"]
 with-uuid-1 = ["uuid_1"]
 with-serde_json-1 = ["serde_json_1", "tokio-postgres/with-serde_json-1"]
 
 [dependencies]
+deadpool-postgres = { version = "0.14.0", optional = true }
 time_03 = { package = "time", version = "0.3", optional = true }
 tokio-postgres = "0.7.12"
 tusker-query-derive = { version = "0.1.0", path = "../tusker-query-derive" }
