@@ -1,0 +1,5 @@
+error: Query sidecar file $WORKSPACE/target/tests/trybuild/tusker-query/db/queries/future.json uses format version 0.1.1, which is newer than this version of tusker-query supports (format version 0.1.0). Upgrade tusker-query, or refresh the sidecar with a matching version of tusker.
+  --> tests/ui/sidecar_newer.rs:10:8
+   |
+10 | struct SelectOne {}
+   |        ^^^^^^^^^

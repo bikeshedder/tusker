@@ -12,6 +12,7 @@ categories = ["data-structures", "database"]
 
 [dependencies]
 hex = { version = "0.4.3", features = ["serde"] }
+semver = { version = "1.0.26", features = ["serde"] }
 serde = { version = "1.0.225", features = ["derive"] }
 
 [dev-dependencies]

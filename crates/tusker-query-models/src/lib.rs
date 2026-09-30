@@ -21,11 +21,23 @@
 )]
 #![allow(clippy::uninlined_format_args)]
 
+pub use semver::Version;
+use semver::{Comparator, Op};
 use serde::{Deserialize, Serialize};
+
+/// Version of the sidecar format written by this crate.
+///
+/// It follows the semantic versioning rules of Cargo: a change of the left-most
+/// non-zero component is breaking (e.g. `0.1.x` to `0.2.0`), anything else only
+/// adds metadata that older readers cannot interpret (e.g. `0.1.0` to `0.1.1`
+/// for a new type kind). See [`Compatibility::of`].
+pub const FORMAT_VERSION: Version = Version::new(0, 1, 0);
 
 /// Offline metadata for a checked SQL query.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Query {
+    /// Sidecar format version, see [`FORMAT_VERSION`].
+    pub version: Version,
     #[serde(
         serialize_with = "hex::serde::serialize",
         deserialize_with = "hex::serde::deserialize"
@@ -36,6 +48,54 @@ pub struct Query {
     pub params: Vec<SqlType>,
     /// Result columns returned by the query.
     pub columns: Vec<Column>,
+}
+
+/// Minimal view of a sidecar file used to check its format version before
+/// parsing the rest of it.
+#[derive(Debug, Deserialize)]
+pub struct QueryVersion {
+    /// Sidecar format version. `None` for sidecars written before the format
+    /// was versioned.
+    pub version: Option<Version>,
+}
+
+/// Compatibility of a sidecar format version with [`FORMAT_VERSION`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Compatibility {
+    /// The sidecar can be read.
+    Compatible,
+    /// The sidecar uses an older, no longer supported format and needs to be
+    /// regenerated.
+    Outdated,
+    /// The sidecar uses a newer format than this crate supports.
+    Newer,
+}
+
+impl Compatibility {
+    /// Checks a sidecar format version. Unversioned sidecars are outdated.
+    ///
+    /// A sidecar is compatible if [`FORMAT_VERSION`] satisfies the Cargo
+    /// requirement `^version`, i.e. the reader is the same or a newer
+    /// compatible version.
+    pub fn of(version: Option<&Version>) -> Self {
+        let Some(version) = version else {
+            return Self::Outdated;
+        };
+        let requirement = Comparator {
+            op: Op::Caret,
+            major: version.major,
+            minor: Some(version.minor),
+            patch: Some(version.patch),
+            pre: version.pre.clone(),
+        };
+        if requirement.matches(&FORMAT_VERSION) {
+            Self::Compatible
+        } else if *version > FORMAT_VERSION {
+            Self::Newer
+        } else {
+            Self::Outdated
+        }
+    }
 }
 
 /// Offline metadata for a single result column.

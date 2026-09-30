@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Improve compile errors of checked queries: they name the parameter or column, its PostgreSQL type, and the supported Rust types including the required feature flag. Enum mismatches name the missing or extra labels.
+- Check the format version of query sidecars: sidecars without a version or with an older major version must be refreshed with `tusker query sync`, and sidecars with a newer version require upgrading tusker-query
 
 ## [0.3.0] - 2026-07-06
 

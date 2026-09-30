@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `SqlType::Enum` for PostgreSQL enum types including their labels
+- Add a semantic `version` field to the sidecar format, along with `FORMAT_VERSION`, `QueryVersion` and `Compatibility` to check it
 
 ## [0.2.0] - 2026-07-06
 

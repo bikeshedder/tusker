@@ -7,7 +7,7 @@ use tokio_postgres::{
     types::{Kind, Type},
     Client,
 };
-use tusker_query_models::{Column, CompositeField, SqlType};
+use tusker_query_models::{Column, CompositeField, SqlType, FORMAT_VERSION};
 
 use crate::config::Config;
 
@@ -101,6 +101,7 @@ async fn inspect_query_sql(client: &Client, sql: &str) -> Result<tusker_query_mo
     }
 
     Ok(tusker_query_models::Query {
+        version: FORMAT_VERSION,
         checksum: Vec::from_iter(digest),
         params: stmt.params().iter().map(inspect_type).collect(),
         columns,

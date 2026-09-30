@@ -1,0 +1,15 @@
+{
+  "version": "0.1.1",
+  "checksum": "bc973e5d64f70155fb01fd40e4e5d489dfcc1a9dc37d0c4d2e85ef684912e7e7818147b55aac3de51230166e6a3951d032cff96af112b2985646d360600137df",
+  "params": [],
+  "columns": [
+    {
+      "name": "one",
+      "type": {
+        "kind": "range",
+        "element": "int4"
+      },
+      "notnull": null
+    }
+  ]
+}

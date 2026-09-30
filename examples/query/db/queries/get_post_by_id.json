@@ -1,4 +1,5 @@
 {
+  "version": "0.1.0",
   "checksum": "8b74810351da493a9591c8cabc5a0550fb196bd3a94b64b563a7ce91fe1e68008e3f484aa1d8736f13b09e103da0dfe6cc26916aba97556232bbf5cde0ec6293",
   "params": [
     "int4"

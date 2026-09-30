@@ -108,6 +108,15 @@ then `#[derive(Query)]` uses it at compile time to validate:
 If the sidecar checksum does not match the SQL file, the derive emits a compile
 error asking you to refresh the metadata.
 
+Each sidecar records the version of its file format. It follows the semantic
+versioning rules of Cargo: `tusker-query` accepts a sidecar if its own format
+version is compatible with the sidecar's, just like Cargo resolves a `^version`
+dependency. For example, a `tusker-query` supporting format `0.1.1` accepts
+sidecars of format `0.1.0` and `0.1.1`, but not `0.2.0`. If a sidecar is older,
+or has no version at all, the derive asks you to refresh it with
+`tusker query sync`. If it is newer, the derive asks you to upgrade
+`tusker-query`.
+
 Queries without sidecar metadata still compile; they just skip this extra
 validation.
 
@@ -173,9 +182,6 @@ enum GroupKind {
     InviteOnly,
 }
 ```
-
-Sidecars generated before enum support recorded enum types by name only.
-Run `tusker query sync` to refresh them.
 
 When a check fails, the compile error names the parameter or column, its
 PostgreSQL type, and the Rust types it maps to, including the feature flag
