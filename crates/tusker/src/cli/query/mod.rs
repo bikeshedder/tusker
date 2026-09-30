@@ -123,6 +123,11 @@ fn inspect_type(ty: &Type) -> SqlType {
                 })
                 .collect(),
         },
+        Kind::Enum(variants) => SqlType::Enum {
+            schema: ty.schema().to_owned(),
+            name: ty.name().to_owned(),
+            variants: variants.clone(),
+        },
         _ => SqlType::scalar(ty.schema(), ty.name()),
     }
 }

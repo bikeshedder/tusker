@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `#[derive(QueryEnum)]` for generating structural metadata used to check PostgreSQL enum parameter and row types
 - Support checked query metadata for PostgreSQL `numeric` types
+- Support checked query metadata for PostgreSQL enum types
 
 ## [0.2.0] - 2026-07-06
 

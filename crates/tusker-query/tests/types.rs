@@ -1,10 +1,10 @@
 use postgres_types::{FromSql, ToSql};
 use tusker_query::{
     types::{
-        PgArray, PgComposite, PgF64, PgField, PgI32, PgString, QueryMaybeNullableRowTyped,
-        QueryNullableRowTyped, QueryParamTyped, QueryRowTyped,
+        PgArray, PgComposite, PgEnum, PgF64, PgField, PgI32, PgString, PgVariant,
+        QueryMaybeNullableRowTyped, QueryNullableRowTyped, QueryParamTyped, QueryRowTyped,
     },
-    QueryComposite,
+    QueryComposite, QueryEnum,
 };
 
 fn assert_array_param<T: QueryParamTyped<PgArray<PgI32>>>() {}
@@ -69,6 +69,56 @@ fn query_composite_derives_structural_type_checks() {
     assert_composite_row::<InventoryItem>();
     assert_maybe_nullable_composite_row::<InventoryItem>();
     assert_maybe_nullable_composite_row::<Option<InventoryItem>>();
+}
+
+#[derive(Debug, FromSql, QueryEnum, ToSql)]
+#[postgres(name = "group_kind", rename_all = "snake_case")]
+enum GroupKind {
+    Public,
+    InviteOnly,
+    #[postgres(name = "secret")]
+    Hidden,
+}
+
+// Labels are sorted, so the marker does not depend on declaration order.
+type GroupKindSql = PgEnum<
+    { stable_name_hash("group_kind") },
+    (
+        PgVariant<{ stable_name_hash("invite_only") }>,
+        PgVariant<{ stable_name_hash("public") }>,
+        PgVariant<{ stable_name_hash("secret") }>,
+    ),
+>;
+
+#[derive(Debug, FromSql, QueryEnum, ToSql)]
+#[postgres(name = "group_kind", allow_mismatch)]
+enum PartialGroupKind {
+    #[postgres(name = "public")]
+    Public,
+}
+
+fn assert_enum_param<T: QueryParamTyped<GroupKindSql>>() {}
+fn assert_enum_row<T: QueryRowTyped<GroupKindSql>>() {}
+fn assert_nullable_enum_row<T: QueryNullableRowTyped<GroupKindSql>>() {}
+fn assert_maybe_nullable_enum_row<T: QueryMaybeNullableRowTyped<GroupKindSql>>() {}
+
+#[test]
+fn query_enum_derives_structural_type_checks() {
+    assert_enum_param::<GroupKind>();
+    assert_enum_param::<Option<GroupKind>>();
+    assert_enum_row::<GroupKind>();
+    assert_nullable_enum_row::<Option<GroupKind>>();
+    assert_maybe_nullable_enum_row::<GroupKind>();
+    assert_maybe_nullable_enum_row::<Option<GroupKind>>();
+    assert_array_of_enum_param::<Vec<GroupKind>>();
+}
+
+fn assert_array_of_enum_param<T: QueryParamTyped<PgArray<GroupKindSql>>>() {}
+
+#[test]
+fn query_enum_allow_mismatch_only_checks_the_type_name() {
+    assert_enum_param::<PartialGroupKind>();
+    assert_enum_row::<PartialGroupKind>();
 }
 
 #[cfg(feature = "with-rust_decimal-1")]

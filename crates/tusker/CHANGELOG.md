@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `tusker query sync` and `tusker query inspect` record PostgreSQL enum types including their labels
+
 ## [0.7.0] - 2026-07-06
 
 ### Added

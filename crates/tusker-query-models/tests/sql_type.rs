@@ -52,6 +52,30 @@ fn structured_composite_type_round_trips() {
 }
 
 #[test]
+fn structured_enum_type_round_trips() {
+    let ty = SqlType::Enum {
+        schema: "public".to_owned(),
+        name: "group_kind".to_owned(),
+        variants: vec!["public".to_owned(), "private".to_owned()],
+    };
+
+    let json = serde_json::to_string(&ty).unwrap();
+    let parsed: SqlType = serde_json::from_str(&json).unwrap();
+
+    assert_eq!(
+        json,
+        r#"{"kind":"enum","schema":"public","name":"group_kind","variants":["public","private"]}"#
+    );
+    match parsed {
+        SqlType::Enum { name, variants, .. } => {
+            assert_eq!(name, "group_kind");
+            assert_eq!(variants, ["public", "private"]);
+        }
+        _ => panic!("enum type should deserialize as enum"),
+    }
+}
+
+#[test]
 fn query_sidecar_keeps_scalar_params_and_columns_compact() {
     let query = Query {
         checksum: vec![0xab],

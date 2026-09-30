@@ -33,6 +33,7 @@ use tusker_query_models::{Column, Query as QueryMetadata, SqlType};
 
 mod case;
 mod composites;
+mod enums;
 mod overrides;
 
 #[derive(FromDeriveInput)]
@@ -307,6 +308,7 @@ fn sql_type_marker(sql_type: &SqlType) -> Result<TokenStream2, String> {
         SqlType::Composite { name, fields, .. } => {
             composites::sql_type_marker(name, fields, sql_type_marker)
         }
+        SqlType::Enum { name, variants, .. } => Ok(enums::sql_type_marker(name, variants)),
         SqlType::Scalar { name, .. } => scalar_sql_type_marker(name),
     }
 }
@@ -332,7 +334,9 @@ fn scalar_sql_type_marker(sql_type: &str) -> Result<TokenStream2, String> {
         "time" => Ok(quote!(::tusker_query::types::PgTime)),
         "uuid" => Ok(quote!(::tusker_query::types::PgUuid)),
         "json" | "jsonb" => Ok(quote!(::tusker_query::types::PgJson)),
-        other => Err(format!("`{other}` is not supported yet")),
+        other => Err(format!(
+            "`{other}` is not supported yet. If it is an enum type, run `tusker query sync` to refresh the sidecar metadata."
+        )),
     }
 }
 
@@ -341,6 +345,16 @@ fn scalar_sql_type_marker(sql_type: &str) -> Result<TokenStream2, String> {
 pub fn derive_query_composite(input: TokenStream) -> TokenStream {
     let ast: DeriveInput = syn::parse(input).unwrap();
     match composites::expand_query_composite(&ast) {
+        Ok(tokens) => tokens.into(),
+        Err(err) => err.to_compile_error().into(),
+    }
+}
+
+#[proc_macro_derive(QueryEnum, attributes(postgres))]
+/// Derives structural `tusker_query` metadata for PostgreSQL enum types.
+pub fn derive_query_enum(input: TokenStream) -> TokenStream {
+    let ast: DeriveInput = syn::parse(input).unwrap();
+    match enums::expand_query_enum(&ast) {
         Ok(tokens) => tokens.into(),
         Err(err) => err.to_compile_error().into(),
     }

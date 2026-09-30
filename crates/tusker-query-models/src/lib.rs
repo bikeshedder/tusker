@@ -74,6 +74,15 @@ pub enum SqlType {
         /// Composite fields in PostgreSQL declaration order.
         fields: Vec<CompositeField>,
     },
+    /// A PostgreSQL enum type.
+    Enum {
+        /// PostgreSQL schema containing the type.
+        schema: String,
+        /// PostgreSQL type name.
+        name: String,
+        /// Enum labels in PostgreSQL declaration order.
+        variants: Vec<String>,
+    },
 }
 
 impl SqlType {
@@ -88,7 +97,9 @@ impl SqlType {
     /// Returns a human-readable PostgreSQL type name.
     pub fn display_name(&self) -> String {
         match self {
-            Self::Scalar { schema, name } | Self::Composite { schema, name, .. } => {
+            Self::Scalar { schema, name }
+            | Self::Composite { schema, name, .. }
+            | Self::Enum { schema, name, .. } => {
                 if schema == "public" || schema == "pg_catalog" || schema.is_empty() {
                     name.clone()
                 } else {
@@ -124,6 +135,11 @@ enum StructuredSqlType {
         name: String,
         fields: Vec<CompositeField>,
     },
+    Enum {
+        schema: String,
+        name: String,
+        variants: Vec<String>,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -155,6 +171,15 @@ impl From<SqlTypeRepr> for SqlType {
                 name,
                 fields,
             },
+            SqlTypeRepr::Structured(StructuredSqlType::Enum {
+                schema,
+                name,
+                variants,
+            }) => Self::Enum {
+                schema,
+                name,
+                variants,
+            },
         }
     }
 }
@@ -172,6 +197,15 @@ impl From<SqlType> for SqlTypeRepr {
                 schema,
                 name,
                 fields,
+            }),
+            SqlType::Enum {
+                schema,
+                name,
+                variants,
+            } => Self::Structured(StructuredSqlType::Enum {
+                schema,
+                name,
+                variants,
             }),
         }
     }

@@ -9,6 +9,7 @@ This crate provides:
 - `#[derive(Query)]` for binding Rust structs to SQL files in `db/queries/`
 - `#[derive(FromRow)]` for decoding rows into Rust structs
 - `#[derive(QueryComposite)]` for checked PostgreSQL composite type metadata
+- `#[derive(QueryEnum)]` for checked PostgreSQL enum type metadata
 - `query()` and `query_one()` helpers on top of `tokio-postgres`
 - metadata-driven query checks similar in spirit to SQLx offline metadata
 
@@ -146,6 +147,7 @@ Examples:
 - `numeric` -> `rust_decimal::Decimal` with `with-rust_decimal-1`
 - arrays -> `Vec<T>`, `&[T]`, `Box<[T]>`, and nullable outer `Option<...>` for bind parameters; `Vec<T>` and nullable `Option<Vec<T>>` for rows
 - composites -> Rust structs that derive `QueryComposite` and implement the matching `tokio-postgres` / `postgres-types` `ToSql` and/or `FromSql` traits
+- enums -> Rust enums that derive `QueryEnum` and implement the matching `tokio-postgres` / `postgres-types` `ToSql` and/or `FromSql` traits
 
 This mapping is intentionally conservative. If query metadata references a type
 that is not supported yet, the derive fails with a compile error instead of
@@ -156,6 +158,24 @@ name, field names, and field types from sidecar metadata against the Rust type
 metadata emitted by `QueryComposite`. Runtime encoding and decoding still belong
 to `tokio-postgres`, so composite structs should also derive or implement the
 appropriate `postgres-types` traits.
+
+Enum checks work the same way. Tusker validates the PostgreSQL enum type name
+and its set of labels against the Rust enum. Like `postgres-types`, label order
+does not matter. `QueryEnum` understands the `#[postgres(name = "...")]`,
+`#[postgres(rename_all = "...")]`, and `#[postgres(allow_mismatch)]` attributes.
+With `allow_mismatch`, only the type name is checked.
+
+```rust,ignore
+#[derive(Debug, FromSql, ToSql, QueryEnum)]
+#[postgres(name = "group_kind", rename_all = "snake_case")]
+enum GroupKind {
+    Public,
+    InviteOnly,
+}
+```
+
+Sidecars generated before enum support recorded enum types by name only.
+Run `tusker query sync` to refresh them.
 
 ## Limitations
 

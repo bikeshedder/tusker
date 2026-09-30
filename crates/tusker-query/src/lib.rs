@@ -27,7 +27,7 @@ use tokio_postgres::{types::ToSql, Error, Row, Statement};
 #[allow(unused_extern_crates)]
 extern crate self as tusker_query;
 
-pub use tusker_query_derive::{Query, QueryComposite};
+pub use tusker_query_derive::{Query, QueryComposite, QueryEnum};
 
 /// Marker traits and PostgreSQL type markers used by checked query validation.
 pub mod types;

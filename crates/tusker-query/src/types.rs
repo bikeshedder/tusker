@@ -27,6 +27,16 @@ pub struct PgComposite<const NAME: u64, Fields>(PhantomData<Fields>);
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub struct PgField<const NAME: u64, T>(PhantomData<T>);
 
+/// Marker for PostgreSQL enum types.
+///
+/// `Variants` is a tuple of [`PgVariant`] markers sorted by label.
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub struct PgEnum<const NAME: u64, Variants>(PhantomData<Variants>);
+
+/// Marker for one PostgreSQL enum label.
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub struct PgVariant<const NAME: u64>;
+
 /// Marker trait implemented by `QueryComposite` for composite bind parameters.
 pub trait QueryCompositeParamTyped<const NAME: u64, Fields> {}
 
@@ -132,6 +142,19 @@ impl<T, const NAME: u64, Fields> QueryNullableRowTyped<PgComposite<NAME, Fields>
 }
 impl<T, const NAME: u64, Fields> QueryMaybeNullableRowTyped<PgComposite<NAME, Fields>> for Option<T> where
     T: QueryRowTyped<PgComposite<NAME, Fields>>
+{
+}
+
+impl<T, const NAME: u64, Variants> QueryParamTyped<PgEnum<NAME, Variants>> for Option<T> where
+    T: QueryParamTyped<PgEnum<NAME, Variants>>
+{
+}
+impl<T, const NAME: u64, Variants> QueryNullableRowTyped<PgEnum<NAME, Variants>> for Option<T> where
+    T: QueryRowTyped<PgEnum<NAME, Variants>>
+{
+}
+impl<T, const NAME: u64, Variants> QueryMaybeNullableRowTyped<PgEnum<NAME, Variants>> for Option<T> where
+    T: QueryRowTyped<PgEnum<NAME, Variants>>
 {
 }
 

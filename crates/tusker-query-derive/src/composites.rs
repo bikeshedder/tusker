@@ -181,7 +181,7 @@ fn composite_impl(
     }
 }
 
-fn tuple_type(items: Vec<TokenStream2>) -> TokenStream2 {
+pub(crate) fn tuple_type(items: Vec<TokenStream2>) -> TokenStream2 {
     match items.as_slice() {
         [] => quote!(()),
         [item] => quote!((#item,)),
@@ -189,8 +189,8 @@ fn tuple_type(items: Vec<TokenStream2>) -> TokenStream2 {
     }
 }
 
-fn stable_name_hash(name: &str) -> u64 {
-    // Composite and field names have to participate in generated type markers,
+pub(crate) fn stable_name_hash(name: &str) -> u64 {
+    // Composite, field, enum, and label names have to participate in generated type markers,
     // but stable Rust const generics cannot use string literals as parameters.
     // A stable integer hash keeps structural name checks in the type system.
     let mut hash = 0xcbf29ce484222325u64;
@@ -201,6 +201,6 @@ fn stable_name_hash(name: &str) -> u64 {
     hash
 }
 
-fn strip_raw_ident(name: &str) -> &str {
+pub(crate) fn strip_raw_ident(name: &str) -> &str {
     name.strip_prefix("r#").unwrap_or(name)
 }
