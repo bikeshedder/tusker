@@ -177,6 +177,17 @@ enum GroupKind {
 Sidecars generated before enum support recorded enum types by name only.
 Run `tusker query sync` to refresh them.
 
+When a check fails, the compile error names the parameter or column, its
+PostgreSQL type, and the Rust types it maps to, including the feature flag
+required for them. Enum mismatches name the missing or extra labels:
+
+```text
+error[E0277]: `Option<f64>` cannot be used for column `budget` (position 1) of PostgreSQL type `numeric`
+  = note: PostgreSQL `numeric` maps to `rust_decimal::Decimal` (requires the `with-rust_decimal-1` feature of tusker-query)
+
+error[E0080]: evaluation panicked: PostgreSQL enum `group_kind` has label 'community' which the Rust enum for parameter 1 does not map
+```
+
 ## Limitations
 
 - SQL files are resolved relative to `db/queries/`

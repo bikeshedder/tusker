@@ -7,12 +7,32 @@ pub use tokio_postgres::types::Json;
 pub trait FromSqlTyped<'a, T> {}
 
 /// Marker trait for Rust types accepted as bind parameters for a PostgreSQL type.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` cannot be used as a query parameter of PostgreSQL type `{T}`",
+    label = "unsupported parameter type",
+    note = "see \"Supported PostgreSQL type mappings\" in the tusker-query README"
+)]
 pub trait QueryParamTyped<T> {}
 /// Marker trait for Rust types accepted as non-null result values for a PostgreSQL type.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` cannot be decoded from a NOT NULL value of PostgreSQL type `{T}`",
+    label = "unsupported row type",
+    note = "see \"Supported PostgreSQL type mappings\" in the tusker-query README"
+)]
 pub trait QueryRowTyped<T> {}
 /// Marker trait for Rust types accepted as nullable result values for a PostgreSQL type.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` cannot be decoded from a nullable value of PostgreSQL type `{T}`",
+    label = "unsupported row type",
+    note = "see \"Supported PostgreSQL type mappings\" in the tusker-query README"
+)]
 pub trait QueryNullableRowTyped<T> {}
 /// Marker trait for Rust types accepted when query nullability is best-effort.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` cannot be decoded from a value of PostgreSQL type `{T}`",
+    label = "unsupported row type",
+    note = "see \"Supported PostgreSQL type mappings\" in the tusker-query README"
+)]
 pub trait QueryMaybeNullableRowTyped<T> {}
 
 /// Marker for PostgreSQL array types.
@@ -36,6 +56,48 @@ pub struct PgEnum<const NAME: u64, Variants>(PhantomData<Variants>);
 /// Marker for one PostgreSQL enum label.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub struct PgVariant<const NAME: u64>;
+
+/// Label metadata implemented by `QueryEnum`.
+///
+/// Checked queries use it to report enum label mismatches by name. It is
+/// forwarded through `Option<T>` and the supported array containers.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` does not map a PostgreSQL enum",
+    label = "expected a Rust enum deriving `QueryEnum`",
+    note = "derive `QueryEnum` for the Rust enum that maps the PostgreSQL enum"
+)]
+pub trait QueryEnumLabels {
+    /// PostgreSQL enum type name mapped by the Rust enum.
+    const NAME: &'static str;
+    /// Stable hash of [`Self::NAME`] as used in [`PgEnum`].
+    const NAME_HASH: u64;
+    /// Label markers as used in [`PgEnum`].
+    type Labels;
+    /// PostgreSQL labels mapped by the Rust enum, in declaration order.
+    const LABELS: &'static [&'static str];
+    /// One error message per entry of [`Self::LABELS`], used when that label
+    /// is missing from the PostgreSQL enum.
+    const EXTRA_LABEL_ERRORS: &'static [&'static str];
+    /// Whether `#[postgres(allow_mismatch)]` disables the label check.
+    const ALLOW_MISMATCH: bool;
+}
+
+macro_rules! forward_enum_labels {
+    ($( $ty:ty ),+ $(,)?) => {
+        $(
+            impl<T: QueryEnumLabels> QueryEnumLabels for $ty {
+                const NAME: &'static str = T::NAME;
+                const NAME_HASH: u64 = T::NAME_HASH;
+                type Labels = T::Labels;
+                const LABELS: &'static [&'static str] = T::LABELS;
+                const EXTRA_LABEL_ERRORS: &'static [&'static str] = T::EXTRA_LABEL_ERRORS;
+                const ALLOW_MISMATCH: bool = T::ALLOW_MISMATCH;
+            }
+        )+
+    };
+}
+
+forward_enum_labels!(Option<T>, Vec<T>, &[T], Box<[T]>);
 
 /// Marker trait implemented by `QueryComposite` for composite bind parameters.
 pub trait QueryCompositeParamTyped<const NAME: u64, Fields> {}

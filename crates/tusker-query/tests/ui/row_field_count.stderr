@@ -1,0 +1,37 @@
+error[E0277]: `Group` has no field at index 1, but the query returns more columns
+  --> tests/ui/row_field_count.rs:17:38
+   |
+17 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^ row type has too few fields
+   |
+help: the trait `RowFieldType<1>` is not implemented for `Group`
+      but trait `RowFieldType<0>` is implemented for it
+  --> tests/ui/row_field_count.rs:11:10
+   |
+11 | #[derive(FromRow)]
+   |          ^^^^^^^
+   = note: this error originates in the derive macro `FromRow` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `Group` does not have the 2 fields required by the 2 columns the query returns
+  --> tests/ui/row_field_count.rs:17:38
+   |
+17 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^ row field count does not match the query
+   |
+help: the trait `RowFieldCount<2>` is not implemented for `Group`
+      but trait `RowFieldCount<1>` is implemented for it
+  --> tests/ui/row_field_count.rs:11:10
+   |
+11 | #[derive(FromRow)]
+   |          ^^^^^^^
+note: required for `Group` to implement `__TuskerRowCount`
+  --> tests/ui/row_field_count.rs:17:38
+   |
+17 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^
+note: required by a bound in `__tusker_check_row_count`
+  --> tests/ui/row_field_count.rs:17:38
+   |
+17 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^ required by this bound in `__tusker_check_row_count`
+   = note: this error originates in the derive macro `FromRow` (in Nightly builds, run with -Z macro-backtrace for more info)

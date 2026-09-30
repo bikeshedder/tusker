@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `#[derive(QueryEnum)]` for structurally checked PostgreSQL enum parameter and row types
 - Support checked `numeric` parameter and row types via `rust_decimal::Decimal` behind the `with-rust_decimal-1` feature
 
+### Changed
+
+- Improve compile errors of checked queries: they name the parameter or column, its PostgreSQL type, and the supported Rust types including the required feature flag. Enum mismatches name the missing or extra labels.
+
 ## [0.3.0] - 2026-07-06
 
 ### Added

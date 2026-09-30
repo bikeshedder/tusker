@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support checked query metadata for PostgreSQL `numeric` types
 - Support checked query metadata for PostgreSQL enum types
 
+### Changed
+
+- Improve compile errors of checked queries: they name the parameter or column, its PostgreSQL type, and the supported Rust types including the required feature flag. Enum mismatches name the missing or extra labels.
+
 ## [0.2.0] - 2026-07-06
 
 ### Added

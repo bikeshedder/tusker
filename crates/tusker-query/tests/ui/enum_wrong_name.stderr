@@ -1,0 +1,11 @@
+error[E0080]: evaluation panicked: the Rust enum for parameter 1 does not map PostgreSQL enum `group_kind`; check its `#[postgres(name = "...")]` attribute
+  --> tests/ui/enum_wrong_name.rs:20:11
+   |
+20 |     kind: GroupKind,
+   |           ^^^^^^^^^ evaluation of `<GroupByKind as tusker_query::Query>::as_params::_` failed here
+
+error[E0080]: evaluation panicked: the Rust enum for column `kind` (position 2) does not map PostgreSQL enum `group_kind`; check its `#[postgres(name = "...")]` attribute
+  --> tests/ui/enum_wrong_name.rs:18:38
+   |
+18 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^ evaluation of `<GroupByKind as tusker_query::Query>::as_params::_` failed here

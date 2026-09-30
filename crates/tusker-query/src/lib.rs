@@ -36,6 +36,48 @@ pub mod types;
 pub mod __private {
     use super::{Error, Row, Statement, ToSql};
 
+    /// Returns whether `labels` contains `label`. Used by checked queries in
+    /// constant evaluation.
+    pub const fn contains_label(labels: &[&str], label: &str) -> bool {
+        let mut idx = 0;
+        while idx < labels.len() {
+            if str_eq(labels[idx], label) {
+                return true;
+            }
+            idx += 1;
+        }
+        false
+    }
+
+    /// Returns the index of the first entry of `labels` that is missing from
+    /// `expected`. Used by checked queries in constant evaluation.
+    pub const fn first_extra_label(labels: &[&str], expected: &[&str]) -> Option<usize> {
+        let mut idx = 0;
+        while idx < labels.len() {
+            if !contains_label(expected, labels[idx]) {
+                return Some(idx);
+            }
+            idx += 1;
+        }
+        None
+    }
+
+    /// Compares two strings. Used by checked queries in constant evaluation.
+    pub const fn str_eq(a: &str, b: &str) -> bool {
+        let (a, b) = (a.as_bytes(), b.as_bytes());
+        if a.len() != b.len() {
+            return false;
+        }
+        let mut idx = 0;
+        while idx < a.len() {
+            if a[idx] != b[idx] {
+                return false;
+            }
+            idx += 1;
+        }
+        true
+    }
+
     pub mod sealed {
         pub trait Sealed {}
 
@@ -160,6 +202,10 @@ pub mod __private {
 
     pub trait RowFieldCount<const N: usize> {}
 
+    #[diagnostic::on_unimplemented(
+        message = "`{Self}` has no field at index {I}, but the query returns more columns",
+        label = "row type has too few fields"
+    )]
     pub trait RowFieldType<const I: usize> {
         type Ty;
     }

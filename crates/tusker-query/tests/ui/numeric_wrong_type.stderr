@@ -1,0 +1,36 @@
+error[E0277]: `Option<f64>` cannot be used for column `budget` (position 1) of PostgreSQL type `numeric`
+ --> tests/ui/numeric_wrong_type.rs:9:37
+  |
+9 | #[query(sql = "group_budget", row = Budget)]
+  |                                     ^^^^^^ incompatible with column `budget`
+  |
+  = note: PostgreSQL `numeric` maps to `rust_decimal::Decimal` (requires the `with-rust_decimal-1` feature of tusker-query)
+help: the trait `QueryMaybeNullableRowTyped<PgNumeric>` is not implemented for `Option<f64>`
+      but trait `QueryMaybeNullableRowTyped<PgF64>` is implemented for it
+ --> src/types.rs
+  |
+  |               impl QueryMaybeNullableRowTyped<$marker> for Option<$row> {}
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+  | / impl_query_types! {
+  | |     PgBool => param: bool, row: bool;
+  | |     PgI8 => param: i8, row: i8;
+  | |     PgI16 => param: i16, row: i16;
+... |
+  | |     PgInet => param: IpAddr, row: IpAddr;
+  | | }
+  | |_- in this macro invocation
+  = help: for that trait implementation, expected `PgF64`, found `PgNumeric`
+note: required for `Option<f64>` to implement `__TuskerColumn1`
+ --> tests/ui/numeric_wrong_type.rs:9:37
+  |
+8 | #[derive(Query)]
+  |          ----- unsatisfied trait bound introduced here
+9 | #[query(sql = "group_budget", row = Budget)]
+  |                                     ^^^^^^
+note: required by a bound in `__tusker_check_column1`
+ --> tests/ui/numeric_wrong_type.rs:9:37
+  |
+9 | #[query(sql = "group_budget", row = Budget)]
+  |                                     ^^^^^^ required by this bound in `__tusker_check_column1`
+  = note: this error originates in the macro `impl_query_types` (in Nightly builds, run with -Z macro-backtrace for more info)

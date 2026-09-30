@@ -1,0 +1,39 @@
+error[E0277]: `String` does not map a PostgreSQL enum
+  --> tests/ui/enum_non_enum_type.rs:20:11
+   |
+20 |     kind: String,
+   |           ^^^^^^ expected a Rust enum deriving `QueryEnum`
+   |
+   = help: the trait `QueryEnumLabels` is not implemented for `String`
+   = note: derive `QueryEnum` for the Rust enum that maps the PostgreSQL enum
+   = help: the following other types implement trait `QueryEnumLabels`:
+             &[T]
+             Box<[T]>
+             GroupKind
+             Option<T>
+             Vec<T>
+
+error[E0277]: `String` cannot be used for parameter 1 of PostgreSQL type `group_kind`
+  --> tests/ui/enum_non_enum_type.rs:20:11
+   |
+20 |     kind: String,
+   |           ^^^^^^ incompatible with parameter 1
+   |
+   = help: the trait `QueryEnumLabels` is not implemented for `String`
+   = note: PostgreSQL enum `group_kind` maps to a Rust enum deriving `QueryEnum` with exactly the labels 'announcement', 'community'
+   = help: the following other types implement trait `QueryEnumLabels`:
+             &[T]
+             Box<[T]>
+             GroupKind
+             Option<T>
+             Vec<T>
+note: required for `String` to implement `__TuskerParam1`
+  --> tests/ui/enum_non_enum_type.rs:20:11
+   |
+20 |     kind: String,
+   |           ^^^^^^
+note: required by a bound in `__tusker_check_param1`
+  --> tests/ui/enum_non_enum_type.rs:20:11
+   |
+20 |     kind: String,
+   |           ^^^^^^ required by this bound in `__tusker_check_param1`

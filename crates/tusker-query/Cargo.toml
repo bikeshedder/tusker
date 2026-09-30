@@ -28,3 +28,4 @@ serde_json_1 = { package = "serde_json", version = "1.0.144", optional = true }
 
 [dev-dependencies]
 postgres-types = { version = "0.2.13", features = ["derive"] }
+trybuild = "1.0.121"

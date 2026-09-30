@@ -1,0 +1,11 @@
+error[E0080]: evaluation panicked: `GroupKind` maps label 'digest' which PostgreSQL enum `group_kind` does not define
+  --> tests/ui/enum_extra_label.rs:21:11
+   |
+21 |     kind: GroupKind,
+   |           ^^^^^^^^^ evaluation of `<GroupByKind as tusker_query::Query>::as_params::_` failed here
+
+error[E0080]: evaluation panicked: `GroupKind` maps label 'digest' which PostgreSQL enum `group_kind` does not define
+  --> tests/ui/enum_extra_label.rs:19:38
+   |
+19 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^ evaluation of `<GroupByKind as tusker_query::Query>::as_params::_` failed here

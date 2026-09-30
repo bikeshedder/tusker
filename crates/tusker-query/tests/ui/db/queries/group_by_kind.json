@@ -1,0 +1,34 @@
+{
+  "checksum": "a6b1dd236938c9e6528a9ed1c14814e4501f8c9f1a8841d5878e7222ece293aff66fe6809f2be4a5402135cd2a0389ccdee8bdc1d47341268cbdef1924ae471c",
+  "params": [
+    {
+      "kind": "enum",
+      "schema": "public",
+      "name": "group_kind",
+      "variants": [
+        "announcement",
+        "community"
+      ]
+    }
+  ],
+  "columns": [
+    {
+      "name": "id",
+      "type": "int4",
+      "notnull": true
+    },
+    {
+      "name": "kind",
+      "type": {
+        "kind": "enum",
+        "schema": "public",
+        "name": "group_kind",
+        "variants": [
+          "announcement",
+          "community"
+        ]
+      },
+      "notnull": true
+    }
+  ]
+}

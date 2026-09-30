@@ -1,0 +1,36 @@
+error[E0277]: `Option<i32>` cannot be used for NOT NULL column `id` (position 1) of PostgreSQL type `int4`
+  --> tests/ui/not_null_option.rs:18:38
+   |
+18 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^ incompatible with column `id`
+   |
+   = help: the trait `QueryRowTyped<PgI32>` is not implemented for `Option<i32>`
+   = note: PostgreSQL `int4` maps to `i32`
+   = note: the column is NOT NULL, so its field must not be an `Option`
+help: the trait `QueryRowTyped<PgI32>` is implemented for `i32`
+  --> src/types.rs
+   |
+   |               impl QueryRowTyped<$marker> for $row {}
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+   | / impl_query_types! {
+   | |     PgBool => param: bool, row: bool;
+   | |     PgI8 => param: i8, row: i8;
+   | |     PgI16 => param: i16, row: i16;
+...  |
+   | |     PgInet => param: IpAddr, row: IpAddr;
+   | | }
+   | |_- in this macro invocation
+note: required for `Option<i32>` to implement `__TuskerColumn1`
+  --> tests/ui/not_null_option.rs:18:38
+   |
+17 | #[derive(Query)]
+   |          ----- unsatisfied trait bound introduced here
+18 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^
+note: required by a bound in `__tusker_check_column1`
+  --> tests/ui/not_null_option.rs:18:38
+   |
+18 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^ required by this bound in `__tusker_check_column1`
+   = note: this error originates in the macro `impl_query_types` (in Nightly builds, run with -Z macro-backtrace for more info)

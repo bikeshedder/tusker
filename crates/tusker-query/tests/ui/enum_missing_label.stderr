@@ -1,0 +1,11 @@
+error[E0080]: evaluation panicked: PostgreSQL enum `group_kind` has label 'community' which the Rust enum for parameter 1 does not map
+  --> tests/ui/enum_missing_label.rs:19:11
+   |
+19 |     kind: GroupKind,
+   |           ^^^^^^^^^ evaluation of `<GroupByKind as tusker_query::Query>::as_params::_` failed here
+
+error[E0080]: evaluation panicked: PostgreSQL enum `group_kind` has label 'community' which the Rust enum for column `kind` (position 2) does not map
+  --> tests/ui/enum_missing_label.rs:17:38
+   |
+17 | #[query(sql = "group_by_kind", row = Group)]
+   |                                      ^^^^^ evaluation of `<GroupByKind as tusker_query::Query>::as_params::_` failed here

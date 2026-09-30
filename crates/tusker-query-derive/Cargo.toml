@@ -20,5 +20,5 @@ proc-macro2 = "1.0.92"
 quote = "1.0.37"
 serde_json = "1.0.144"
 sha2 = "0.11"
-syn = "2.0.87"
+syn = { version = "2.0.87", features = ["visit-mut"] }
 tusker-query-models = { version = "0.2.0", path = "../tusker-query-models" }

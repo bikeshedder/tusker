@@ -67,13 +67,14 @@ pub(crate) fn expand_query_enum(ast: &DeriveInput) -> syn::Result<TokenStream2> 
     let name = &ast.ident;
     let mut generics = ast.generics.clone();
     let (_, ty_generics, _) = ast.generics.split_for_impl();
+    let label_markers = variant_markers(labels.iter().map(String::as_str));
     let variants = if overrides.allow_mismatch {
         // `#[postgres(allow_mismatch)]` only compares the type name at runtime,
         // so any label set is accepted here as well.
         generics.params.push(syn::parse_quote!(TuskerVariants));
         quote!(TuskerVariants)
     } else {
-        variant_markers(labels.iter().map(String::as_str))
+        label_markers.clone()
     };
     let marker = quote!(::tusker_query::types::PgEnum<#type_hash, #variants>);
 
@@ -93,7 +94,22 @@ pub(crate) fn expand_query_enum(ast: &DeriveInput) -> syn::Result<TokenStream2> 
         ));
     let (row_impl_generics, _, row_where_clause) = row_generics.split_for_impl();
 
+    let allow_mismatch = overrides.allow_mismatch;
+    let extra_label_errors = labels.iter().map(|label| {
+        format!("`{name}` maps label '{label}' which PostgreSQL enum `{type_name}` does not define")
+    });
+    let (impl_generics, _, where_clause) = ast.generics.split_for_impl();
+
     Ok(quote! {
+        impl #impl_generics ::tusker_query::types::QueryEnumLabels for #name #ty_generics #where_clause {
+            const NAME: &'static str = #type_name;
+            const NAME_HASH: u64 = #type_hash;
+            type Labels = #label_markers;
+            const LABELS: &'static [&'static str] = &[#(#labels),*];
+            const EXTRA_LABEL_ERRORS: &'static [&'static str] = &[#(#extra_label_errors),*];
+            const ALLOW_MISMATCH: bool = #allow_mismatch;
+        }
+
         impl #param_impl_generics ::tusker_query::types::QueryParamTyped<#marker>
             for #name #ty_generics #param_where_clause
         {
