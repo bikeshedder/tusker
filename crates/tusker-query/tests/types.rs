@@ -71,6 +71,36 @@ fn query_composite_derives_structural_type_checks() {
     assert_maybe_nullable_composite_row::<Option<InventoryItem>>();
 }
 
+#[cfg(feature = "with-rust_decimal-1")]
+mod numeric_tests {
+    use rust_decimal_1::Decimal;
+    use tusker_query::types::{
+        FromSqlTyped, PgNumeric, QueryMaybeNullableRowTyped, QueryNullableRowTyped,
+        QueryParamTyped, QueryRowTyped,
+    };
+
+    fn assert_param<T: QueryParamTyped<PgNumeric>>() {}
+    fn assert_row<T: QueryRowTyped<PgNumeric>>() {}
+    fn assert_nullable_row<T: QueryNullableRowTyped<PgNumeric>>() {}
+    fn assert_maybe_nullable_row<T: QueryMaybeNullableRowTyped<PgNumeric>>() {}
+    fn assert_from_sql<T>()
+    where
+        T: FromSqlTyped<'static, PgNumeric>,
+    {
+    }
+
+    #[test]
+    fn rust_decimal_is_supported_for_checked_queries() {
+        assert_param::<Decimal>();
+        assert_param::<Option<Decimal>>();
+        assert_row::<Decimal>();
+        assert_nullable_row::<Option<Decimal>>();
+        assert_maybe_nullable_row::<Decimal>();
+        assert_maybe_nullable_row::<Option<Decimal>>();
+        assert_from_sql::<Decimal>();
+    }
+}
+
 #[cfg(feature = "with-serde_json-1")]
 mod json_tests {
     use tusker_query::types::{

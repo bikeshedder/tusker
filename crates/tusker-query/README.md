@@ -20,6 +20,7 @@ Feature | Description | Extra dependencies | Default
 `with-time-0_3` | Enable typed query checks for `time` 0.3 date/time types | `time` | no
 `with-uuid-1` | Enable typed query checks for `uuid` 1 types | `uuid` | no
 `with-serde_json-1` | Enable typed query checks for `serde_json::Value` and `Json<T>` wrappers | `serde_json` | no
+`with-rust_decimal-1` | Enable typed query checks for `numeric` using `rust_decimal::Decimal` | `rust_decimal` | no
 
 These feature flags only affect the Rust types accepted by the compile-time
 query checker. If query metadata references a PostgreSQL type that maps to an
@@ -142,6 +143,7 @@ Examples:
 - `timestamptz` -> `time::OffsetDateTime` with `with-time-0_3`
 - `uuid` -> `uuid::Uuid` with `with-uuid-1`
 - `json` / `jsonb` -> `serde_json::Value` or `tusker_query::types::Json<T>` with `with-serde_json-1`
+- `numeric` -> `rust_decimal::Decimal` with `with-rust_decimal-1`
 - arrays -> `Vec<T>`, `&[T]`, `Box<[T]>`, and nullable outer `Option<...>` for bind parameters; `Vec<T>` and nullable `Option<Vec<T>>` for rows
 - composites -> Rust structs that derive `QueryComposite` and implement the matching `tokio-postgres` / `postgres-types` `ToSql` and/or `FromSql` traits
 

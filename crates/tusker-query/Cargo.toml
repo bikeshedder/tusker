@@ -15,9 +15,11 @@ deadpool = ["dep:deadpool-postgres"]
 with-time-0_3 = ["time_03"]
 with-uuid-1 = ["uuid_1"]
 with-serde_json-1 = ["serde_json_1", "tokio-postgres/with-serde_json-1"]
+with-rust_decimal-1 = ["rust_decimal_1"]
 
 [dependencies]
 deadpool-postgres = { version = "0.14.0", optional = true }
+rust_decimal_1 = { package = "rust_decimal", version = "1.30", optional = true, default-features = false, features = ["db-tokio-postgres"] }
 time_03 = { package = "time", version = "0.3.5", optional = true }
 tokio-postgres = "0.7.12"
 tusker-query-derive = { version = "0.2.0", path = "../tusker-query-derive" }

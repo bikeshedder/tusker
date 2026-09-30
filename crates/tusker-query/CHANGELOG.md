@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support checked `numeric` parameter and row types via `rust_decimal::Decimal` behind the `with-rust_decimal-1` feature
+
 ## [0.3.0] - 2026-07-06
 
 ### Added

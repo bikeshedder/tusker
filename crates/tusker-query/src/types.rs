@@ -58,6 +58,8 @@ marker_types! {
     PgF32;
     /// PostgreSQL `double precision`.
     PgF64;
+    /// PostgreSQL `numeric`.
+    PgNumeric;
     /// PostgreSQL text-like string types.
     PgString;
     /// PostgreSQL `bytea`.
@@ -227,3 +229,11 @@ impl_query_types! {
 
 #[cfg(feature = "with-uuid-1")]
 impl<'a> FromSqlTyped<'a, PgUuid> for uuid_1::Uuid {}
+
+#[cfg(feature = "with-rust_decimal-1")]
+impl_query_types! {
+    PgNumeric => param: rust_decimal_1::Decimal, row: rust_decimal_1::Decimal;
+}
+
+#[cfg(feature = "with-rust_decimal-1")]
+impl<'a> FromSqlTyped<'a, PgNumeric> for rust_decimal_1::Decimal {}

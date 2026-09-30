@@ -320,6 +320,7 @@ fn scalar_sql_type_marker(sql_type: &str) -> Result<TokenStream2, String> {
         "int8" | "oid" => Ok(quote!(::tusker_query::types::PgI64)),
         "float4" => Ok(quote!(::tusker_query::types::PgF32)),
         "float8" => Ok(quote!(::tusker_query::types::PgF64)),
+        "numeric" => Ok(quote!(::tusker_query::types::PgNumeric)),
         "varchar" | "bpchar" | "text" | "citext" | "name" | "unknown" | "ltree" | "lquery"
         | "ltxtquery" => Ok(quote!(::tusker_query::types::PgString)),
         "bytea" => Ok(quote!(::tusker_query::types::PgBytea)),
