@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-02
+
 ### Added
 
 - Add `SqlType::Enum` for PostgreSQL enum types including their labels
 - Add a semantic `version` field to the sidecar format, along with `FORMAT_VERSION`, `QueryVersion` and `Compatibility` to check it
+
+### Changed
+
+- **Breaking:** `Query` has a new required `version` field and `SqlType` a new `Enum` variant
 
 ## [0.2.0] - 2026-07-06
 
@@ -32,7 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release
 
-[unreleased]: https://github.com/bikeshedder/tusker/compare/tusker-query-models-v0.2.0...HEAD
+[unreleased]: https://github.com/bikeshedder/tusker/compare/tusker-query-models-v0.3.0...HEAD
+[0.3.0]: https://github.com/bikeshedder/tusker/releases/tag/tusker-query-models-v0.3.0
 [0.2.0]: https://github.com/bikeshedder/tusker/releases/tag/tusker-query-models-v0.2.0
 [0.1.1]: https://github.com/bikeshedder/tusker/releases/tag/tusker-query-models-v0.1.1
 [0.1.0]: https://github.com/bikeshedder/tusker/releases/tag/tusker-query-models-v0.1.0

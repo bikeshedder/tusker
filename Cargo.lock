@@ -1634,7 +1634,7 @@ dependencies = [
 
 [[package]]
 name = "tusker"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -1679,7 +1679,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-migration"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "clap",
  "glob",
@@ -1694,7 +1694,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-query"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "deadpool-postgres",
  "postgres-types",
@@ -1709,7 +1709,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-query-derive"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "darling",
  "heck",
@@ -1723,7 +1723,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-query-models"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "hex",
  "semver",
@@ -1733,7 +1733,7 @@ dependencies = [
 
 [[package]]
 name = "tusker-schema"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "itertools",

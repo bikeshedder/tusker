@@ -1,6 +1,6 @@
 [package]
 name = "tusker-query"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "Lightweight query layer for tokio-postgres with derive-based SQL bindings and checked query metadata"
 license = "MIT OR Apache-2.0"
@@ -22,7 +22,7 @@ deadpool-postgres = { version = "0.14.0", optional = true }
 rust_decimal_1 = { package = "rust_decimal", version = "1.30", optional = true, default-features = false, features = ["db-tokio-postgres"] }
 time_03 = { package = "time", version = "0.3.5", optional = true }
 tokio-postgres = "0.7.12"
-tusker-query-derive = { version = "0.2.0", path = "../tusker-query-derive" }
+tusker-query-derive = { version = "0.3.0", path = "../tusker-query-derive" }
 uuid_1 = { package = "uuid", version = "1", optional = true }
 serde_json_1 = { package = "serde_json", version = "1.0.144", optional = true }
 

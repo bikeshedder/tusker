@@ -1,6 +1,6 @@
 [package]
 name = "tusker-query-derive"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "Derive macros for tusker-query query and row bindings"
 license = "MIT OR Apache-2.0"
@@ -21,4 +21,4 @@ quote = "1.0.37"
 serde_json = "1.0.144"
 sha2 = "0.11"
 syn = { version = "3", features = ["visit-mut"] }
-tusker-query-models = { version = "0.2.0", path = "../tusker-query-models" }
+tusker-query-models = { version = "0.3.0", path = "../tusker-query-models" }

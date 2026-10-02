@@ -1,6 +1,6 @@
 [package]
 name = "tusker-migration"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "PostgreSQL specific database migration manager"
 license = "MIT OR Apache-2.0"
@@ -23,7 +23,7 @@ termcolor = "1.4.0"
 time = "0.3.5"
 tokio = { version = "1.34.0", features = ["rt"] }
 tokio-postgres = { version = "0.7.12", features = ["with-time-0_3"] }
-tusker-query = { version = "0.3.0", path = "../tusker-query", features = ["with-time-0_3"] }
+tusker-query = { version = "0.4.0", path = "../tusker-query", features = ["with-time-0_3"] }
 
 [package.metadata.docs.rs]
 features = ["rust-embed"]
