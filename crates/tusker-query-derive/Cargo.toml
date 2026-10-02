@@ -14,11 +14,11 @@ proc-macro = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-darling = "0.23"
+darling = "0.24"
 heck = "0.5"
 proc-macro2 = "1.0.92"
 quote = "1.0.37"
 serde_json = "1.0.144"
 sha2 = "0.11"
-syn = { version = "2.0.87", features = ["visit-mut"] }
+syn = { version = "3", features = ["visit-mut"] }
 tusker-query-models = { version = "0.2.0", path = "../tusker-query-models" }
