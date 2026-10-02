@@ -53,6 +53,43 @@ jobs:
           tar -C dist -czf "dist/${ASSET_BASENAME}.tar.gz" "${ASSET_BASENAME}"
           sha256sum "dist/${ASSET_BASENAME}.tar.gz" > "dist/${ASSET_BASENAME}.tar.gz.sha256"
 
+      - name: Extract release notes from changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${RELEASE_TAG#tusker-v}"
+          CHANGELOG="crates/tusker/CHANGELOG.md"
+          HEADING="## [${VERSION}]"
+
+          # Section of this version, up to the next version heading, without
+          # the link definitions at the end of the changelog.
+          NOTES="$(awk -v heading="$HEADING" '
+            index($0, "## [") == 1 { if (found) exit; if (index($0, heading) == 1) { found = 1; next } }
+            /^\[[^]]+\]: / { next }
+            found { print }
+          ' "$CHANGELOG" | sed -e '/./,$!d')"
+          # Version of the next heading, i.e. the previous release.
+          PREVIOUS="$(awk -v heading="$HEADING" '
+            index($0, "## [") == 1 {
+              if (found) { sub(/^## \[/, ""); sub(/\].*/, ""); print; exit }
+              if (index($0, heading) == 1) found = 1
+            }
+          ' "$CHANGELOG")"
+
+          if [ -z "$(printf '%s' "$NOTES" | tr -d '[:space:]')" ]; then
+            echo "::error file=${CHANGELOG}::No changelog entry found for ${VERSION}"
+            exit 1
+          fi
+
+          {
+            printf '%s\n' "$NOTES"
+            if [ -n "$PREVIOUS" ]; then
+              printf '\n**Full Changelog**: %s/%s/compare/tusker-v%s...%s\n' \
+                "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$PREVIOUS" "$RELEASE_TAG"
+            fi
+          } > dist/RELEASE_NOTES.md
+
       - name: Create GitHub release and upload assets
         uses: softprops/action-gh-release@v2
         with:
@@ -60,7 +97,7 @@ jobs:
           files: |
             dist/*.tar.gz
             dist/*.sha256
-          generate_release_notes: true
+          body_path: dist/RELEASE_NOTES.md
 
       - name: Log in to GitHub Container Registry
         run: buildah login --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" ${{ env.REGISTRY }}
