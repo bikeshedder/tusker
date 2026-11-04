@@ -11,6 +11,18 @@ with it. Their changelogs contain the details of the Rust APIs.
 
 ## [Unreleased]
 
+### Fixed
+
+- `tusker query sync` reports columns from the nullable side of an outer join
+  as nullable, even if the table column is declared NOT NULL. This covers the
+  right table of a `LEFT JOIN`, the left table of a `RIGHT JOIN`, both tables
+  of a `FULL JOIN`, and CTEs used there. tusker reads this from the generic plan
+  of the query, so outer joins that PostgreSQL turns into inner joins, e.g.
+  because of a `WHERE` condition on the joined table, keep their NOT NULL
+  columns.
+- `tusker query sync` reports the grouping columns of `GROUPING SETS`, `ROLLUP`
+  and `CUBE` as nullable, even if the table column is declared NOT NULL.
+
 ## [0.8.0] - 2026-10-02
 
 ### Added

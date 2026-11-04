@@ -11,6 +11,12 @@ use tusker_query_models::{Column, CompositeField, SqlType, FORMAT_VERSION};
 
 use crate::config::Config;
 
+mod nullability;
+#[cfg(test)]
+mod tests;
+
+use nullability::PlanRelations;
+
 #[derive(Debug, Parser)]
 pub(crate) struct QueryCommand {
     #[command(subcommand)]
@@ -88,15 +94,29 @@ async fn inspect_query_sql(client: &Client, sql: &str) -> Result<tusker_query_mo
     let stmt = client.prepare(sql).await?;
 
     let mut columns: Vec<Column> = Vec::new();
+    let mut plan: Option<PlanRelations> = None;
     for c in stmt.columns() {
+        let notnull = match (c.table_oid(), c.column_id()) {
+            (Some(table_oid), Some(column_id)) => {
+                let source = inspect_source_column(client, table_oid, column_id).await?;
+                if !source.notnull {
+                    Some(false)
+                } else {
+                    // The constraint of the table column only holds for the
+                    // result if the query cannot NULL-extend the table's rows.
+                    let plan = match &mut plan {
+                        Some(plan) => plan,
+                        None => plan.insert(PlanRelations::explain(client, sql).await?),
+                    };
+                    Some(plan.keeps_not_null(&source.relations))
+                }
+            }
+            _ => None,
+        };
         columns.push(Column {
             name: c.name().to_owned(),
             r#type: inspect_type(c.type_()),
-            notnull: if let (Some(table_oid), Some(column_id)) = (c.table_oid(), c.column_id()) {
-                Some(is_nullable(client, table_oid, column_id).await?)
-            } else {
-                None
-            },
+            notnull,
         })
     }
 
@@ -153,12 +173,45 @@ fn write_query_types(output: &Path, query: &tusker_query_models::Query) -> Resul
     Ok(status)
 }
 
-async fn is_nullable(client: &Client, table_id: u32, column_id: i16) -> Result<bool> {
-    let stmt = client
-        .prepare("SELECT attnotnull FROM pg_catalog.pg_attribute WHERE attrelid=$1 AND attnum=$2")
+/// The table column a result column is taken from.
+struct SourceColumn {
+    /// Whether the table column is declared `NOT NULL`.
+    notnull: bool,
+    /// Schema and name of the table and of all tables inheriting from it,
+    /// including partitions.
+    relations: Vec<(String, String)>,
+}
+
+async fn inspect_source_column(
+    client: &Client,
+    table_oid: u32,
+    column_id: i16,
+) -> Result<SourceColumn> {
+    let row = client
+        .query_one(
+            "SELECT attnotnull FROM pg_catalog.pg_attribute WHERE attrelid=$1 AND attnum=$2",
+            &[&table_oid, &column_id],
+        )
         .await?;
-    let row = client.query_one(&stmt, &[&table_id, &column_id]).await?;
-    Ok(row.get(0))
+    let notnull = row.get(0);
+    let relations = client
+        .query(
+            "WITH RECURSIVE rel(oid) AS (\
+                SELECT $1::oid \
+                UNION \
+                SELECT i.inhrelid FROM pg_catalog.pg_inherits i JOIN rel ON i.inhparent = rel.oid\
+            ) \
+            SELECT n.nspname::text, c.relname::text \
+            FROM rel \
+            JOIN pg_catalog.pg_class c ON c.oid = rel.oid \
+            JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace",
+            &[&table_oid],
+        )
+        .await?
+        .iter()
+        .map(|row| (row.get(0), row.get(1)))
+        .collect();
+    Ok(SourceColumn { notnull, relations })
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
