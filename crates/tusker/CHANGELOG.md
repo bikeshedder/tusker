@@ -11,6 +11,8 @@ with it. Their changelogs contain the details of the Rust APIs.
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-04
+
 ### Fixed
 
 - `tusker query sync` reports columns from the nullable side of an outer join
@@ -105,7 +107,8 @@ implementation on [PyPI](https://pypi.org/project/tusker/).
 
 - Initial release
 
-[unreleased]: https://github.com/bikeshedder/tusker/compare/tusker-v0.8.0...HEAD
+[unreleased]: https://github.com/bikeshedder/tusker/compare/tusker-v0.8.1...HEAD
+[0.8.1]: https://github.com/bikeshedder/tusker/releases/tag/tusker-v0.8.1
 [0.8.0]: https://github.com/bikeshedder/tusker/releases/tag/tusker-v0.8.0
 [0.7.0]: https://github.com/bikeshedder/tusker/releases/tag/tusker-v0.7.0
 [0.6.1]: https://github.com/bikeshedder/tusker/releases/tag/tusker-v0.6.1
