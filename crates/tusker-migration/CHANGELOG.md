@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `std::process::exit(1)`; the `tusker` binary still exits with status 1.
 - Errors in a migration's SQL point at the failing line.
 - `RunArgs` implements `Default` and its `number` field is public.
+- `cli::Subcommands`, `cli::FixArgs` and `Command::subcommand` are public, so
+  an embedding CLI can flatten the subcommands into an enum of its own and add
+  commands next to them.
 
 ### Fixed
 

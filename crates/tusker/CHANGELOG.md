@@ -11,6 +11,16 @@ with it. Their changelogs contain the details of the Rust APIs.
 
 ## [Unreleased]
 
+### Added
+
+- Vendoring migrations of a dependency: a project lists the crates it vendors
+  as `[vendor.<crate>]`, found through `cargo metadata`, so it is the version
+  in `Cargo.lock`. `tusker migration vendor` copies their migrations into the
+  project's folder with a `-- tusker:vendored` header. `tusker diff` /
+  `tusker check` refuse while something is not vendored, a copy does not match
+  its source, or a crate in the dependency graph ships migrations but is not
+  listed. See the README.
+
 ### Changed
 
 - `tusker migrate` / `tusker migration run` apply each migration in one

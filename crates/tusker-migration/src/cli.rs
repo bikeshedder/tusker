@@ -12,28 +12,42 @@ use crate::migrator::{self, FixAction, RunOptions};
 use crate::models::MigrationStatus;
 use crate::source::MigrationSource;
 
-#[derive(Debug, Args)]
+#[derive(Debug, Clone, Copy, Args)]
 #[clap(about = "Manage database migrations")]
 /// Top-level migration command used by embedding CLIs.
 pub struct Command {
+    /// The migration subcommand to run.
     #[clap(subcommand)]
-    subcommand: Subcommands,
+    pub subcommand: Subcommands,
 }
 
-#[derive(Debug, Subcommand)]
-enum Subcommands {
+impl From<Subcommands> for Command {
+    fn from(subcommand: Subcommands) -> Self {
+        Self { subcommand }
+    }
+}
+
+/// The migration subcommands. Public so that embedding CLIs can flatten them
+/// into a subcommand enum of their own and add commands next to them.
+#[derive(Debug, Clone, Copy, Subcommand)]
+pub enum Subcommands {
+    /// List migrations and show their current status.
     #[clap(aliases = &["ls", "list"], about = "List migrations and show their current status")]
     Status,
 
+    /// Show the migration log.
     #[clap(aliases = &["history"], about = "Show migration log")]
     Log,
 
+    /// Run migrations on the database.
     #[clap(aliases = &["apply"], about = "Run migrations on the database")]
     Run(RunArgs),
 
+    /// Fail unless all migrations are cleanly applied.
     #[clap(about = "Fail unless all migrations are cleanly applied")]
     Check,
 
+    /// Fix a database migration.
     #[clap(about = "Fix database migration")]
     Fix(FixArgs),
 }
@@ -50,10 +64,12 @@ pub struct RunArgs {
     pub number: Option<i32>,
 }
 
-#[derive(Debug, Args)]
-struct FixArgs {
+/// Arguments for fixing a migration.
+#[derive(Debug, Clone, Copy, Args)]
+pub struct FixArgs {
+    /// Number of the migration to fix.
     #[clap(value_name = "NUMBER")]
-    number: i32,
+    pub number: i32,
 }
 
 struct Colors {

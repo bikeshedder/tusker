@@ -6,6 +6,7 @@ use tusker_schema::{diff::DiffSql, models::schema::join_sql, Inspection};
 use crate::{
     config::{Config, DatabaseConfig},
     db::DiffDatabase,
+    vendor,
 };
 
 use super::Backend;
@@ -34,11 +35,16 @@ pub(crate) struct DiffArgs {
     without_privileges: bool,
 }
 
-async fn inspect_sql(db: &DiffDatabase, filename: &str) -> Result<Inspection> {
+async fn inspect_sql(db: &DiffDatabase, patterns: &[String]) -> Result<Inspection> {
     let mut client = db.connect().await?;
     let txn = client.transaction().await?;
-    for filename in glob::glob(filename)? {
-        let filename = filename?;
+    let mut filenames = Vec::new();
+    for pattern in patterns {
+        let mut matched = glob::glob(pattern)?.collect::<Result<Vec<_>, _>>()?;
+        matched.sort();
+        filenames.extend(matched);
+    }
+    for filename in filenames {
         let mut file = File::open(filename).await?;
         let mut contents = vec![];
         let _ = file.read_to_end(&mut contents).await?;
@@ -62,13 +68,32 @@ pub(crate) async fn inspect_backend(
     backend: Backend,
 ) -> Result<Inspection> {
     match backend {
-        Backend::Migrations => inspect_sql(db, &cfg.migrations.filename).await,
-        Backend::Schema => inspect_sql(db, &cfg.schema.filename).await,
+        Backend::Migrations => {
+            inspect_sql(db, std::slice::from_ref(&cfg.migrations.filename)).await
+        }
+        Backend::Schema => {
+            let globs = vendor::project_schema_globs(cfg, &std::env::current_dir()?)?;
+            inspect_sql(db, &globs).await
+        }
         Backend::Database => inspect_db(&cfg.database).await,
     }
 }
 
+/// Refuses to compare migrations while vendored migrations are missing or
+/// do not match their dependency: the diff would otherwise put the
+/// dependency's changes into a migration of this project.
+pub(crate) fn require_vendored(cfg: &Config, from: Backend, to: Backend) -> Result<()> {
+    if (from == Backend::Migrations || to == Backend::Migrations)
+        && !vendor::verify(cfg, &std::env::current_dir()?)?
+    {
+        eprintln!("Vendor the dependencies' migrations before comparing migrations.");
+        std::process::exit(1);
+    }
+    Ok(())
+}
+
 pub(crate) async fn cmd(cfg: &Config, args: &DiffArgs) -> Result<()> {
+    require_vendored(cfg, args.from, args.to)?;
     let (from, to) = if args.reverse {
         (args.to, args.from)
     } else {

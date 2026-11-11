@@ -192,6 +192,71 @@ You can also override the configuration using environment variables:
 export TUSKER_DATABASE_URL=postgresql:///some-db-host/some-db
 ```
 
+## Vendoring migrations of a dependency
+
+A crate can ship tables of its own – say one that provides user accounts –
+together with its schema files and its migrations. Projects that use the crate
+*vendor* those migrations: tusker copies them into the project's migration
+folder. The runner stays as simple as it is (a directory of SQL files, run in
+order), and every project's folder holds exactly the SQL that ran on its
+database.
+
+### In the crate
+
+The crate is an ordinary tusker project: a `tusker.toml` next to its
+`Cargo.toml`, its schema files and one linear history of migrations
+(`db/migrations/0001_init.sql`, `0002_auth_init.sql`, …). Released migrations
+are never edited.
+
+The crate's migrations must be its own: tusker refuses to vendor a crate whose
+migrations are themselves vendored from another crate.
+
+### In the project
+
+The project lists the crates it vendors, by crate name:
+
+```toml
+[vendor.tragwerk]
+```
+
+Crates are found through `cargo metadata`, so it is exactly the version in
+`Cargo.lock`, whether it comes from crates.io, git or a path – adding the crate
+to `Cargo.toml` is all it takes. The crate's directory contains its
+`tusker.toml`, schema files and migrations, because Cargo packages everything
+in the crate directory by default. When the dependency graph has several
+versions of the crate, `version = "…"` picks one; `path = "../somewhere"`
+names a directory instead of looking the crate up.
+
+`tusker migration vendor` copies every migration that the folder does not have
+yet to its end, in the crate's order:
+
+```sql
+-- tusker:vendored
+--   crate: tragwerk 0.3.0
+--   source: 0002_auth_init.sql
+--   sha256: 3f9a…
+--
+CREATE TABLE "auth_user" ( … );
+```
+
+The header is a comment; a leading `-- tusker:no-transaction` stays the first
+line. Once committed, a vendored migration keeps its place in the project's
+history: the order in which migrations run is fixed by the project and never
+computed from dependencies. Run `tusker migration vendor` after updating a
+crate and after adding one.
+
+The project's schema is the vendored crates' schema files followed by its own.
+`tusker diff` and `tusker check` refuse to compare migrations while something
+is not in order – `tusker migration vendor --check` reports the same:
+
+- migrations that are not vendored yet,
+- a crate in the dependency graph that ships migrations but has no
+  `[vendor.<crate>]` section,
+- a vendored copy that was edited (its body does not match its `sha256`),
+- a crate's migration that changed after it was vendored,
+- a copy that comes before an earlier migration of its crate,
+- a copy from an unknown crate or file.
+
 ## How can I use the generated SQL files?
 
 The resulting SQL files can either be applied to the database by hand

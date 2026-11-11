@@ -5,7 +5,10 @@ use clap::Parser;
 
 use crate::{config::Config, db::DiffDatabase};
 
-use super::{diff::inspect_backend, Backend};
+use super::{
+    diff::{inspect_backend, require_vendored},
+    Backend,
+};
 
 #[derive(Copy, Clone, Debug, Parser)]
 pub(crate) struct CheckArgs {
@@ -32,6 +35,7 @@ pub(crate) struct CheckArgs {
 }
 
 pub(crate) async fn cmd(cfg: &Config, args: &CheckArgs) -> Result<()> {
+    require_vendored(cfg, args.from, args.to)?;
     let mut db = DiffDatabase::new(&cfg.database).await?;
     db.create().await?;
     let from = inspect_backend(cfg, &mut db, args.from).await?;

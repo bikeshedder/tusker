@@ -1,10 +1,12 @@
-use std::str::FromStr;
+use std::{collections::BTreeMap, str::FromStr};
 
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use tokio_postgres::{Client as PgClient, Config as PgConfig, NoTls};
 use tusker_schema::diff::{DiffOptions, RemovedEnumValue};
 use uzers::get_current_username;
+
+use crate::vendor::VendorConfig;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -19,6 +21,9 @@ pub(crate) struct Config {
     pub(crate) diff: DiffConfig,
     #[serde(default)]
     pub(crate) queries: QueriesConfig,
+    /// Crates whose migrations are vendored into this project, by crate name.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub(crate) vendor: BTreeMap<String, VendorConfig>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -65,6 +70,7 @@ impl Config {
             queries: QueriesConfig {
                 filename: default_queries_filename(),
             },
+            vendor: BTreeMap::new(),
         }
     }
 }

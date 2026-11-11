@@ -27,6 +27,7 @@ use config::Config;
 mod cli;
 mod config;
 mod db;
+mod vendor;
 
 #[tokio::main]
 async fn main() -> Result<()> {

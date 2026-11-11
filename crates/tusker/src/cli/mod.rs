@@ -5,6 +5,7 @@ use crate::config::Config;
 
 mod clean;
 mod config;
+mod migration;
 mod query;
 mod schema;
 
@@ -32,7 +33,7 @@ enum Commands {
     Config(config::ConfigCommand),
     /// Migration commands
     #[command(aliases = ["m", "mig"])]
-    Migration(tusker_migration::cli::Command),
+    Migration(migration::MigrationCommand),
     /// Alias for "schema diff"
     #[command(alias = "d")]
     Diff(schema::diff::DiffArgs),
@@ -53,10 +54,7 @@ pub(crate) async fn run(cfg: &Config) -> Result<()> {
             clean::cmd(cfg, cmd_args).await?;
         }
         Commands::Query(args) => query::cmd(cfg, args).await?,
-        Commands::Migration(args) => {
-            let source = tusker_migration::GlobSource::new(&cfg.migrations.filename);
-            tusker_migration::cli::cmd(&(cfg.database.pg_config()?), &source, args).await?
-        }
+        Commands::Migration(args) => migration::cmd(cfg, args).await?,
         Commands::Config(args) => config::cmd(cfg, args).await?,
         Commands::Diff(args) => schema::diff::cmd(cfg, args).await?,
         Commands::Check(args) => schema::check::cmd(cfg, args).await?,
