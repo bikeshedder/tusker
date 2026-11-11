@@ -26,11 +26,13 @@ pub mod cli;
 pub(crate) mod db;
 /// Error types returned by migration operations.
 pub mod error;
+pub mod migrator;
 pub(crate) mod models;
 pub(crate) mod queries;
 /// Pluggable sources of migration files.
 pub mod source;
 
+pub use models::{AppliedMigration, MigrationLogEntry, MigrationState, MigrationStatus};
 #[cfg(feature = "rust-embed")]
 pub use source::RustEmbedSource;
-pub use source::{GlobSource, Migration, MigrationSource};
+pub use source::{GlobSource, Migration, MigrationSource, NO_TRANSACTION_MARKER};

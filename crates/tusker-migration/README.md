@@ -17,9 +17,11 @@ This crate provides:
 - a pluggable `MigrationSource` trait, with a filesystem (`GlobSource`) and an
   embedded (`RustEmbedSource`, via [`rust-embed`](https://docs.rs/rust-embed))
   implementation
+- a library API (`migrator`) for status, check, log, run, and fix that returns
+  data and works on a connection you provide
 - embeddable `clap` command types for status, log, check, run, and fix
 - hash-based detection of renamed or modified migration files
-- migration runner logic that can be called directly from Rust code
+- transactional, concurrency-safe application of migrations
 
 ## What it manages
 
@@ -53,7 +55,7 @@ Two implementations ship with the crate:
   feature:
 
   ```toml
-  tusker-migration = { version = "0.1", features = ["rust-embed"] }
+  tusker-migration = { version = "0.3", features = ["rust-embed"] }
   ```
 
   ```ignore
@@ -77,6 +79,9 @@ On first run, `tusker-migration` creates a PostgreSQL table called
 
 - [db/schema.sql](db/schema.sql)
 
+It needs the `btree_gist` extension and creates it if missing, so the role
+running the first migration must be allowed to, or the extension must exist.
+
 The table stores:
 
 - migration number
@@ -88,6 +93,58 @@ The table stores:
 Instead of mutating rows in place, the migration history is tracked as a log of
 entries with time ranges. The current migration state is reconstructed from the
 entries whose validity range contains `now()`.
+
+## Applying migrations
+
+`run` applies the outstanding migrations in order of their numbers:
+
+- Each migration runs in one transaction together with its log entry. A
+  failing migration leaves neither its changes nor a log entry behind, so
+  migrations must not contain their own `BEGIN`/`COMMIT`.
+- A migration whose first line is `-- tusker:no-transaction` runs outside a
+  transaction, for statements PostgreSQL refuses inside one such as
+  `CREATE INDEX CONCURRENTLY`. It is logged after it succeeded.
+- `run` and `fix` hold a session-level advisory lock
+  (`pg_advisory_lock(migrator::LOCK_KEY)`). Several processes migrating the same
+  database at once wait for each other and apply each migration exactly once,
+  e.g. replicas of an application that migrates at startup.
+- Nothing is applied while a migration is mismatched or its file is missing;
+  repair those with `fix` first.
+
+## Library API
+
+The `migrator` module returns data and never prints. Every function takes a
+connected `tokio_postgres::Client`, so you choose how to connect (with or
+without TLS) and may use a pooled connection (`&**client` / `&mut **client`
+for a `deadpool_postgres::Client`):
+
+```rust,no_run
+use tusker_migration::{migrator, GlobSource, MigrationStatus};
+
+async fn migrate(client: &mut tokio_postgres::Client) -> Result<(), tusker_migration::error::Error> {
+    let source = GlobSource::new("db/migrations/**/*.sql");
+
+    // Inspect without changing anything.
+    for state in migrator::status(client, &source).await? {
+        if state.status() != MigrationStatus::Ok {
+            println!("{:04}_{}: {}", state.number, state.name(), state.status());
+        }
+    }
+
+    // Apply everything outstanding (or `RunOptions::new().up_to(n)`).
+    let applied = migrator::run(client, &source, &migrator::RunOptions::new()).await?;
+    println!("applied {} migrations", applied.len());
+
+    // Fails with `Error::NotClean` listing what is out of sync.
+    migrator::check(client, &source).await
+}
+```
+
+- `status` compares source and database (`MigrationState`, `MigrationStatus`).
+- `check` succeeds only if everything is cleanly applied.
+- `log` returns the migration history.
+- `run` applies outstanding migrations and returns them.
+- `fix` repairs one migration and returns what it did (`FixAction`).
 
 ## Commands
 
@@ -136,6 +193,9 @@ async fn run(pg_config: &tokio_postgres::Config) -> Result<(), tusker_migration:
 }
 ```
 
+The built-in commands connect without TLS. To connect differently, call the
+`migrator` functions with a client of your own.
+
 ### Built-in subcommands
 
 ### `status`
@@ -156,16 +216,18 @@ operation.
 
 ### `check`
 
-Fails if migration files and database state are not in sync.
+Fails if migration files and database state are not in sync, listing the
+migrations that are not.
 
 This is useful in CI or before applying new migrations.
 
 ### `run`
 
-Applies all outstanding migrations in order.
+Applies all outstanding migrations in order (see
+[Applying migrations](#applying-migrations)), or with `--number N` only those
+up to and including `N`.
 
-If the migration table does not exist yet, it is created automatically before
-running the first migration.
+If the migration table does not exist yet, it is created automatically.
 
 ### `fix`
 
@@ -179,7 +241,9 @@ This is a repair tool and should be used carefully.
 
 ## Using It From Your App
 
-In an embedded setup, the usual flow is:
+Call the `migrator` functions directly, e.g. `migrator::run` at startup or
+`migrator::status` to refuse starting with outstanding migrations. To offer
+the migration commands in your own CLI instead:
 
 1. expose `tusker_migration::cli::Command` from your own binary
 2. choose a `MigrationSource` (`GlobSource` for the filesystem, `RustEmbedSource`

@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `migrator` module: the runner as a library that returns data instead of
+  printing – `status`, `check`, `log`, `run` and `fix`. Every function takes a
+  connected `tokio_postgres::Client`, so the caller chooses TLS and may use a
+  pooled connection. The returned futures are `Send`.
+- `MigrationState`, `MigrationStatus`, `AppliedMigration` and
+  `MigrationLogEntry` are public.
+- `Migration::hash()` and `Migration::no_transaction()`.
+- A migration whose first line is `-- tusker:no-transaction` runs outside a
+  transaction, e.g. for `CREATE INDEX CONCURRENTLY`.
+- `migration run --number N` applies outstanding migrations only up to and
+  including `N` (`RunOptions::up_to`).
+- `Error::NotClean` with the migrations that are out of sync.
+
+### Changed
+
+- **Breaking:** each migration is applied in one transaction together with its
+  log entry. A failing migration leaves neither its changes nor a log entry
+  behind. Migrations must not contain their own `BEGIN`/`COMMIT`.
+- `run` and `fix` hold a session-level advisory lock (`migrator::LOCK_KEY`), so
+  concurrent runners wait for each other and apply each migration once.
+- **Breaking:** `run` refuses to apply anything while a migration is
+  mismatched or its file is missing, instead of stopping on the first one it
+  reaches.
+- **Breaking:** `check` returns `Error::NotClean` instead of calling
+  `std::process::exit(1)`; the `tusker` binary still exits with status 1.
+- Errors in a migration's SQL point at the failing line.
+- `RunArgs` implements `Default` and its `number` field is public.
+
+### Fixed
+
+- `fix` on a mismatched migration failed with an exclusion constraint
+  violation: the log update could insert the new entry before closing the old
+  one.
+
 ## [0.2.1] - 2026-10-02
 
 ### Changed

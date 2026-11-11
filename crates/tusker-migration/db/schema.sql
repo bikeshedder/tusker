@@ -1,7 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
-BEGIN;
-
 CREATE TYPE migration_operation AS ENUM (
     'apply',
     'fake',
@@ -20,5 +18,3 @@ CREATE TABLE IF NOT EXISTS "migration" (
 );
 
 CREATE INDEX "validity_idx" ON "migration" USING GIST ("number", "validity");
-
-END;

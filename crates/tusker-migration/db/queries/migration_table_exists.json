@@ -1,0 +1,12 @@
+{
+  "version": "0.1.0",
+  "checksum": "ff583411c9d0a4f9794459f6f4982558c99450a01898774dea215723cebeb742309bb7666d1b18100ecb0cca18f391ccff18d789db9af0c514fcae38a0976eec",
+  "params": [],
+  "columns": [
+    {
+      "name": "exists",
+      "type": "bool",
+      "notnull": null
+    }
+  ]
+}

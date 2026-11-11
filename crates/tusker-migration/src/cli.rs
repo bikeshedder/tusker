@@ -5,9 +5,11 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use time::OffsetDateTime;
 use tokio_postgres::Config;
 
-use crate::db::Database;
+use tokio_postgres::Client;
+
 use crate::error::Error;
-use crate::models::{combine_migrations, MigrationState, MigrationStatus};
+use crate::migrator::{self, FixAction, RunOptions};
+use crate::models::MigrationStatus;
 use crate::source::MigrationSource;
 
 #[derive(Debug, Args)]
@@ -29,21 +31,23 @@ enum Subcommands {
     #[clap(aliases = &["apply"], about = "Run migrations on the database")]
     Run(RunArgs),
 
+    #[clap(about = "Fail unless all migrations are cleanly applied")]
     Check,
 
     #[clap(about = "Fix database migration")]
     Fix(FixArgs),
 }
 
-#[derive(Debug, Clone, Copy, Args)]
+#[derive(Debug, Clone, Copy, Default, Args)]
 /// Arguments for applying migrations.
 pub struct RunArgs {
+    /// Apply outstanding migrations only up to and including this number.
     #[clap(
         long,
         short,
-        help = "Number of the migration to be run. If no number is provided all outstanding migrations are run."
+        help = "Apply outstanding migrations only up to and including this number. Without it all outstanding migrations are applied."
     )]
-    number: Option<i32>,
+    pub number: Option<i32>,
 }
 
 #[derive(Debug, Args)]
@@ -96,29 +100,20 @@ impl Colors {
     }
 }
 
-async fn migration_table_exists(db: &Database) -> Result<bool, Error> {
-    db.migration_table_exists()
+async fn connect(pg_config: &Config) -> Result<Client, Error> {
+    let (client, connection) = pg_config
+        .connect(tokio_postgres::NoTls)
         .await
-        .map_err(|e| Error::Pg("Checking status table failed".into(), e))
-}
-
-async fn load_migrations(
-    db: &Database,
-    source: &dyn MigrationSource,
-) -> Result<Vec<MigrationState>, Error> {
-    let migrations = source.load()?;
-    let db_migrations = match migration_table_exists(db).await? {
-        true => db
-            .get_migrations()
-            .await
-            .map_err(|e| Error::Pg("Unable to load already applied migrations".into(), e))?,
-        false => Vec::new(),
-    };
-    Ok(combine_migrations(&migrations, &db_migrations))
+        .map_err(|e| Error::Pg("Unable to connect to database".into(), e))?;
+    drop(tokio::spawn(connection));
+    Ok(client)
 }
 
 /// Dispatches a migration subcommand using the given PostgreSQL configuration
 /// and migration source.
+///
+/// This connects without TLS. To connect differently, use the functions of
+/// [`crate::migrator`] with a client of your own.
 pub async fn cmd(
     pg_config: &Config,
     source: &dyn MigrationSource,
@@ -137,13 +132,10 @@ pub async fn cmd(
 async fn status(pg_config: &Config, source: &dyn MigrationSource) -> Result<(), Error> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     let colors = Colors::new();
-    let db = Database::connect(pg_config).await?;
-    let migrations = load_migrations(&db, source).await?;
-    if !migration_table_exists(&db).await? {
-        writeln!(
-            &mut stdout,
-            "Migration table missing. Migrations were probably never run."
-        )?;
+    let client = connect(pg_config).await?;
+    let states = migrator::status(&client, source).await?;
+    if states.iter().all(|state| state.applied.is_none()) {
+        writeln!(&mut stdout, "No migrations applied yet.")?;
     }
     writeln!(
         &mut stdout,
@@ -153,60 +145,45 @@ async fn status(pg_config: &Config, source: &dyn MigrationSource) -> Result<(), 
         &mut stdout,
         "----------------------------------------------------------------------------"
     )?;
-    for migration in migrations.iter() {
-        write!(&mut stdout, "{:04} ", migration.number)?;
-        match migration.get_status() {
-            MigrationStatus::Ok(migration_file, _) => {
-                stdout.set_color(&colors.bold)?;
-                write!(&mut stdout, "{:48} ", migration_file.name)?;
+    for state in states.iter() {
+        write!(&mut stdout, "{:04} ", state.number)?;
+        stdout.set_color(&colors.bold)?;
+        write!(&mut stdout, "{:48} ", state.name())?;
+        match state.status() {
+            MigrationStatus::Ok => {
                 stdout.set_color(&colors.ok)?;
-                writeln!(&mut stdout, "Ok")?;
-                stdout.reset()?;
+                write!(&mut stdout, "Ok")?;
             }
-            MigrationStatus::Mismatch(migration_file, db_migration) => {
-                stdout.set_color(&colors.bold)?;
-                write!(&mut stdout, "{:48} ", migration_file.name)?;
+            MigrationStatus::Mismatch { name, hash } => {
                 stdout.set_color(&colors.modified)?;
                 write!(&mut stdout, "Mismatch:")?;
-                if migration_file.name != db_migration.name {
+                if name {
                     write!(&mut stdout, " name")?;
                 }
-                if migration_file.hash != db_migration.hash {
+                if hash {
                     write!(&mut stdout, " hash")?;
                 }
-                writeln!(&mut stdout)?;
-                stdout.reset()?;
             }
-            MigrationStatus::NotApplied(migration_file) => {
-                stdout.set_color(&colors.bold)?;
-                write!(&mut stdout, "{:48} ", migration_file.name)?;
+            MigrationStatus::New => {
                 stdout.set_color(&colors.new)?;
                 write!(&mut stdout, "New")?;
-                stdout.reset()?;
-                writeln!(&mut stdout)?;
             }
-            MigrationStatus::FileMissing(db_migration) => {
-                // Migration is part of the database but the migration file
-                // does no longer exist.
-                stdout.set_color(&colors.bold)?;
-                write!(&mut stdout, "{:48} ", db_migration.name)?;
+            MigrationStatus::FileMissing => {
                 stdout.set_color(&colors.error)?;
-                writeln!(&mut stdout, "Migration file missing")?;
-                stdout.reset()?;
+                write!(&mut stdout, "Migration file missing")?;
             }
         }
+        stdout.reset()?;
+        writeln!(&mut stdout)?;
     }
     Ok(())
 }
 
 async fn log(pg_config: &Config) -> Result<(), Error> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    let db = Database::connect(pg_config).await?;
+    let client = connect(pg_config).await?;
     let colors = Colors::new();
-    let log = db
-        .get_migration_log()
-        .await
-        .map_err(|e| Error::Pg("Error fetching migration log".into(), e))?;
+    let log = migrator::log(&client).await?;
     writeln!(
         &mut stdout,
         "Timestamp                  Operation    #    Name"
@@ -264,84 +241,60 @@ fn format_timestamp(timestamp: OffsetDateTime) -> String {
     )
 }
 
+/// Prints whether all migrations are cleanly applied. Returns
+/// [`Error::NotClean`] if not, so a binary exits with a failure.
 async fn check(pg_config: &Config, source: &dyn MigrationSource) -> Result<(), Error> {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    let db = Database::connect(pg_config).await?;
+    let client = connect(pg_config).await?;
     let colors = Colors::new();
-    let migrations = load_migrations(&db, source).await?;
-    for migration in migrations {
-        if let MigrationStatus::Ok(_, _) = migration.get_status() {
-            continue;
-        } else {
+    match migrator::check(&client, source).await {
+        Ok(()) => {
+            stdout.set_color(&colors.ok)?;
+            writeln!(stdout, "All migrations applied")?;
+            stdout.reset()?;
+            Ok(())
+        }
+        Err(Error::NotClean(states)) => {
             stdout.set_color(&colors.error)?;
             writeln!(
                 stdout,
                 "Not all migrations cleanly applied. See `status` for more details"
             )?;
             stdout.reset()?;
-            std::process::exit(1);
+            Err(Error::NotClean(states))
         }
+        Err(e) => Err(e),
     }
-    stdout.set_color(&colors.ok)?;
-    writeln!(stdout, "All migrations applied")?;
-    stdout.reset()?;
-    Ok(())
 }
 
-/// Applies all outstanding migrations in order.
+/// Applies all outstanding migrations in order, or those up to
+/// [`RunArgs::number`].
 pub async fn run(
     pg_config: &Config,
     source: &dyn MigrationSource,
     args: &RunArgs,
 ) -> Result<(), Error> {
-    let _ = args;
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
-    let db = Database::connect(pg_config).await?;
+    let mut client = connect(pg_config).await?;
     let colors = Colors::new();
-    let migrations = load_migrations(&db, source).await?;
-    if !migration_table_exists(&db).await? {
-        writeln!(stdout, "Creating migration table...")?;
-        db.init()
-            .await
-            .map_err(|e| Error::Pg("Unable to create migration table".into(), e))?;
+    let mut options = RunOptions::new();
+    if let Some(number) = args.number {
+        options = options.up_to(number);
     }
-    // FIXME make sure there are no modified or missing migration files first (!)
-    // FIXME add support for running only a specific migration
-    //let number = matches.value_of("number").map(|s| s.parse::<i32>());
-    //println!("NUMBER={:?}", number);
-    for migration in migrations.iter() {
-        match migration.get_status() {
-            MigrationStatus::Ok(_, _) => {}
-            MigrationStatus::Mismatch(_, _) => {
-                return Err(Error::Misc(
-                    "Migration file mismatch found. See `status` for more details".into(),
-                ));
-            }
-            MigrationStatus::NotApplied(migration) => {
-                write!(stdout, "Applying migration {}: ", migration.number)?;
-                stdout.set_color(&colors.bold)?;
-                write!(stdout, "{}", migration.name)?;
-                stdout.reset()?;
-                writeln!(stdout)?;
-                db.apply_migration(migration).await.map_err(|e| {
-                    Error::Pg(
-                        format!(
-                            "Applying migration {} ({}) failed",
-                            migration.number, migration.name
-                        ),
-                        e,
-                    )
-                })?;
-            }
-            MigrationStatus::FileMissing(_) => {
-                return Err(Error::Misc(
-                    "Migration file missing. See `status` for more details".into(),
-                ));
-            }
-        }
+    let applied = migrator::run(&mut client, source, &options).await?;
+    for migration in &applied {
+        write!(stdout, "Applied migration {}: ", migration.number)?;
+        stdout.set_color(&colors.bold)?;
+        write!(stdout, "{}", migration.name)?;
+        stdout.reset()?;
+        writeln!(stdout)?;
     }
     stdout.set_color(&colors.ok)?;
-    writeln!(stdout, "Done.")?;
+    if applied.is_empty() {
+        writeln!(stdout, "Nothing to apply.")?;
+    } else {
+        writeln!(stdout, "Done.")?;
+    }
     stdout.reset()?;
     Ok(())
 }
@@ -351,40 +304,19 @@ async fn fix(
     source: &dyn MigrationSource,
     args: &FixArgs,
 ) -> Result<(), Error> {
-    let db = Database::connect(pg_config).await?;
-    let migrations = load_migrations(&db, source).await?;
-    let index = migrations.binary_search_by_key(&args.number, |m| m.number);
-    let Ok(index) = index else {
-        return Err(Error::Misc(format!(
-            "Migration number does not exist: {}",
-            args.number
-        )));
-    };
-    let migration = migrations.get(index).unwrap();
-    match migration.get_status() {
-        MigrationStatus::Ok(_, _) => {
-            return Err(Error::Misc(format!(
-                "Migration does not require fixing: {}",
-                args.number
-            )));
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+    let mut client = connect(pg_config).await?;
+    let action = migrator::fix(&mut client, source, args.number).await?;
+    writeln!(
+        stdout,
+        "Migration {}: {}",
+        args.number,
+        match action {
+            FixAction::Updated => "name and hash updated",
+            FixAction::Faked => "recorded as applied without running it",
+            FixAction::Removed => "entry removed",
         }
-        MigrationStatus::Mismatch(migration_file, _) => {
-            db.update_migration(migration_file)
-                .await
-                .map_err(|e| Error::Pg("Fixing migration failed".into(), e))?;
-        }
-        MigrationStatus::NotApplied(migration_file) => {
-            // XXX should this be a separate command?
-            db.fake_migration(migration_file)
-                .await
-                .map_err(|e| Error::Pg("Fixing migration failed".into(), e))?;
-        }
-        MigrationStatus::FileMissing(migration_file) => {
-            db.remove_migration(migration_file.number)
-                .await
-                .map_err(|e| Error::Pg("Fixing migration failed".into(), e))?;
-        }
-    }
+    )?;
     Ok(())
 }
 

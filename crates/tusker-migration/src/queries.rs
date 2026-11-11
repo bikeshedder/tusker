@@ -5,6 +5,15 @@ use tusker_query::{FromRow, Query};
 pub(crate) struct NoRow {}
 
 #[derive(Copy, Clone, Debug, Default, Query)]
+#[query(sql = "migration_table_exists", row = MigrationTableExistsRow)]
+pub(crate) struct MigrationTableExists {}
+
+#[derive(Debug, FromRow)]
+pub(crate) struct MigrationTableExistsRow {
+    pub(crate) exists: bool,
+}
+
+#[derive(Copy, Clone, Debug, Default, Query)]
 #[query(sql = "migration_current", row = MigrationCurrentRow)]
 pub(crate) struct MigrationCurrent {}
 

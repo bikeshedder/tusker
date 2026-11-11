@@ -11,6 +11,25 @@ with it. Their changelogs contain the details of the Rust APIs.
 
 ## [Unreleased]
 
+### Changed
+
+- `tusker migrate` / `tusker migration run` apply each migration in one
+  transaction together with its log entry and hold an advisory lock, so
+  concurrent runs apply each migration once. A migration whose first line is
+  `-- tusker:no-transaction` runs outside a transaction.
+- `tusker migrate --number N` applies outstanding migrations up to and
+  including `N`.
+- `tusker migration check` reports the migrations that are out of sync in its
+  error.
+
+### Fixed
+
+- `tusker migration fix` on a mismatched migration failed with an exclusion
+  constraint violation.
+- A database `url` (also `TUSKER_DATABASE_URL`) keeps its host and user: the
+  default socket directory and the system user name are only used when
+  neither the url nor `host`/`user` give one.
+
 ## [0.8.1] - 2026-11-04
 
 ### Fixed

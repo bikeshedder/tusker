@@ -51,8 +51,7 @@ pub struct Migration {
     pub name: String,
     /// The SQL executed when this migration is applied.
     pub sql: String,
-    /// SHA-512 hash of the SQL bytes, used to detect modified migrations.
-    pub(crate) hash: Vec<u8>,
+    hash: Vec<u8>,
 }
 
 impl Migration {
@@ -71,12 +70,31 @@ impl Migration {
         }
     }
 
+    /// SHA-512 hash of the SQL bytes, used to detect migrations that were
+    /// modified after they had been applied.
+    pub fn hash(&self) -> &[u8] {
+        &self.hash
+    }
+
+    /// Whether the migration must run outside a transaction: its first line
+    /// is `-- tusker:no-transaction`. Needed for statements PostgreSQL refuses
+    /// inside a transaction block, such as `CREATE INDEX CONCURRENTLY`.
+    pub fn no_transaction(&self) -> bool {
+        self.sql
+            .lines()
+            .next()
+            .is_some_and(|line| line.trim() == NO_TRANSACTION_MARKER)
+    }
+
     /// Build a migration from a `<number>_<name>` file stem and its SQL.
     pub(crate) fn from_stem(stem: &str, sql: String) -> Result<Self, Error> {
         let (number, name) = parse_stem(stem)?;
         Ok(Self::new(number, name, sql))
     }
 }
+
+/// First line of a migration that must run outside a transaction.
+pub const NO_TRANSACTION_MARKER: &str = "-- tusker:no-transaction";
 
 /// Compute the SHA-512 hash of the given SQL.
 ///

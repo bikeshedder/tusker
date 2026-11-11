@@ -76,9 +76,10 @@ impl DatabaseConfig {
         } else {
             tokio_postgres::Config::new()
         };
+        // Defaults only for what neither the url nor the fields give.
         if let Some(host) = &self.host {
             let _ = cfg.host(host);
-        } else {
+        } else if cfg.get_hosts().is_empty() {
             let _ = cfg.host_path("/var/run/postgresql");
         }
         if let Some(port) = self.port {
@@ -86,7 +87,7 @@ impl DatabaseConfig {
         }
         if let Some(user) = &self.user {
             let _ = cfg.user(user);
-        } else {
+        } else if cfg.get_user().is_none() {
             let _ = cfg.user(
                 get_current_username()
                     .with_context(|| {
@@ -198,5 +199,39 @@ impl Default for QueriesConfig {
         Self {
             filename: default_queries_filename(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use tokio_postgres::config::Host;
+
+    use super::DatabaseConfig;
+
+    #[test]
+    fn url_keeps_its_host_and_user() {
+        let db = DatabaseConfig {
+            url: Some("postgres://alice:secret@db.example/ignored".into()),
+            dbname: "app".into(),
+            ..Default::default()
+        };
+        let cfg = db.pg_config().unwrap();
+        assert_eq!(cfg.get_hosts(), &[Host::Tcp("db.example".into())]);
+        assert_eq!(cfg.get_user(), Some("alice"));
+        assert_eq!(cfg.get_dbname(), Some("app"));
+    }
+
+    #[test]
+    fn fields_override_the_url() {
+        let db = DatabaseConfig {
+            url: Some("postgres://alice@db.example/app".into()),
+            host: Some("other.example".into()),
+            user: Some("bob".into()),
+            dbname: "app".into(),
+            ..Default::default()
+        };
+        let cfg = db.pg_config().unwrap();
+        assert!(cfg.get_hosts().contains(&Host::Tcp("other.example".into())));
+        assert_eq!(cfg.get_user(), Some("bob"));
     }
 }
